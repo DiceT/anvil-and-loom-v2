@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(git -C \"e:\\Anvil and Loom\\anvil-and-loom-v2\" log --oneline -10)",
+      "Bash(git -C \"e:\\Anvil and Loom\\anvil-and-loom-v2\" status)",
+      "Bash(pnpm init)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(pnpm add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
