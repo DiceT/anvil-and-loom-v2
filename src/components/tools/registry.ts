@@ -1,5 +1,6 @@
 import { LucideIcon, Dices } from 'lucide-react';
 import { ComponentType } from 'react';
+import { DiceTool } from './dice/DiceTool';
 
 export interface ToolConfig {
   id: string;
@@ -8,9 +9,7 @@ export interface ToolConfig {
   component: ComponentType;
 }
 
-// Import tool components (will be added as we build them)
-import { DiceTool } from './dice/DiceTool';
-
+// Tool registry - tools that appear in the icon rail
 export const tools: ToolConfig[] = [
   {
     id: 'dice',
@@ -18,8 +17,4 @@ export const tools: ToolConfig[] = [
     icon: Dices,
     component: DiceTool,
   },
-  // More tools will be added here:
-  // { id: 'environments', name: 'Environments', icon: Mountain, component: EnvironmentsTool },
-  // { id: 'oracles', name: 'Oracles', icon: Eye, component: OraclesTool },
-  // { id: 'ai', name: 'AI', icon: Sparkles, component: AITool },
 ];

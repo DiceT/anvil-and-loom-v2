@@ -3,10 +3,11 @@ import { ButtonHTMLAttributes } from 'react';
 
 type IconButtonSize = 's' | 'm' | 'l' | 'xl';
 
-interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'title'> {
   icon: LucideIcon;
   size?: IconButtonSize;
   active?: boolean;
+  tooltip?: string;
 }
 
 const sizeClasses: Record<IconButtonSize, { icon: string; button: string }> = {
@@ -20,6 +21,7 @@ export function IconButton({
   icon: Icon,
   size = 'm',
   active = false,
+  tooltip,
   className = '',
   ...props
 }: IconButtonProps) {
@@ -41,6 +43,7 @@ export function IconButton({
         focus:drop-shadow-[0_0_10px_rgba(96,165,250,0.6)]
         ${className}
       `}
+      {...(tooltip ? { 'data-tooltip': tooltip } : {})}
       {...props}
     >
       <Icon className={iconSize} />

@@ -11,4 +11,8 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.invoke('tapestry:saveResults', cards),
     loadResults: () => ipcRenderer.invoke('tapestry:loadResults'),
   },
+  tables: {
+    loadAll: () => ipcRenderer.invoke('tables:loadAll'),
+    getUserDir: () => ipcRenderer.invoke('tables:getUserDir'),
+  },
 });

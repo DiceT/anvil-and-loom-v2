@@ -1,24 +1,77 @@
 import { useState } from 'react';
+import {
+  Triangle,
+  Square,
+  Diamond,
+  Pentagon,
+  Hexagon,
+  Circle,
+  Percent,
+  Eraser,
+  Dices,
+  Info,
+} from 'lucide-react';
 import { rollDiceExpression } from '../../../core/dice/diceEngine';
 import { logResultCard } from '../../../core/results/resultCardEngine';
+import { IconButton } from '../../ui/IconButton';
+
+type AdvantageMode = 'none' | 'advantage' | 'disadvantage';
 
 export function DiceTool() {
   const [expression, setExpression] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [advantageMode, setAdvantageMode] = useState<AdvantageMode>('none');
 
-  const handleDiceButtonClick = (fragment: string) => {
-    setExpression((prev) => prev + fragment);
+  const handleDiceClick = (die: string) => {
+    setExpression((prev) => {
+      // Handle advantage/disadvantage mode
+      if (advantageMode !== 'none') {
+        const keepModifier = advantageMode === 'advantage' ? 'kh' : 'kl';
+        const prefix = prev.trim() && !prev.trim().endsWith('+') && !prev.trim().endsWith('-') ? '+' : '';
+        const newExpression = prev + prefix + `2${die}${keepModifier}`;
+
+        // Reset advantage mode after use
+        setAdvantageMode('none');
+        return newExpression;
+      }
+
+      // Normal dice click logic
+      const diePattern = new RegExp(`(\\d*)${die.replace('d', 'd')}`, 'i');
+      const match = prev.match(diePattern);
+
+      if (match) {
+        // Die exists - increment the count
+        const currentCount = match[1] ? parseInt(match[1], 10) : 1;
+        const newCount = currentCount + 1;
+        return prev.replace(diePattern, `${newCount}${die}`);
+      } else {
+        // Die doesn't exist - add it with a + if expression isn't empty
+        const prefix = prev.trim() && !prev.trim().endsWith('+') && !prev.trim().endsWith('-') ? '+' : '';
+        return prev + prefix + die;
+      }
+    });
+    setError(null);
+  };
+
+  const handleModifierClick = (modifier: string) => {
+    setExpression((prev) => prev + modifier);
+    setError(null);
   };
 
   const handleRoll = async () => {
-    if (!expression.trim()) return;
+    if (!expression.trim()) {
+      setError('Please enter a dice expression');
+      return;
+    }
 
     try {
+      setError(null);
       // Roll the dice using the dice engine
       const result = await rollDiceExpression(expression);
 
-      // Format the rolls for display
+      // Format the rolls for display with bold for kept dice
       const rollsText = result.rolls
-        .map((r) => `${r.value}`)
+        .map((r) => (r.kept ? `**${r.value}**` : `${r.value}`))
         .join(' + ');
 
       const modifierText = result.modifier
@@ -27,9 +80,9 @@ export function DiceTool() {
 
       // Create a result card using the result card engine
       logResultCard({
-        header: `Dice Roll: ${expression}`,
+        header: `DICE: ${expression}`,
         result: `${result.total}`,
-        content: `Rolls: ${rollsText}${modifierText}`,
+        content: `Expression: ${expression}\nRolls: ${rollsText}${modifierText}`,
         source: 'dice',
         meta: {
           expression: result.expression,
@@ -37,112 +90,156 @@ export function DiceTool() {
           modifier: result.modifier,
         },
       });
-
-      // Clear the expression after rolling
-      setExpression('');
-    } catch (error) {
-      console.error('Error rolling dice:', error);
-      // Optionally show an error message to the user
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to roll dice');
     }
   };
 
   const handleClear = () => {
     setExpression('');
+    setError(null);
   };
 
   return (
     <div className="space-y-3">
-      {/* Expression Input */}
-      <div>
-        <label className="block text-xs text-slate-400 mb-1">
-          Dice Expression
-        </label>
-        <input
-          type="text"
-          value={expression}
-          onChange={(e) => setExpression(e.target.value)}
-          placeholder="e.g., 2d6+3, 1d20+5"
-          className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleRoll();
-            }
-          }}
+      {/* Dice Tray Header */}
+      <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        Dice Tray
+      </div>
+
+      {/* Dice Icons */}
+      <div className="flex items-center justify-center gap-2">
+        <IconButton
+          icon={Triangle}
+          size="m"
+          onClick={() => handleDiceClick('d4')}
+          tooltip="d4"
+        />
+        <IconButton
+          icon={Square}
+          size="m"
+          onClick={() => handleDiceClick('d6')}
+          tooltip="d6"
+        />
+        <IconButton
+          icon={Diamond}
+          size="m"
+          onClick={() => handleDiceClick('d8')}
+          tooltip="d8"
+        />
+        <IconButton
+          icon={Circle}
+          size="m"
+          onClick={() => handleDiceClick('d10')}
+          tooltip="d10"
+        />
+        <IconButton
+          icon={Pentagon}
+          size="m"
+          onClick={() => handleDiceClick('d12')}
+          tooltip="d12"
+        />
+        <IconButton
+          icon={Hexagon}
+          size="m"
+          onClick={() => handleDiceClick('d20')}
+          tooltip="d20"
+        />
+        <IconButton
+          icon={Percent}
+          size="m"
+          onClick={() => handleDiceClick('d100')}
+          tooltip="d100"
         />
       </div>
 
-      {/* Common Dice Buttons */}
-      <div>
-        <label className="block text-xs text-slate-400 mb-2">
-          Quick Add
-        </label>
-        <div className="grid grid-cols-4 gap-2">
-          <button
-            onClick={() => handleDiceButtonClick('d4')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d4
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('d6')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d6
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('d8')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d8
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('d10')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d10
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('d12')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d12
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('d20')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d20
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('d100')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            d100
-          </button>
-          <button
-            onClick={() => handleDiceButtonClick('+')}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded transition-colors"
-          >
-            +
-          </button>
-        </div>
+      {/* Modifiers Row */}
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={() => handleModifierClick('-1')}
+          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded transition-colors"
+        >
+          -1
+        </button>
+        <button
+          onClick={() => setAdvantageMode(advantageMode === 'disadvantage' ? 'none' : 'disadvantage')}
+          className={`px-3 py-1 text-xs rounded transition-colors ${
+            advantageMode === 'disadvantage'
+              ? 'bg-blue-600 text-white'
+              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+          }`}
+          data-tooltip="Disadvantage"
+        >
+          DIS
+        </button>
+        <button
+          onClick={() => setAdvantageMode(advantageMode === 'advantage' ? 'none' : 'advantage')}
+          className={`px-3 py-1 text-xs rounded transition-colors ${
+            advantageMode === 'advantage'
+              ? 'bg-blue-600 text-white'
+              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+          }`}
+          data-tooltip="Advantage"
+        >
+          ADV
+        </button>
+        <button
+          onClick={() => handleModifierClick('+1')}
+          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded transition-colors"
+        >
+          +1
+        </button>
       </div>
 
+      {/* Dice Expression Label */}
+      <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        Dice Expression
+      </div>
+
+      {/* Expression Input */}
+      <input
+        type="text"
+        value={expression}
+        onChange={(e) => {
+          setExpression(e.target.value);
+          setError(null);
+        }}
+        placeholder="e.g., 2d6+3, d20+5"
+        className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleRoll();
+          }
+        }}
+      />
+
+      {/* Error Message */}
+      {error && (
+        <div className="text-xs text-red-400 px-2">
+          {error}
+        </div>
+      )}
+
       {/* Action Buttons */}
-      <div className="flex gap-2">
-        <button
+      <div className="flex justify-between items-center pt-1">
+        <IconButton
+          icon={Eraser}
+          size="m"
+          onClick={handleClear}
+          tooltip="Clear expression"
+        />
+        <IconButton
+          icon={Info}
+          size="m"
+          tooltip="kl         keep lowest&#10;kh         keep highest&#10;klN        keep lowest N&#10;khN        keep highest N"
+        />
+        <IconButton
+          icon={Dices}
+          size="m"
           onClick={handleRoll}
           disabled={!expression.trim()}
-          className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold py-2 px-4 rounded transition-colors text-sm"
-        >
-          Roll
-        </button>
-        <button
-          onClick={handleClear}
-          className="bg-slate-700 hover:bg-slate-600 text-slate-300 py-2 px-4 rounded transition-colors text-sm"
-        >
-          Clear
-        </button>
+          tooltip="Roll dice"
+        />
       </div>
     </div>
   );

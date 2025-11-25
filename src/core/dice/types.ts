@@ -1,6 +1,7 @@
 export interface RollResult {
   value: number;
   sides: number;
+  kept?: boolean; // Whether this die was kept (for advantage/disadvantage)
 }
 
 export interface DiceRollResult {

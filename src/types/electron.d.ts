@@ -6,6 +6,27 @@ export interface ElectronAPI {
     saveResults: (cards: unknown[]) => Promise<{ success: boolean }>;
     loadResults: () => Promise<unknown[]>;
   };
+  tables: {
+    loadAll: () => Promise<{
+      success: boolean;
+      data?: {
+        aspects: {
+          core: Array<{ filename: string; data: unknown }>;
+          user: Array<{ filename: string; data: unknown }>;
+        };
+        domains: {
+          core: Array<{ filename: string; data: unknown }>;
+          user: Array<{ filename: string; data: unknown }>;
+        };
+        oracles: {
+          core: Array<{ filename: string; data: unknown }>;
+          user: Array<{ filename: string; data: unknown }>;
+        };
+      };
+      error?: string;
+    }>;
+    getUserDir: () => Promise<string>;
+  };
 }
 
 declare global {

@@ -9,7 +9,8 @@
       "Bash(pnpm install:*)",
       "Bash(pnpm rebuild:*)",
       "Bash(npx tailwindcss:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

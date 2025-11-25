@@ -1,5 +1,7 @@
 export type ResultSource =
   | 'dice'
+  | 'aspect'
+  | 'domain'
   | 'table'
   | 'oracle'
   | 'interpretation'
