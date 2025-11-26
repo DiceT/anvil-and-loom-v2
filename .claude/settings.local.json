@@ -10,7 +10,15 @@
       "Bash(pnpm rebuild:*)",
       "Bash(npx tailwindcss:*)",
       "Bash(pnpm add:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(node install.js:*)",
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(taskkill:*)",
+      "Bash(nul)",
+      "Bash(exit 0)"
     ],
     "deny": [],
     "ask": []

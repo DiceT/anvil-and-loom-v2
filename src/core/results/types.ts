@@ -6,6 +6,7 @@ export type ResultSource =
   | 'oracle'
   | 'interpretation'
   | 'system'
+  | 'weave'
   | 'other';
 
 export interface ResultCard {

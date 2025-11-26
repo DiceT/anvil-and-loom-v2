@@ -21,7 +21,7 @@ export function TopBar() {
   };
 
   const handleWeaveClick = () => {
-    console.log('The Weave clicked (not yet implemented)');
+    setRightPaneMode('weave');
   };
 
   return (
@@ -41,12 +41,13 @@ export function TopBar() {
           />
         ))}
 
-        {/* Weave Button (Placeholder) */}
+        {/* Weave Button */}
         <IconButton
           icon={Infinity}
           size="xl"
+          active={rightPaneMode === 'weave'}
           onClick={handleWeaveClick}
-          tooltip="The Weave (not implemented yet)"
+          tooltip="The Weave"
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
+import type { Weave } from '../src/core/weave/weaveTypes';
 
 // Expose protected methods that allow the renderer process to use ipcRenderer
 contextBridge.exposeInMainWorld('electron', {
@@ -14,5 +15,10 @@ contextBridge.exposeInMainWorld('electron', {
   tables: {
     loadAll: () => ipcRenderer.invoke('tables:loadAll'),
     getUserDir: () => ipcRenderer.invoke('tables:getUserDir'),
+  },
+  weaves: {
+    loadAll: () => ipcRenderer.invoke('weaves:loadAll') as Promise<{ success: boolean; data?: Weave[]; error?: string }>,
+    save: (weave: Weave) => ipcRenderer.invoke('weaves:save', weave) as Promise<{ success: boolean; error?: string }>,
+    delete: (id: string) => ipcRenderer.invoke('weaves:delete', id) as Promise<{ success: boolean; error?: string }>,
   },
 });

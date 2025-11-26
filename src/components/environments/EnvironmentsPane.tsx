@@ -50,7 +50,35 @@ export function EnvironmentsPane() {
   };
 
   const handleAddToWeave = (type: 'aspect' | 'domain', packId: string) => {
-    console.log(`Add to Weave: ${type} - ${packId} (not yet implemented)`);
+    const { registry: weaveRegistry, activeWeaveId, createWeave, updateWeave, setActiveWeave } = useWeaveStore.getState();
+    const { openTab } = useTabStore.getState();
+
+    let weave = activeWeaveId ? weaveRegistry?.weaves.get(activeWeaveId) ?? null : null;
+
+    if (!weave) {
+      weave = createWeave({ name: `${packId} Weave`, author: 'T' });
+    }
+
+    const newRow: WeaveRow = {
+      id: generateRowId(),
+      from: 0,
+      to: 0,
+      targetType: type,
+      targetId: packId,
+    };
+
+    const updatedRows = recalculateRanges([...weave.rows, newRow], weave.maxRoll);
+    const updatedWeave = { ...weave, rows: updatedRows };
+
+    updateWeave(updatedWeave);
+    setActiveWeave(updatedWeave.id);
+
+    // Open the weave editor
+    openTab({
+      id: updatedWeave.id,
+      type: 'weave',
+      title: updatedWeave.name,
+    });
   };
 
   const handleRollSubtable = (pack: TablePackMetadata, subtableIndex: number) => {
@@ -110,7 +138,7 @@ export function EnvironmentsPane() {
           <button
             onClick={() => handleAddToWeave(pack.category, pack.packId)}
             className="p-1 hover:bg-slate-700 rounded transition-colors"
-            data-tooltip="Add to Weave (not implemented yet)"
+            data-tooltip="Add to Weave"
           >
             <Infinity className="w-4 h-4 text-slate-500" />
           </button>

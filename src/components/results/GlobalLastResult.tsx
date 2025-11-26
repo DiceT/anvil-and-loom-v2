@@ -24,8 +24,8 @@ export function GlobalLastResult() {
   }
 
   return (
-    <div className="bg-slate-900 px-2 pt-2 pb-2">
-      <div className="flex justify-between items-center mb-2">
+    <div className="bg-slate-900 px-2 pt-2 pb-2 flex flex-col" style={{ maxHeight: '300px' }}>
+      <div className="flex justify-between items-center mb-2 flex-shrink-0">
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
           Last Result
         </h3>
@@ -36,7 +36,9 @@ export function GlobalLastResult() {
           tooltip="Clear all results"
         />
       </div>
-      <ResultCard card={lastCard} defaultExpanded={true} />
+      <div className="flex-1 overflow-y-auto app-scroll min-h-0">
+        <ResultCard card={lastCard} defaultExpanded={true} />
+      </div>
     </div>
   );
 }

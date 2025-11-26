@@ -1,0 +1,38 @@
+{
+  "id": "haunted_frontier",
+  "name": "Haunted Frontier",
+  "author": "T",
+  "maxRoll": 10,
+  "rows": [
+    {
+      "id": "r1",
+      "from": 1,
+      "to": 3,
+      "targetType": "aspect",
+      "targetId": "Haunted"
+    },
+    {
+      "id": "r2",
+      "from": 4,
+      "to": 6,
+      "targetType": "domain",
+      "targetId": "Forest"
+    },
+    {
+      "id": "r3",
+      "from": 7,
+      "to": 8,
+      "targetType": "oracleCombo",
+      "targetId": "Action+Theme"
+    },
+    {
+      "id": "r4",
+      "from": 9,
+      "to": 10,
+      "targetType": "aspect",
+      "targetId": "Overgrown"
+    }
+  ],
+  "createdAt": "2025-11-25T20:00:00.000Z",
+  "updatedAt": "2025-11-25T20:05:00.000Z"
+}

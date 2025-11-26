@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { setupFileSystemHandlers } from './ipc/fileSystem.js';
 import { setupStorageHandlers } from './ipc/storage.js';
 import { setupTableHandlers } from './ipc/tables.js';
+import { setupWeaveHandlers } from './ipc/weaves.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,7 @@ app.whenReady().then(() => {
   setupFileSystemHandlers();
   setupStorageHandlers();
   setupTableHandlers();
+  setupWeaveHandlers();
 
   createWindow();
 

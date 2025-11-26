@@ -7,8 +7,11 @@ import fs from 'fs/promises';
 // ============================================================================
 
 const CORE_TABLES_DIR = path.join(process.cwd(), 'app', 'core-data', 'tables');
-const USER_DATA_DIR = app.getPath('userData');
-const USER_TABLES_DIR = path.join(USER_DATA_DIR, 'AnvilAndLoom', 'assets', 'tables');
+
+// Lazy getter for USER_DATA_DIR to avoid calling app.getPath() before app is ready
+function getUserDataDir(): string {
+  return path.join(app.getPath('userData'), 'AnvilAndLoom', 'assets', 'tables');
+}
 
 // ============================================================================
 // Table Loading
@@ -63,9 +66,9 @@ async function loadAllTables() {
       loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'aspects')),
       loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'domains')),
       loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'oracles')),
-      loadJsonFilesFromDirectory(path.join(USER_TABLES_DIR, 'aspects')),
-      loadJsonFilesFromDirectory(path.join(USER_TABLES_DIR, 'domains')),
-      loadJsonFilesFromDirectory(path.join(USER_TABLES_DIR, 'oracles')),
+      loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'aspects')),
+      loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'domains')),
+      loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'oracles')),
     ]);
 
   return {
@@ -112,6 +115,6 @@ export function setupTableHandlers() {
    * Get the user tables directory path
    */
   ipcMain.handle('tables:getUserDir', async () => {
-    return USER_TABLES_DIR;
+    return getUserDataDir();
   });
 }

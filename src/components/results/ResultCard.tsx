@@ -13,6 +13,7 @@ const sourceColors: Record<string, string> = {
   table: '#224422',   // General table (legacy)
   oracle: '#332244',  // Purple-ish for Oracles
   interpretation: '#442244',
+  weave: '#685431',   // The Weave's gold/brown
   system: '#1e293b',
   other: '#1e293b',
 };
@@ -61,7 +62,7 @@ export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
 
       {/* Footer - Always Visible */}
       <div className="px-3 py-3 border-t border-slate-700">
-        <div className="text-2xl font-bold text-slate-100">
+        <div className={`font-bold text-slate-100 ${card.source === 'dice' ? 'text-2xl' : 'text-base'}`}>
           {card.result}
         </div>
       </div>

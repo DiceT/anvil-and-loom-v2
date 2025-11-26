@@ -1,3 +1,5 @@
+import type { Weave } from '../core/weave/weaveTypes';
+
 export interface ElectronAPI {
   tapestry: {
     getTree: () => Promise<unknown>;
@@ -26,6 +28,11 @@ export interface ElectronAPI {
       error?: string;
     }>;
     getUserDir: () => Promise<string>;
+  };
+  weaves: {
+    loadAll: () => Promise<{ success: boolean; data?: Weave[]; error?: string }>;
+    save: (weave: Weave) => Promise<{ success: boolean; error?: string }>;
+    delete: (id: string) => Promise<{ success: boolean; error?: string }>;
   };
 }
 
