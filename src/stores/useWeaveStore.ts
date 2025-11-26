@@ -58,7 +58,9 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
   createWeave: (partial = {}) => {
     const name = partial.name || 'New Weave';
     const author = partial.author || 'Unknown';
-    const id = slugify(name) || `weave-${Date.now()}`;
+    const baseId = slugify(name) || 'weave';
+    const timestamp = Date.now();
+    const id = `${baseId}-${timestamp}`;
     const now = new Date().toISOString();
 
     const newWeave: Weave = {

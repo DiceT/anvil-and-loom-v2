@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Infinity, Dices } from 'lucide-react';
 import { useTableStore } from '../../stores/useTableStore';
+import { useToolStore } from '../../stores/useToolStore';
 import { TablePackMetadata } from '../../core/tables/types';
 import { rollOnTable } from '../../core/tables/tableEngine';
 import { resolveMacro } from '../../core/tables/macroResolver';
@@ -11,9 +12,11 @@ import {
   formatObjectivesCard,
   formatTheWeaveCard,
 } from '../../core/tables/resultCardFormatter';
+import type { WeaveRow } from '../../core/weave/weaveTypes';
 
 export function EnvironmentsPane() {
   const { registry, loadTables } = useTableStore();
+  const { requestExpandPack, setRequestExpandPack } = useToolStore();
   const [expandedPacks, setExpandedPacks] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -21,6 +24,19 @@ export function EnvironmentsPane() {
       loadTables();
     }
   }, [registry, loadTables]);
+
+  // Listen for requests to expand a specific pack
+  useEffect(() => {
+    if (requestExpandPack) {
+      setExpandedPacks((prev) => {
+        const next = new Set(prev);
+        next.add(requestExpandPack);
+        return next;
+      });
+      // Clear the request
+      setRequestExpandPack(null);
+    }
+  }, [requestExpandPack, setRequestExpandPack]);
 
   if (!registry) {
     return (
@@ -50,6 +66,10 @@ export function EnvironmentsPane() {
   };
 
   const handleAddToWeave = (type: 'aspect' | 'domain', packId: string) => {
+    const { useWeaveStore } = require('../../stores/useWeaveStore');
+    const { useTabStore } = require('../../stores/useTabStore');
+    const { generateRowId, recalculateRanges } = require('../../core/weave/weaveUtils');
+
     const { registry: weaveRegistry, activeWeaveId, createWeave, updateWeave, setActiveWeave } = useWeaveStore.getState();
     const { openTab } = useTabStore.getState();
 
@@ -109,7 +129,7 @@ export function EnvironmentsPane() {
     } else {
       // Normal roll
       const category = pack.category === 'aspect' ? 'ASPECT' : 'DOMAIN';
-      formatTableRollCard(result, category, pack.packName);
+      formatTableRollCard(result, category, pack.packName, pack.packId);
     }
   };
 

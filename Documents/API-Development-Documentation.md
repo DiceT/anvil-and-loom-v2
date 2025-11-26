@@ -2,7 +2,7 @@
 
 **Version:** 0.1.0  
 **Description:** A story-first TTRPG engine for journaling, dice, and oracles  
-**Generated:** 2025-11-24
+**Generated:** 2025-11-25
 
 ---
 
@@ -10,13 +10,14 @@
 
 1. [Project Overview](#project-overview)
 2. [Architecture](#architecture)
-3. [Electron Main Process](#electron-main-process)
-4. [IPC Communication](#ipc-communication)
-5. [Core Engines](#core-engines)
-6. [State Management](#state-management)
-7. [Component APIs](#component-apis)
-8. [Type Definitions](#type-definitions)
-9. [Dependencies](#dependencies)
+3. [Build System](#build-system)
+4. [Electron Main Process](#electron-main-process)
+5. [IPC Communication](#ipc-communication)
+6. [Core Engines](#core-engines)
+7. [State Management](#state-management)
+8. [Component APIs](#component-apis)
+9. [Type Definitions](#type-definitions)
+10. [Dependencies](#dependencies)
 
 ---
 
@@ -26,10 +27,10 @@ Anvil and Loom is an Electron-based desktop application built with:
 - **Frontend:** React 19.2.0 + TypeScript
 - **State Management:** Zustand 5.0.8
 - **Styling:** TailwindCSS 3.4.18
-- **Build Tools:** Vite 7.2.4
+- **Build Tools:** Vite 7.2.4 + electron-vite 4.0.1
 - **Desktop:** Electron 39.2.3
 
-The application provides tools for tabletop RPG players to manage their campaigns, including dice rolling, result tracking, and file management.
+The application provides tools for tabletop RPG players to manage their campaigns, including dice rolling, Weaves (custom random tables), oracles, and result tracking.
 
 ---
 
@@ -42,14 +43,98 @@ anvil-and-loom-v2/
 │   ├── preload.ts            # Context bridge for IPC
 │   └── ipc/                  # IPC handlers
 │       ├── fileSystem.ts     # File system operations
-│       └── storage.ts        # Results storage
+│       ├── storage.ts        # Results storage
+│       ├── tables.ts         # Table loading
+│       └── weaves.ts         # Weave CRUD operations
 ├── src/                      # React application
 │   ├── components/           # React components
 │   ├── core/                 # Business logic engines
+│   │   ├── dice/             # Dice rolling engine
+│   │   ├── tables/           # Table system
+│   │   ├── weave/            # Weave system
+│   │   └── results/          # Result cards
 │   ├── stores/               # Zustand state stores
 │   └── types/                # TypeScript definitions
+├── out/                      # Build output (electron-vite)
+│   ├── main/                 # Main process (CJS)
+│   ├── preload/              # Preload scripts (CJS)
+│   └── renderer/             # Renderer (bundled React)
+├── electron.vite.config.ts   # electron-vite configuration
 └── Documents/                # Documentation folder
 ```
+
+---
+
+## Build System
+
+Anvil and Loom uses **electron-vite** for building the application, which properly handles the dual-environment architecture of Electron (Node.js main process + Chromium renderer).
+
+### electron.vite.config.ts
+
+**Location:** `/electron.vite.config.ts`
+
+Defines separate build configurations for:
+- **Main process** → CommonJS output (`out/main/main.cjs`)
+- **Preload scripts** → CommonJS output (`out/preload/preload.cjs`)  
+- **Renderer** → Bundled React app (`out/renderer/`)
+
+**Configuration:**
+```typescript
+export default defineConfig({
+  main: {
+    plugins: [externalizeDepsPlugin()],
+    build: {
+      lib: {
+        entry: 'electron/main.ts',
+        formats: ['cjs']
+      }
+    }
+  },
+  preload: {
+    plugins: [externalizeDepsPlugin()],
+    build: {
+      lib: {
+        entry: 'electron/preload.ts',
+        formats: ['cjs']
+      }
+    }
+  },
+  renderer: {
+    root: '.',
+    build: {
+      rollupOptions: {
+        input: resolve(__dirname, 'index.html')
+      }
+    },
+    plugins: [react()]
+  }
+});
+```
+
+**Key Points:**
+- `externalizeDepsPlugin()` prevents bundling of `electron` and Node.js built-ins
+- `formats: ['cjs']` ensures CommonJS output for main/preload (required by Electron)
+- Renderer uses standard Vite React bundling
+
+### Build Scripts
+
+**Development:**
+```bash
+pnpm dev
+```
+Starts electron-vite dev server with hot reload.
+
+**Production Build:**
+```bash
+pnpm run build
+```
+Builds all processes and packages with electron-builder.
+
+**Preview:**
+```bash
+pnpm preview
+```
+Runs built application without packaging.
 
 ---
 
@@ -252,6 +337,31 @@ export function setupTableHandlers(): void
 
 ---
 
+#### Weave Handler
+
+**Location:** `/electron/ipc/weaves.ts`
+
+##### `setupWeaveHandlers()`
+
+Registers IPC handlers for Weave CRUD operations.
+
+**Signature:**
+```typescript
+export function setupWeaveHandlers(): void
+```
+
+**Registered Handlers:**
+
+1. **`weaves:loadAll`** - Loads all Weaves from core and user directories (user Weaves override core).
+2. **`weaves:save`** - Saves a Weave to the user directory as JSON.
+3. **`weaves:delete`** - Deletes a Weave from the user directory.
+
+**Directory Structure:**
+- **Core Weaves:** `app/core-data/weaves/`
+- **User Weaves:** `{userData}/AnvilAndLoom/assets/weaves/`
+
+---
+
 ## Core Engines
 
 ### Dice Engine
@@ -437,6 +547,44 @@ export async function loadAndBuildRegistry(): Promise<TableRegistry>
 ```
 
 **Returns:** Promise resolving to `TableRegistry`.
+
+---
+
+### Weave Engine
+
+**Location:** `/src/core/weave/weaveEngine.ts`
+
+Handles rolling on Weaves (custom random tables).
+
+#### Functions
+
+##### `rollWeave(weave: Weave)`
+
+Rolls on a Weave and returns the matching row.
+
+**Signature:**
+```typescript
+export function rollWeave(weave: Weave): { roll: number; row: WeaveRow }
+```
+
+**Parameters:**
+- `weave` (Weave): The Weave to roll on
+
+**Returns:** Object containing:
+- `roll`: The die roll result (1 to `weave.maxRoll`)
+- `row`: The matching `WeaveRow` for that roll
+
+**Behavior:**
+- Rolls a die with `weave.maxRoll` sides
+- Finds the row where `roll >= row.from && roll <= row.to`
+- Throws error if no row matches the roll
+
+**Example:**
+```typescript
+const result = rollWeave(myWeave);
+// result.roll = 47
+// result.row = { id: '...', from: 41, to: 60, targetType: 'oracle', targetId: 'action' }
+```
 
 ---
 
@@ -631,6 +779,60 @@ Loads all tables and updates the registry.
 ```typescript
 loadTables: () => Promise<void>
 ```
+
+---
+
+### Weave Store
+
+**Location:** `/src/stores/useWeaveStore.ts`
+
+Manages the Weave registry and active Weave state.
+
+#### Interface: `WeaveStore`
+
+```typescript
+interface WeaveStore {
+  registry: WeaveRegistry | null;
+  activeWeaveId: string | null;
+  isLoading: boolean;
+  error: string | null;
+  loadWeaves: () => Promise<void>;
+  setActiveWeave: (id: string | null) => void;
+  createWeave: (partial?: { name?: string; author?: string }) => Weave;
+  updateWeave: (weave: Weave) => void;
+  saveWeave: (id: string) => Promise<void>;
+  deleteWeave: (id: string) => Promise<void>;
+}
+```
+
+#### Store: `useWeaveStore`
+
+**Import:**
+```typescript
+import { useWeaveStore } from './stores/useWeaveStore';
+```
+
+#### Key Actions
+
+##### `loadWeaves()`
+
+Loads all Weaves from IPC and builds registry.
+
+##### `createWeave(partial?)`
+
+Creates a new Weave with default values.
+
+##### `updateWeave(weave)`
+
+Updates a Weave in the registry.
+
+##### `saveWeave(id)`
+
+Saves a Weave to disk via IPC.
+
+##### `deleteWeave(id)`
+
+Deletes a Weave from disk and registry.
 
 ---
 
@@ -874,6 +1076,60 @@ export interface TableRegistry {
 
 ---
 
+### Weave Types
+
+**Location:** `/src/core/weave/weaveTypes.ts`
+
+#### `WeaveTargetType`
+
+Type of target that a Weave row can reference.
+
+```typescript
+export type WeaveTargetType = 'oracle' | 'oracleCombo' | 'aspect' | 'domain';
+```
+
+#### `WeaveRow`
+
+A single row in a Weave table.
+
+```typescript
+export interface WeaveRow {
+  id: string;        // Local row UUID for UI
+  from: number;      // Inclusive range start
+  to: number;        // Inclusive range end
+  targetType: WeaveTargetType;
+  targetId: string;  // ID resolvable by TableRegistry or known oracle IDs
+}
+```
+
+#### `Weave`
+
+A custom random table (Weave).
+
+```typescript
+export interface Weave {
+  id: string;        // Slug / filename-safe identifier
+  name: string;      // Display name
+  author: string;    // Creator name
+  maxRoll: number;   // Die size: 10, 20, 100, etc.
+  rows: WeaveRow[];  // Array of roll ranges
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
+}
+```
+
+#### `WeaveRegistry`
+
+Registry containing all loaded Weaves.
+
+```typescript
+export interface WeaveRegistry {
+  weaves: Map<string, Weave>;
+}
+```
+
+---
+
 ### Electron API Types
 
 **Location:** `/src/types/electron.d.ts`
@@ -894,6 +1150,11 @@ export interface ElectronAPI {
   tables: {
     loadAll: () => Promise<{ success: boolean; data?: unknown; error?: string }>;
     getUserDir: () => Promise<string>;
+  };
+  weaves: {
+    loadAll: () => Promise<{ success: boolean; data?: Weave[]; error?: string }>;
+    save: (weave: Weave) => Promise<{ success: boolean; error?: string }>;
+    delete: (id: string) => Promise<{ success: boolean; error?: string }>;
   };
 }
 ```

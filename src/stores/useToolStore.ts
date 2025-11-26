@@ -7,6 +7,8 @@ interface ToolStore {
   setActiveTool: (toolId: string | null) => void;
   rightPaneMode: RightPaneMode;
   setRightPaneMode: (mode: RightPaneMode) => void;
+  requestExpandPack: string | null;
+  setRequestExpandPack: (packId: string | null) => void;
 }
 
 export const useToolStore = create<ToolStore>((set) => ({
@@ -14,4 +16,6 @@ export const useToolStore = create<ToolStore>((set) => ({
   setActiveTool: (toolId) => set({ activeTool: toolId }),
   rightPaneMode: 'dice',
   setRightPaneMode: (mode) => set({ rightPaneMode: mode }),
+  requestExpandPack: null,
+  setRequestExpandPack: (packId) => set({ requestExpandPack: packId }),
 }));

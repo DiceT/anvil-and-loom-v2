@@ -1,5 +1,10 @@
 import { useState } from 'react';
+import { Dice6, TentTree, Sparkles } from 'lucide-react';
 import { ResultCard as ResultCardType } from '../../core/results/types';
+import { useTableStore } from '../../stores/useTableStore';
+import { useToolStore } from '../../stores/useToolStore';
+import { resolveActionTheme, resolveDescriptorFocus } from '../../core/tables/macroResolver';
+import { formatComboOracleCard } from '../../core/tables/resultCardFormatter';
 
 interface ResultCardProps {
   card: ResultCardType;
@@ -20,8 +25,109 @@ const sourceColors: Record<string, string> = {
 
 export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const { registry } = useTableStore();
+  const { setRightPaneMode, setRequestExpandPack } = useToolStore();
   const headerBgColor = sourceColors[card.source || 'other'];
   const timestamp = new Date(card.timestamp).toLocaleTimeString();
+
+  const handleRollOracle = (type: 'action' | 'theme' | 'descriptor' | 'focus') => {
+    if (!registry) return;
+
+    // Determine which combo this belongs to and roll it
+    if (type === 'action' || type === 'theme') {
+      const result = resolveActionTheme(registry);
+      if (result) {
+        formatComboOracleCard(result, 'Action + Theme', registry);
+      }
+    } else {
+      const result = resolveDescriptorFocus(registry);
+      if (result) {
+        formatComboOracleCard(result, 'Descriptor + Focus', registry);
+      }
+    }
+  };
+
+  const handleOpenEnvironment = (packId: string) => {
+    setRightPaneMode('environments');
+    setRequestExpandPack(packId);
+  };
+
+  const handleWeaveAction = (targetType: string, targetId: string) => {
+    if (targetType === 'aspect' || targetType === 'domain') {
+      handleOpenEnvironment(targetId);
+    } else if (targetType === 'oracleCombo') {
+      // Roll the oracle combo (Action+Theme or Descriptor+Focus)
+      if (targetId === 'Action+Theme') {
+        handleRollOracle('action');
+      } else if (targetId === 'Descriptor+Focus') {
+        handleRollOracle('descriptor');
+      }
+    }
+    // For single oracles, we'd need to implement individual oracle rolling
+  };
+
+  // Check if this is an oracle combo result
+  const isOracleCombo = card.source === 'oracle' && card.meta?.oracleType;
+  const oracleType = card.meta?.oracleType as string;
+
+  // Check if this is an aspect/domain result
+  const isAspectOrDomain = (card.source === 'aspect' || card.source === 'domain') && card.meta?.packId;
+  const packId = card.meta?.packId as string;
+
+  // Check if this is a weave result
+  const isWeave = card.source === 'weave' && card.meta?.targetType;
+  const weaveTargetType = card.meta?.targetType as string;
+  const weaveTargetId = card.meta?.targetId as string;
+
+  const renderResultWithButtons = () => {
+    // Weave result with action button
+    if (isWeave) {
+      const icon = (weaveTargetType === 'aspect' || weaveTargetType === 'domain') ? TentTree : Sparkles;
+      const IconComponent = icon;
+      const tooltipText = (weaveTargetType === 'aspect' || weaveTargetType === 'domain')
+        ? 'Open in Environments'
+        : 'Roll Oracle';
+
+      return (
+        <div className="font-bold text-slate-100 text-base flex items-center justify-between">
+          <span>{card.result}</span>
+          <button
+            onClick={() => handleWeaveAction(weaveTargetType, weaveTargetId)}
+            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            title={tooltipText}
+          >
+            <IconComponent className="w-4 h-4 text-slate-400" />
+          </button>
+        </div>
+      );
+    }
+
+    // Aspect/Domain with Environment link
+    if (isAspectOrDomain) {
+      return (
+        <div className="font-bold text-slate-100 text-base flex items-center justify-between">
+          <span>{card.result}</span>
+          <button
+            onClick={() => handleOpenEnvironment(packId)}
+            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            title="Open in Environments"
+          >
+            <TentTree className="w-4 h-4 text-slate-400" />
+          </button>
+        </div>
+      );
+    }
+
+    // Oracle combo - just show the result, no buttons needed (it's already a result)
+    if (isOracleCombo) {
+      return <div className="font-bold text-slate-100 text-base">{card.result}</div>;
+    }
+
+    // Default result without buttons
+    return <div className={`font-bold text-slate-100 ${card.source === 'dice' ? 'text-2xl' : 'text-base'}`}>
+      {card.result}
+    </div>;
+  };
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden flex flex-col">
@@ -62,9 +168,7 @@ export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
 
       {/* Footer - Always Visible */}
       <div className="px-3 py-3 border-t border-slate-700">
-        <div className={`font-bold text-slate-100 ${card.source === 'dice' ? 'text-2xl' : 'text-base'}`}>
-          {card.result}
-        </div>
+        {renderResultWithButtons()}
       </div>
     </div>
   );

@@ -103,7 +103,7 @@ export function OraclesPane() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#442255')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#332244')}
           >
-            <Sparkles className="w-4 h-4" />
+            <Dices className="w-4 h-4" />
             <span className="text-sm font-medium">Action + Theme</span>
           </button>
           <button
@@ -113,7 +113,7 @@ export function OraclesPane() {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#442255')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#332244')}
           >
-            <Sparkles className="w-4 h-4" />
+            <Dices className="w-4 h-4" />
             <span className="text-sm font-medium">Descriptor + Focus</span>
           </button>
         </div>

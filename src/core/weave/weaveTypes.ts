@@ -16,6 +16,7 @@ export interface Weave {
   rows: WeaveRow[];
   createdAt: string;
   updatedAt: string;
+  readOnly?: boolean; // If true, prevent editing and deletion
 }
 
 export interface WeaveRegistry {

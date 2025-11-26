@@ -23,7 +23,13 @@ export default defineConfig({
     },
     renderer: {
         root: '.',
+        resolve: {
+            alias: {
+                '@': resolve(__dirname, 'src')
+            }
+        },
         build: {
+            outDir: 'out/renderer',
             rollupOptions: {
                 input: resolve(__dirname, 'index.html')
             }

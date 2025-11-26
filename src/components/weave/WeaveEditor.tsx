@@ -87,6 +87,13 @@ export function WeaveEditor({ weaveId }: WeaveEditorProps) {
     setLocalWeave({ ...localWeave, rows: recalculated });
   };
 
+  const handleRowRangeChange = (rowId: string, field: 'from' | 'to', value: number) => {
+    const updatedRows = localWeave.rows.map((row) =>
+      row.id === rowId ? { ...row, [field]: value } : row
+    );
+    setLocalWeave({ ...localWeave, rows: updatedRows });
+  };
+
   const handleRoll = () => {
     try {
       const { roll, row } = rollWeave(localWeave);
@@ -248,8 +255,26 @@ export function WeaveEditor({ weaveId }: WeaveEditorProps) {
 
               return (
                 <tr key={row.id} className="border-b border-slate-800 hover:bg-slate-850">
-                  <td className="px-3 py-2 text-sm text-slate-400">{row.from}</td>
-                  <td className="px-3 py-2 text-sm text-slate-400">{row.to}</td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      value={row.from}
+                      onChange={(e) => handleRowRangeChange(row.id, 'from', Number(e.target.value))}
+                      className="w-16 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 text-sm focus:outline-none focus:border-slate-500"
+                      min={1}
+                      max={localWeave.maxRoll}
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      value={row.to}
+                      onChange={(e) => handleRowRangeChange(row.id, 'to', Number(e.target.value))}
+                      className="w-16 px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 text-sm focus:outline-none focus:border-slate-500"
+                      min={1}
+                      max={localWeave.maxRoll}
+                    />
+                  </td>
                   <td className="px-3 py-2">
                     <select
                       value={row.targetType}

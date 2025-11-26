@@ -15,11 +15,13 @@ import { getOraclesByTag } from './tableLoader';
  * @param roll - The table roll result
  * @param category - "ASPECT", "DOMAIN", "ORACLE"
  * @param parentName - For subtables: "Haunted", "Forest", etc.
+ * @param packId - The pack ID for aspect/domain results (e.g., "haunted", "forest")
  */
 export function formatTableRollCard(
   roll: TableRollResult,
   category: string,
-  parentName?: string
+  parentName?: string,
+  packId?: string
 ): void {
   const header = parentName
     ? `${category}: ${parentName}: ${roll.tableName}`.toUpperCase()
@@ -41,6 +43,8 @@ export function formatTableRollCard(
     meta: {
       tableId: roll.tableId,
       roll: roll.roll,
+      packId: packId,
+      packName: parentName,
     },
   });
 }
@@ -60,8 +64,8 @@ export function formatComboOracleCard(
 
   const [roll1, roll2] = macroResult.rolls;
 
-  // Header: "ORACLE: ACTION + THEME"
-  const header = `ORACLE: ${oracleLabel}`.toUpperCase();
+  // Header: Just the oracle label (e.g., "ACTION + THEME")
+  const header = oracleLabel.toUpperCase();
 
   // Result: "Advance + Shadows" (combined)
   const result = `${roll1.result} + ${roll2.result}`;

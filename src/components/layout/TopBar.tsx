@@ -9,7 +9,6 @@ export function TopBar() {
     { mode: 'dice', icon: Dices, label: 'Dice' },
     { mode: 'environments', icon: TentTree, label: 'Environments' },
     { mode: 'oracles', icon: Eclipse, label: 'Oracles' },
-    { mode: 'results', icon: List, label: 'Results' },
   ];
 
   const handleModeClick = (mode: RightPaneMode) => {
@@ -48,6 +47,15 @@ export function TopBar() {
           active={rightPaneMode === 'weave'}
           onClick={handleWeaveClick}
           tooltip="The Weave"
+        />
+
+        {/* Results Button - Far Right */}
+        <IconButton
+          icon={List}
+          size="xl"
+          active={rightPaneMode === 'results'}
+          onClick={() => handleModeClick('results')}
+          tooltip="All Results"
         />
       </div>
     </div>
