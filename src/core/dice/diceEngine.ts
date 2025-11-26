@@ -1,7 +1,7 @@
 import { DiceRollResult, DiceOptions, RollResult } from './types';
 import { parseDiceExpression } from './diceParser';
 
-function rollDie(sides: number): number {
+export function rollDie(sides: number): number {
   return Math.floor(Math.random() * sides) + 1;
 }
 
