@@ -168,30 +168,6 @@ This is a great collaboration system. Thanks for embracing it!
 - If unsure, leave a ❓ message asking
 
 **When you complete work:**
-- Leave a ✅ message with changes
-- Update task status
-- Note any issues for Loomwright to review
-
-**If you get stuck:**
-- Leave a ❌ message with error details
-- Don't spin in circles - ask for help
-- Include relevant error messages/screenshots
-
-**Communication Tips:**
-- Be specific about file changes
-- Use bullet points for clarity
-- Include error messages verbatim
-- Link to relevant files when possible
-
----
-
-**Remember:** This is **async communication**. I won't see your messages until the user starts a session with me. Likewise, you won't see mine until you read this file. Keep messages clear and actionable!
-
----
-
-*Last Updated: 2025-11-26 05:00 by Loomwright*
-
----
 
 ### [2025-11-26 05:17] - Loomwright - 🔄
 **Topic:** Dockable Panel System - Starting Development
@@ -242,8 +218,308 @@ See `implementation_plan.md` artifact for full details.
 - Consider layout preset ideas
 - Plan View menu structure
 
-Will update when framework is ready!
 
 ---
 
-*Last Updated: 2025-11-26 05:17 by Loomwright*
+### [2025-11-26 06:50] - Loomwright - ✅
+**Topic:** Docking Framework Ready
+**Status:** ✅ Phase 1 Complete
+**Changes:**
+- Installed `rc-dock`
+- Created `DockContainer` component
+- Implemented `useDockingStore` with persistence
+- Registered core panels (Tapestry, Editor, Tools)
+- Added IPC handlers for layout saving/loading
+- Updated `AppLayout` to use docking system
+- Preserved `GlobalLastResult` as fixed toolbar
+
+**Action Needed:** Start Phase 2 (UI & Features)
+
+**Notes:**
+The framework is live! You can now start styling and adding features.
+
+**Key Files for You:**
+- `src/components/docking/DockContainer.tsx` - Main dock component
+- `src/lib/docking/panels.ts` - Where panels are registered
+- `src/styles/globals.css` - Docking styles (I added some basics)
+- `src/lib/docking/defaultLayout.ts` - Initial layout config
+
+**Your Tasks:**
+1. **Theming:** Make it look seamless with the app (slate-900/950 theme)
+2. **View Menu:** Add menu to toggle panels
+3. **Presets:** Add layout presets if possible
+4. **Polish:** Fix any visual glitches (drag indicators, tab styling)
+
+**Important:**
+- `GlobalLastResult` is fixed at the bottom, DO NOT move it into the dock.
+- Use `panelRegistry` to add new panels if needed.
+
+
+---
+
+### [2025-11-26 07:15] - Loomwright - ✅
+**Topic:** 3D Dice Engine - Physics Ready
+**Status:** ✅ Phase 1 & 2 Complete
+**Changes:**
+- Installed `three`, `@react-three/fiber`, `@react-three/cannon`
+- Created `DiceTray` panel (registered in `panels.ts`)
+- Implemented basic physics world (Gravity: -9.81)
+- Added `Floor` (Static) and `TestDie` (Dynamic Box)
+
+**Action Needed:** Start Phase 3 (Models) & Phase 4 (Materials)
+
+**Your Tasks:**
+1. **Models:** Replace `TestDie` with real d4, d6, d8, d10, d12, d20 geometries.
+   - You can generate them procedurally or import them.
+   - Ensure they match the physics bodies (or update physics shapes).
+2. **Materials:** Create a `DiceMaterial` system.
+   - We need presets: Plastic, Metal, Wood.
+   - Textures for numbers/runes.
+3. **Sound:** (Phase 5) Start thinking about collision sounds.
+
+**Key Files:**
+- `src/components/dice/DiceTray.tsx` - The main scene.
+
+The physics engine is humming. Give us some beautiful dice to roll! 🎲
+
+---
+
+### [2025-11-26 14:35] - Loomwright - ✅
+**Topic:** 3D Dice Engine - Models & Physics Stability
+**Status:** ✅ Phase 3 Complete (Core Models & Physics Proxy)
+**Changes:**
+- `src/components/dice/DiceModels.tsx` (Implemented robust physics proxy)
+- `src/components/dice/DiceModelLoader.ts` (Added ASCII STL support)
+- `src/components/dice/useDiceModel.ts` (Added auto-centering & scaling)
+- `public/models/dice/*.stl` (User provided clean models)
+
+**Action Needed:** Proceed to Phase 4 (Materials & Polish)
+
+**Notes:**
+I've completed the model integration and ensured rock-solid stability.
+
+**What I did:**
+1.  **Physics Proxy Pattern:** The engine now uses invisible, mathematically perfect shapes for physics collisions, while rendering the detailed STL models for visuals. This prevents "Vertex not found" crashes.
+2.  **Robust Loader:** I patched the loader to handle both Binary and ASCII STLs (the user's new files are ASCII).
+3.  **Auto-Scaling:** The loader now automatically centers and scales loaded models to a radius of ~1.0, so they fit the physics bodies perfectly.
+
+**Your Tasks (Weaver):**
+1.  **Materials:** The dice currently look like "globular messes" because they lack proper materials/textures. Please implement the `DiceMaterial` system (Plastic, Metal, Wood).
+2.  **Visual Polish:** Add shadows, lighting tweaks, and maybe a nice environment map.
+3.  **Collision Sounds:** Implement the audio system for dice impacts.
+
+The engine is stable and ready for your artistic touch! 🎨
+
+---
+
+### [2025-11-27 10:45] - Loomwright - ⚠️
+**Topic:** 3D Dice Engine - PAUSED (Shader/Geometry Issues)
+**Status:** ⚠️ Paused / Partial Success
+**Changes:**
+- `src/components/dice/DiceModelLoader.ts` (Implemented Convex Hull engraving detection)
+- `src/lib/docking/panels.ts` (Disabled DiceTray panel for now)
+
+**Action Needed:** Review "Gold Standard" plan below when resuming.
+
+**Current State:**
+- **Standard Dice (Chamfered/Sharp):** ✅ Working perfectly. The Convex Hull algorithm with a **0.005** threshold correctly detects the numbers.
+- **Recessed Dice (Valkyrie/Stamped):** ❌ Failing. These dice have "recessed faces" (like a picture frame) that are ~0.02 deep. The algorithm struggles to distinguish between the "face recess" and the "number recess" (~0.05 deep).
+- **Workaround Attempted:** I tried a "Tuned Threshold" of **0.035** to filter out the face but keep the numbers. It was inconsistent.
+
+**The Fix (For Weaver/Future):**
+We have decided to **abandon the runtime geometry analysis** for these complex dice. It is too fragile.
+
+**The "Gold Standard" Plan:**
+1.  **Convert to GLTF:** Open the original STLs in Blender.
+2.  **Material Slots:** Assign two material slots:
+    - Slot 0: `DiceBody`
+    - Slot 1: `DiceNumber`
+3.  **Export:** Save as `.glb`.
+4.  **Code Update:** Update `DiceModels.tsx` to simply pass an array of materials: `materials={[bodyMat, numberMat]}`.
+
+This will permanently solve all coloring issues without any math or shaders.
+
+**Note:** The `DiceTray` panel is currently commented out in `panels.ts` to hide the broken feature from the user. Uncomment it when you are ready to resume work.
+
+
+---
+
+### [2025-11-27 11:47] - Loomwright - 🚫
+**Topic:** 3D Dice - Complete Removal
+**Status:** ✅ Removed / 🚫 On Hold Indefinitely
+**Changes:**
+- **DELETED:** `src/components/dice/` (entire folder - all 3D components)
+- **DELETED:** `public/models/` (52 GLTF dice model files)
+- **DELETED:** `public/sounds/` (75 dice audio files)
+- **DELETED:** `public/textures/` (38 texture files)
+- **MODIFIED:** `src/lib/docking/panels.ts` (removed DiceTray panel registration)
+- **PRESERVED:** `src/components/settings/DiceSettings.tsx`
+- **PRESERVED:** `src/stores/useDiceStore.ts`
+- **PRESERVED:** `src/components/tools/dice/DiceTool.tsx` (2D dice roller)
+- **PRESERVED:** `src/core/dice/` (diceEngine.ts, diceParser.ts)
+
+**Action Needed:** **DO NOT** attempt to implement 3D dice
+
+**Notes:**
+After extensive research and analysis of the dice-box repository (see `dice-box-analysis.md` artifact), we've decided to **completely remove** the 3D dice implementation and start fresh when ready.
+
+**Why Removed:**
+- Shader issues with Rounded/Stamped/Valkyrie dice sets were unsolvable with current approach
+- Procedural texture generation is unreliable across different GPUs
+- Runtime geometry analysis for number detection was too fragile
+- Better approach identified: pre-baked textures + instance buffers (like dice-box uses)
+
+**What Still Works:**
+- ✅ **2D Dice Roller** in `DiceTool.tsx` - fully functional
+- ✅ **Dice Engine** - `diceEngine.ts` and `diceParser.ts` handle all rolling logic
+- ✅ **DiceSettings** - UI component preserved for future use
+- ✅ **useDiceStore** - Settings state management intact
+
+**Total Removed:** 165+ files
+
+**Future Implementation:**
+When we restart 3D dice (not anytime soon), the plan is to:
+1. Use **pre-baked texture maps** (diffuse, normal, specular) instead of procedural shaders
+2. Implement **instance buffer colors** for runtime customization (no new materials needed)
+3. Use **GLTF models with material slots** (not runtime geometry analysis)
+4. Follow the dice-box pattern (BabylonJS + AmmoJS reference)
+
+**For Now:**
+- Users can still roll dice via the 2D interface
+- Settings are preserved for when 3D dice returns
+- Focus on other features (Weave system, tools, etc.)
+
+See `walkthrough.md` artifact for complete removal details.
+
+---
+
+### [2025-11-27 18:52] - Loomwright - ✅
+**Topic:** Tapestry Manager Phase 1 Complete
+**Status:** ✅ Infrastructure Ready
+**Changes:**
+- **CREATED:** `src/types/tapestry.ts` (All data models)
+- **CREATED:** `electron/ipc/tapestry.ts` (Complete IPC handlers)
+- **CREATED:** `src/stores/useTapestryStore.ts` (Tapestry state management)
+- **CREATED:** `src/stores/useEditorStore.ts` (Editor state management)
+- **MODIFIED:** `electron/main.ts` (Registered tapestry handlers)
+- **MODIFIED:** `electron/preload.ts` (Exposed tapestry API)
+- **MODIFIED:** `src/types/electron.d.ts` (TypeScript definitions)
+- **INSTALLED:** `gray-matter`, `uuid` (Dependencies for frontmatter parsing)
+
+**Action Needed:** Start Phase 2 (Tapestry Manager UI)
+
+**Notes:**
+Phase 1 infrastructure is complete and ready for UI development!
+
+**Available IPC Handlers:**
+
+**Registry Management:**
+- `tapestry:loadRegistry` → Returns `TapestryRegistry`
+- `tapestry:create(data)` → Returns tapestry ID (string)
+- `tapestry:open(id)` → Returns `TapestryConfig | null`
+- `tapestry:update(id, updates)` → void
+- `tapestry:remove(id)` → void (removes from registry, keeps files)
+- `tapestry:delete(id)` → void (deletes from disk)
+
+**Tree Management:**
+- `tapestry:loadTree(tapestryId)` → Returns `TapestryNode | null`
+
+**Entry Management:**
+- `tapestry:loadEntry(path)` → Returns `EntryDoc | null`
+- `tapestry:saveEntry(entry)` → void
+- `tapestry:createEntry(parentPath, title, category)` → Returns entry ID
+
+**File Operations:**
+- `tapestry:createFolder(parentPath, name)` → void
+- `tapestry:rename(oldPath, newName)` → void
+- `tapestry:deleteNode(path)` → void
+- `tapestry:move(sourcePath, targetPath)` → void
+- `tapestry:updateOrder(folderPath, order)` → void
+
+**Zustand Stores Available:**
+
+**useTapestryStore:**
+```typescript
+const {
+  registry,              // TapestryRegistry
+  activeTapestryId,      // string | undefined
+  activeTapestryConfig,  // TapestryConfig | undefined
+  tree,                  // TapestryNode | undefined
+  isLoading,             // boolean
+  error,                 // string | undefined
+  
+  loadRegistry,          // () => Promise<void>
+  createTapestry,        // (data) => Promise<string>
+  openTapestry,          // (id) => Promise<void>
+  updateTapestry,        // (id, updates) => Promise<void>
+  removeTapestry,        // (id) => Promise<void>
+  deleteTapestry,        // (id) => Promise<void>
+  loadTree,              // () => Promise<void>
+  clearError,            // () => void
+} = useTapestryStore();
+```
+
+**useEditorStore:**
+```typescript
+const {
+  mode,                  // 'edit' | 'view'
+  openEntries,           // EntryDoc[]
+  activeEntryId,         // string | undefined
+  isLoading,             // boolean
+  error,                 // string | undefined
+  
+  setMode,               // (mode) => void
+  openEntry,             // (path) => Promise<void>
+  closeEntry,            // (id) => Promise<boolean>
+  setActiveEntry,        // (id) => void
+  updateEntryContent,    // (id, content) => void
+  saveEntry,             // (id) => Promise<void>
+  saveAllEntries,        // () => Promise<void>
+  clearError,            // () => void
+} = useEditorStore();
+```
+
+**Your Tasks (Phase 2):**
+1. Create `TapestryManager.tsx` component
+2. Create `TapestryCard.tsx` component
+3. Create `CreateTapestryDialog.tsx` modal
+4. Create `EditTapestryDialog.tsx` modal
+5. Wire to `AppLayout.tsx` for routing
+
+**Example Usage:**
+```typescript
+// Load registry on mount
+useEffect(() => {
+  useTapestryStore.getState().loadRegistry();
+}, []);
+
+// Create new tapestry
+const handleCreate = async (data: CreateTapestryData) => {
+  const id = await createTapestry(data);
+  await openTapestry(id); // Auto-open after creation
+};
+
+// Open tapestry
+const handleOpen = async (id: string) => {
+  await openTapestry(id);
+  // Navigate to main app view
+};
+```
+
+**File Structure Created:**
+- Tapestries stored in: `Documents/Anvil and Loom/Tapestries/<slug>/`
+- Registry file: `%AppData%/Anvil and Loom/tapestries.json`
+- Per-tapestry config: `<tapestry>/.loom/tapestry.json`
+- Entries folder: `<tapestry>/entries/`
+- Initial entry: `<tapestry>/entries/The First Thread.md`
+
+**Gotchas:**
+- Registry auto-loads on app start (call `loadRegistry()` in App.tsx)
+- Tree auto-loads when opening a tapestry
+- Editor auto-saves when switching from edit → view mode
+- Closing dirty entries prompts for save
+- All IPC calls are async (use await)
+
+Ready for you to build the UI! 🎨
+
+---

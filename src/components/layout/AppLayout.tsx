@@ -1,30 +1,24 @@
 import { TopBar } from './TopBar';
-import { LeftLane } from './LeftLane';
-import { CenterLane } from './CenterLane';
-import { RightLane } from './RightLane';
-import { GlobalLastResult } from '../results/GlobalLastResult';
+import { DockContainer } from '../docking/DockContainer';
+import { TapestryManager } from '../tapestry/TapestryManager';
+import { useTapestryStore } from '../../stores/useTapestryStore';
 
 export function AppLayout() {
+  const activeTapestryId = useTapestryStore((state) => state.activeTapestryId);
+
+  // Show TapestryManager if no tapestry is active
+  if (!activeTapestryId) {
+    return <TapestryManager />;
+  }
+
+  // Show main app with docking system
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden bg-slate-950">
       <TopBar />
-      <div className="flex-1 flex min-h-0">
-        <div className="w-64 flex-shrink-0 overflow-hidden">
-          <LeftLane />
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <CenterLane />
-        </div>
-        <div className="w-80 flex-shrink-0 overflow-visible flex flex-col">
-          {/* Tool Panes Area - scrollable */}
-          <div className="flex-1 min-h-0 overflow-y-auto app-scroll">
-            <RightLane />
-          </div>
-          {/* Last Result - Fixed Status Bar */}
-          <div className="flex-shrink-0 border-t border-slate-800">
-            <GlobalLastResult />
-          </div>
-        </div>
+
+      {/* Main Docking Area */}
+      <div className="flex-1 min-h-0 relative">
+        <DockContainer />
       </div>
     </div>
   );

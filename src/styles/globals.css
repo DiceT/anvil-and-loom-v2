@@ -75,3 +75,110 @@ body::-webkit-scrollbar-button,
 [data-tooltip]:hover::after {
   right: clamp(10px, auto, 10px);
 }
+
+/* Docking System Styles */
+:root {
+  --dock-color-background: #0f172a;
+  /* slate-900 */
+  --dock-color-panel: #020617;
+  /* slate-950 */
+  --dock-color-tab-bar: #1e293b;
+  /* slate-800 */
+  --dock-color-tab: #334155;
+  /* slate-700 */
+  --dock-color-tab-active: #0f172a;
+  /* slate-900 */
+  --dock-color-tab-hover: #475569;
+  /* slate-600 */
+  --dock-color-text: #94a3b8;
+  /* slate-400 */
+  --dock-color-text-active: #e2e8f0;
+  /* slate-200 */
+  --dock-border: #1e293b;
+  /* slate-800 */
+  --dock-divider: #1e293b;
+  /* slate-800 */
+}
+
+/* Override rc-dock styles for dark theme integration */
+.dock-theme-dark .dock-panel {
+  background: var(--dock-color-panel);
+  border: none;
+}
+
+.dock-theme-dark .dock-bar {
+  background: var(--dock-color-tab-bar);
+  border-bottom: 1px solid var(--dock-border);
+  padding: 0;
+  min-height: 32px;
+}
+
+.dock-theme-dark .dock-tab {
+  background: transparent;
+  color: var(--dock-color-text);
+  border: none;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.dock-theme-dark .dock-tab:hover {
+  background: var(--dock-color-tab-hover);
+  color: var(--dock-color-text-active);
+}
+
+.dock-theme-dark .dock-tab-active {
+  background: var(--dock-color-tab-active);
+  color: var(--dock-color-text-active);
+  font-weight: 500;
+}
+
+.dock-theme-dark .dock-ink-bar {
+  background-color: #6366f1;
+  /* indigo-500 for subtle accent */
+  height: 2px;
+}
+
+.dock-theme-dark .dock-divider {
+  background: var(--dock-divider);
+  width: 1px;
+  transition: background 0.2s ease;
+}
+
+.dock-theme-dark .dock-divider:hover {
+  background: #475569;
+  /* slate-600 on hover for visibility */
+}
+
+.dock-theme-dark .dock-drop-layer .dock-drop-square {
+  background: rgba(99, 102, 241, 0.15);
+  /* indigo with transparency */
+  border: 2px dashed #6366f1;
+  /* indigo-500 */
+  border-radius: 4px;
+}
+
+.dock-theme-dark .dock-drop-layer .dock-drop-square-active {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: #818cf8;
+  /* indigo-400 */
+}
+
+/* Close button styling */
+.dock-theme-dark .dock-tab-close-btn {
+  color: var(--dock-color-text);
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.dock-theme-dark .dock-tab-close-btn:hover {
+  opacity: 1;
+  color: var(--dock-color-text-active);
+}
+
+/* Panel content area */
+.dock-theme-dark .dock-panel-content {
+  background: var(--dock-color-background);
+}

@@ -1,0 +1,2009 @@
+body > .dragging-layer {
+  position: absolute !important;
+  z-index: 9999;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+  border: none;
+  pointer-events: none;
+  opacity: 0.6;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: nowrap;
+  --default-background-color: #fff;
+  /* dragging element */
+  /* icon */
+}
+body > .dragging-layer > *:first-child {
+  pointer-events: none !important;
+  overflow: hidden !important;
+  transform: translate(-50%, -50%) !important;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1), inset 0 0 8px rgba(0, 0, 0, 0.1);
+}
+body > .dragging-layer > .dragging {
+  /* prevent double translucent layers */
+  opacity: 1 !important;
+}
+body > .dragging-layer > div:last-child {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+}
+.drag-initiator {
+  -moz-user-select: none;
+       user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+.drag-accept-reject::after {
+  content: "🚫";
+}
+.dock {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+  display: flex;
+}
+.dock-bar {
+  font-size: 14px;
+  line-height: 1.5;
+  box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  white-space: nowrap;
+  outline: none;
+  zoom: 1;
+}
+.dock-ink-bar {
+  position: absolute;
+  box-sizing: border-box;
+  margin-top: -3px;
+  background-color: #108ee9;
+  transform-origin: 0 0;
+  width: 0;
+  height: 0;
+}
+.dock-tab-btn-disabled {
+  cursor: default;
+  color: #ccc;
+}
+.dock-nav-animated {
+  transition: transform 0.25s cubic-bezier(0.35, 0, 0.25, 1);
+}
+.dock-tab {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  min-width: 30px;
+  height: 30px;
+  text-align: center;
+  transition: color 0.25s cubic-bezier(0.35, 0, 0.25, 1);
+  padding: 0;
+  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  float: left;
+  margin-right: 10px;
+  background: #fafafd;
+  outline: none;
+}
+.dock-tab.dragging {
+  opacity: 0.3;
+}
+.dock-tab > div {
+  padding: 4px 14px;
+  outline-color: #108ee9;
+}
+.dock-tab:hover {
+  color: #349fec;
+}
+.dock-tab-active,
+.dock-tab-active:hover {
+  color: #108ee9;
+  cursor: default;
+  transform: translateZ(0);
+}
+.dock-tab-disabled {
+  cursor: default;
+  color: #ccc;
+}
+.dock-tab-disabled:hover {
+  color: #ccc;
+}
+.dock-content-animated {
+  transition: margin 0.3s;
+}
+.dock-bottom > .dock-nav .dock-ink-bar-animated,
+.dock-top > .dock-nav .dock-ink-bar-animated,
+.dock-bottom > div > .dock-nav .dock-ink-bar-animated,
+.dock-top > div > .dock-nav .dock-ink-bar-animated {
+  transition: width 0.3s, left 0.3s, right 0.3s;
+}
+.dock-content-animated .dock-tabpane {
+  flex-shrink: 0;
+}
+.no-flexbox .dock-content {
+  transform: none !important;
+  overflow: auto;
+}
+.dock-tabpane:not(.dock-tabpane-active) {
+  animation-name: dock-fadeOut;
+  animation-duration: 0.5s;
+}
+.dock-tabpane-hidden {
+  display: none;
+}
+@keyframes dock-fadeOut {
+  from {
+    height: 100%;
+    visibility: visible;
+  }
+  to {
+    height: 100%;
+    visibility: visible;
+  }
+}
+.dock-top {
+  flex-direction: column;
+}
+.dock-top .dock-bar {
+  flex: 0 0 auto;
+  background: #fafafd;
+  border-bottom: 1px solid #f3f3f3;
+  padding-left: 8px;
+}
+.dock-top .dock-content-animated {
+  flex-direction: row;
+}
+.dock-top .dock-tab-next {
+  right: 2px;
+}
+.dock-top .dock-ink-bar {
+  height: 2px;
+  bottom: 0;
+  left: 0;
+}
+.dock-tab-close-btn {
+  position: absolute;
+  cursor: pointer;
+  font-family: 'Fredoka One', sans-serif;
+  color: #ddd;
+  right: -3px;
+  font-size: 12px;
+  width: 16px;
+  text-align: center;
+  top: 6px;
+  outline: none;
+  transition: all 0.25s ease-in-out;
+}
+.dock-tab-close-btn:before {
+  content: "X";
+}
+.dock-tab-close-btn:hover,
+.dock-tab-close-btn:focus {
+  color: #666;
+  transform: scale(1.1, 1.1);
+}
+.dock-tab:hover .dock-tab-close-btn,
+.dock-tab-close-btn:focus {
+  opacity: 1;
+  color: #a2a2a2;
+}
+.dock-tab-hit-area {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  right: -5px;
+}
+.dock-pane-cache {
+  width: 100%;
+  height: 100%;
+}
+.dock-content {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.dock-content-holder {
+  flex: auto;
+}
+.dock-top > .dock-content-holder {
+  /* work around for the height issue in content holder*/
+  height: 0;
+}
+.dock-content .dock-tabpane {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  flex: none;
+}
+.dock-nav {
+  display: flex;
+  flex: none;
+  position: relative;
+}
+.dock-nav-operations {
+  display: flex;
+}
+.dock-nav-more {
+  height: 30px;
+  border: none;
+  color: rgba(0, 0, 0, 0.85);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  align-self: flex-end;
+}
+.dock-nav-more::after {
+  position: absolute;
+  z-index: 1;
+  content: '';
+  pointer-events: none;
+  width: 30px;
+  height: 30px;
+  left: -30px;
+  top: 0;
+  box-shadow: inset -10px 0 8px -8px rgba(0, 0, 0, 0.08);
+}
+.dock-nav-wrap {
+  position: relative;
+  display: flex;
+  flex: auto;
+  align-self: stretch;
+  overflow: hidden;
+  white-space: nowrap;
+  transform: translate(0);
+}
+.dock-nav-list {
+  display: flex;
+  position: relative;
+  transition: transform 0.3s;
+}
+.dock-extra-content {
+  display: flex;
+  height: 30px;
+}
+.dock-extra-content .dock-tab-close-btn {
+  position: relative;
+  right: 4px;
+}
+.dock-dropdown {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5715;
+  list-style: none;
+  font-feature-settings: "tnum";
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  z-index: 1050;
+  display: block;
+}
+.dock-dropdown-hidden {
+  display: none;
+}
+.dock-dropdown-menu {
+  max-height: 200px;
+  margin: 0;
+  padding: 4px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  text-align: left;
+  list-style-type: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border-radius: 2px;
+  outline: none;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+.dock-dropdown-menu-item {
+  min-width: 120px;
+  margin: 0;
+  padding: 5px 12px;
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+.dock-dropdown-menu-item .dock-tab-hit-area {
+  left: 0;
+  right: 0;
+}
+.dock-dropdown-menu-item .dock-tab-close-btn {
+  right: 2px;
+}
+.dock-dropdown-menu-item:hover {
+  background: #f5f5f5;
+}
+.dock-dropdown-menu-item-disabled,
+.dock-dropdown-menu-item-disabled:hover {
+  color: #ccc;
+  background: 0 0;
+  cursor: not-allowed;
+}
+body.dock-dragging .dock-tab-hit-area {
+  pointer-events: inherit;
+}
+body.dock-dragging {
+  -moz-user-select: none;
+       user-select: none;
+  -webkit-user-select: none;
+}
+body.dock-dragging iframe {
+  pointer-events: none;
+}
+.dock-panel {
+  box-sizing: border-box;
+  position: relative;
+  color: rgba(0, 0, 0, 0.85);
+  background: #fff;
+  border: 1px solid #ddd;
+}
+.dock-panel.dragging {
+  opacity: 0.3;
+}
+.dock-panel-drag-size {
+  position: absolute;
+  z-index: 300;
+}
+.dock-panel-drag-size-t {
+  top: -4px;
+  left: 4px;
+  right: 4px;
+  height: 8px;
+  cursor: ns-resize;
+}
+.dock-panel-drag-size-b {
+  bottom: -4px;
+  left: 4px;
+  right: 4px;
+  height: 8px;
+  cursor: ns-resize;
+}
+.dock-panel-drag-size-l {
+  left: -4px;
+  top: 4px;
+  bottom: 4px;
+  width: 8px;
+  cursor: ew-resize;
+}
+.dock-panel-drag-size-r {
+  right: -4px;
+  top: 4px;
+  bottom: 4px;
+  width: 8px;
+  cursor: ew-resize;
+}
+.dock-panel-drag-size-t-l {
+  top: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  cursor: nwse-resize;
+}
+.dock-panel-drag-size-t-r {
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  cursor: nesw-resize;
+}
+.dock-panel-drag-size-b-l {
+  bottom: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  cursor: nesw-resize;
+}
+.dock-panel-drag-size-b-r {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='17' height='17' viewBox='0 0 17 17'%3E%3Cpath fill='rgba(0, 0, 0, 0.1)' d='M2 12 L12 2 L12 12z'/%3E%3C/svg%3E");
+  bottom: -4px;
+  right: -4px;
+  width: 17px;
+  height: 17px;
+  cursor: nwse-resize;
+}
+.dock-box {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+}
+.divider-box {
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+}
+.divider-box > *:nth-child(odd) {
+  flex: 1 1 auto;
+}
+.dock-divider {
+  box-sizing: border-box;
+  flex: 0 0 4px;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1;
+}
+.dock-hbox > .dock-divider {
+  transform: scaleX(3);
+  cursor: ew-resize;
+}
+.dock-vbox {
+  flex-direction: column;
+}
+.dock-vbox > .dock-divider {
+  transform: scaleY(3);
+  cursor: ns-resize;
+}
+.dock-fbox {
+  pointer-events: none;
+  z-index: 200;
+}
+.dock-fbox > .dock-panel {
+  position: absolute;
+  pointer-events: visible;
+  box-shadow: 0 0 4px #aaaaaa;
+}
+.dock-fbox > .dock-panel.dragging {
+  opacity: 0.8;
+  pointer-events: none;
+}
+.dock-mbox {
+  z-index: 250;
+  width: 100%;
+  height: 100%;
+}
+.dock-mbox > .dock-panel {
+  width: 100%;
+  height: 100%;
+  box-shadow: 0 0 4px #aaaaaa;
+}
+.dock-mbox.dock-mbox-show {
+  visibility: visible;
+  animation: dock-mbox-show 0.2s ease;
+}
+.dock-mbox.dock-mbox-hide {
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  animation: dock-mbox-hide 0.2s ease;
+}
+@keyframes dock-mbox-show {
+  from {
+    transform: scale(0.9, 0.9);
+    visibility: visible;
+  }
+  to {
+    transform: scale(1, 1);
+    visibility: visible;
+  }
+}
+@keyframes dock-mbox-hide {
+  from {
+    transform: scale(1, 1);
+    visibility: visible;
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.9, 0.9);
+    visibility: visible;
+    opacity: 0;
+  }
+}
+.dock-wbox {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.dock-wbox > .dock-panel {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+.dock-layout {
+  overflow: hidden;
+  position: relative;
+}
+.dock-layout > .dock-box {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.dock-layout > .dock-drop-indicator {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 400;
+  border: solid 1px #fff;
+  background: #88c7f4;
+  opacity: 0.5;
+  box-shadow: 0 0 4px #ddd;
+  display: none;
+  transition: all 0.1s ease-out;
+}
+.dock-drop-edge {
+  position: absolute;
+  top: 30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: white;
+  border: none;
+  opacity: 0.01;
+}
+.dock-drop-layer {
+  position: absolute;
+  pointer-events: none;
+  top: 30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.dock-drop-layer .dock-drop-square {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: visible;
+  z-index: 300;
+  width: 32px;
+  height: 32px;
+  font-family: 'Fredoka One', sans-serif;
+  color: #ddd;
+  background: #fff;
+  border: 1px solid transparent;
+  left: calc(50% - 16px);
+  top: calc(50% - 16px);
+}
+.dock-drop-layer .dock-drop-square .dock-drop-square-box {
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  width: 100%;
+  height: 100%;
+}
+.dock-drop-layer .dock-drop-square::before {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: block;
+  line-height: 30px;
+  text-align: center;
+}
+.dock-drop-layer .dock-drop-float {
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  opacity: 0.01;
+}
+.dock-drop-layer .dock-drop-left {
+  left: calc(50% - 48px);
+}
+.dock-drop-layer .dock-drop-left.dock-drop-deep {
+  left: calc(50% - 64px);
+  width: 16px;
+}
+.dock-drop-layer .dock-drop-left::before {
+  content: '>';
+  transform: rotate(180deg);
+}
+.dock-drop-layer .dock-drop-right {
+  left: calc(50% + 16px);
+}
+.dock-drop-layer .dock-drop-right.dock-drop-deep {
+  left: calc(50% + 48px);
+  width: 16px;
+}
+.dock-drop-layer .dock-drop-right::before {
+  content: '>';
+}
+.dock-drop-layer .dock-drop-top {
+  top: calc(50% - 48px);
+}
+.dock-drop-layer .dock-drop-top.dock-drop-deep {
+  top: calc(50% - 64px);
+  height: 16px;
+}
+.dock-drop-layer .dock-drop-top.dock-drop-deep::before {
+  line-height: 14px;
+}
+.dock-drop-layer .dock-drop-top::before {
+  content: '>';
+  transform: rotate(270deg);
+}
+.dock-drop-layer .dock-drop-bottom {
+  top: calc(50% + 16px);
+}
+.dock-drop-layer .dock-drop-bottom.dock-drop-deep {
+  top: calc(50% + 48px);
+  height: 16px;
+}
+.dock-drop-layer .dock-drop-bottom.dock-drop-deep::before {
+  line-height: 14px;
+}
+.dock-drop-layer .dock-drop-bottom::before {
+  content: '>';
+  transform: rotate(90deg);
+}
+.dock-drop-layer .dock-drop-square-dropping {
+  background: #88c7f4;
+  color: white;
+}
+.dock-panel.dock-panel-dropping .dock-tab-close-btn {
+  pointer-events: none;
+}
+.dock-panel-max-btn,
+.dock-panel-min-btn {
+  height: 25px;
+  width: 21px;
+  font-family: 'Fredoka One', sans-serif;
+  margin: 2px 2px 2px 0;
+  padding: 6px 4px 4px 2px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  outline: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  box-sizing: border-box;
+}
+.dock-panel-max-btn:before,
+.dock-panel-min-btn:before {
+  position: absolute;
+  content: " ";
+  border: 2px solid #ddd;
+  border-radius: 1px;
+  width: 13px;
+  height: 13px;
+  box-sizing: border-box;
+}
+.dock-panel-max-btn:hover,
+.dock-panel-min-btn:hover,
+.dock-panel-max-btn:focus,
+.dock-panel-min-btn:focus {
+  color: #a2a2a2;
+}
+.dock-panel-max-btn:hover:before,
+.dock-panel-min-btn:hover:before,
+.dock-panel-max-btn:focus:before,
+.dock-panel-min-btn:focus:before {
+  border-color: #a2a2a2;
+}
+.dock-panel-max-btn:hover,
+.dock-panel-min-btn:hover {
+  transform: scale(1.1);
+}
+.dock-panel-min-btn:before {
+  position: absolute;
+  border-radius: 1px;
+  width: 9px;
+  height: 9px;
+  border: none;
+  content: "-";
+  color: #666;
+  font-size: 20px;
+  line-height: 4px;
+}
+.dock-panel-min-btn:hover:before,
+.dock-panel-min-btn:focus:before {
+  color: #999;
+}
+.dock-panel.dock-style-place-holder {
+  border: none;
+}
+.dock-panel.dock-style-place-holder .dock-bar {
+  display: none;
+}
+.dock-layout > :not(.dock-fbox) .dock-panel.dock-style-headless {
+  border: none;
+}
+.dock-layout > :not(.dock-fbox) .dock-panel.dock-style-headless .dock-bar {
+  position: absolute;
+  z-index: 1;
+  opacity: 0;
+  height: 20px;
+  width: 100%;
+  transition: all 0.15s ease-in-out;
+}
+.dock-layout > :not(.dock-fbox) .dock-panel.dock-style-headless .dock-bar:hover,
+.dock-layout > :not(.dock-fbox) .dock-panel.dock-style-headless .dock-bar:focus-within,
+.dock-layout > :not(.dock-fbox) .dock-panel.dock-style-headless.dock-panel-dropping .dock-bar {
+  opacity: 1;
+  height: 31px;
+}
+.dock-layout > :not(.dock-fbox) .dock-panel.dock-style-headless .dock-content {
+  height: 100%;
+}
+.dock-panel.dock-style-main {
+  border: none;
+}
+.dock-panel.dock-style-main .dock-bar {
+  background: none;
+  border-bottom: 1px solid #eee;
+}
+.dock-panel.dock-style-main .dock-tab {
+  background: #fff;
+}
+.dock-panel.dock-style-card .dock-tab {
+  margin-right: 2px;
+  border: 1px solid #ddd;
+  border-radius: 5px 5px 0 0;
+}
+.dock-panel.dock-style-card .dock-tab.dock-tab-active {
+  border-bottom: 1px solid #fff;
+  background: #fff;
+}
+.dock-panel.dock-style-card .dock-bar {
+  border-bottom: 1px solid #ddd;
+  overflow: visible;
+}
+.dock-panel.dock-style-card .dock-nav-wrap {
+  padding-top: 5px;
+  transform: translate(0, 1px);
+}
+.dock-panel.dock-style-card .dock-ink-bar {
+  /* hide animated ink bar */
+  background: #fff;
+  opacity: 0;
+}
+.dock-panel.dock-style-card .dock-tab-hit-area {
+  /* cover the border area */
+  left: -2px;
+  right: -2px;
+}
+.dock-panel.dock-style-card .dock-panel-max-btn,
+.dock-panel.dock-style-card .dock-panel-min-btn {
+  margin-top: 4px;
+}
+.dock-panel.dock-style-card .dock-tab-close-btn {
+  right: 0;
+  font-size: 10px;
+  top: 8px;
+}
+.dock-panel.dock-style-card .dock-extra-content {
+  height: 35px;
+}
+*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}
+
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x:  ;
+  --tw-pan-y:  ;
+  --tw-pinch-zoom:  ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position:  ;
+  --tw-gradient-via-position:  ;
+  --tw-gradient-to-position:  ;
+  --tw-ordinal:  ;
+  --tw-slashed-zero:  ;
+  --tw-numeric-figure:  ;
+  --tw-numeric-spacing:  ;
+  --tw-numeric-fraction:  ;
+  --tw-ring-inset:  ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-blur:  ;
+  --tw-brightness:  ;
+  --tw-contrast:  ;
+  --tw-grayscale:  ;
+  --tw-hue-rotate:  ;
+  --tw-invert:  ;
+  --tw-saturate:  ;
+  --tw-sepia:  ;
+  --tw-drop-shadow:  ;
+  --tw-backdrop-blur:  ;
+  --tw-backdrop-brightness:  ;
+  --tw-backdrop-contrast:  ;
+  --tw-backdrop-grayscale:  ;
+  --tw-backdrop-hue-rotate:  ;
+  --tw-backdrop-invert:  ;
+  --tw-backdrop-opacity:  ;
+  --tw-backdrop-saturate:  ;
+  --tw-backdrop-sepia:  ;
+  --tw-contain-size:  ;
+  --tw-contain-layout:  ;
+  --tw-contain-paint:  ;
+  --tw-contain-style:  ;
+}/*
+! tailwindcss v3.4.18 | MIT License | https://tailwindcss.com
+*//*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+*,
+::before,
+::after {
+  box-sizing: border-box; /* 1 */
+  border-width: 0; /* 2 */
+  border-style: solid; /* 2 */
+  border-color: #e5e7eb; /* 2 */
+}
+
+::before,
+::after {
+  --tw-content: '';
+}
+
+/*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+6. Use the user's configured `sans` font-variation-settings by default.
+7. Disable tap highlights on iOS
+*/
+
+html,
+:host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  -moz-tab-size: 4; /* 3 */
+  -o-tab-size: 4;
+     tab-size: 4; /* 3 */
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* 4 */
+  font-feature-settings: normal; /* 5 */
+  font-variation-settings: normal; /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+
+/*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+body {
+  margin: 0; /* 1 */
+  line-height: inherit; /* 2 */
+}
+
+/*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+
+/*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
+}
+
+/*
+Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+/*
+Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+1. Use the user's configured `mono` font-family by default.
+2. Use the user's configured `mono` font-feature-settings by default.
+3. Use the user's configured `mono` font-variation-settings by default.
+4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; /* 1 */
+  font-feature-settings: normal; /* 2 */
+  font-variation-settings: normal; /* 3 */
+  font-size: 1em; /* 4 */
+}
+
+/*
+Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+
+/*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  font-weight: inherit; /* 1 */
+  line-height: inherit; /* 1 */
+  letter-spacing: inherit; /* 1 */
+  color: inherit; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 3 */
+}
+
+/*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+button,
+select {
+  text-transform: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+button,
+input:where([type='button']),
+input:where([type='reset']),
+input:where([type='submit']) {
+  -webkit-appearance: button; /* 1 */
+  background-color: transparent; /* 2 */
+  background-image: none; /* 2 */
+}
+
+/*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield; /* 1 */
+  outline-offset: -2px; /* 2 */
+}
+
+/*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button; /* 1 */
+  font: inherit; /* 2 */
+}
+
+/*
+Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+Removes the default spacing and border for appropriate elements.
+*/
+
+blockquote,
+dl,
+dd,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+figure,
+p,
+pre {
+  margin: 0;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+ol,
+ul,
+menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+Reset default styling for dialogs.
+*/
+dialog {
+  padding: 0;
+}
+
+/*
+Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+input::-moz-placeholder, textarea::-moz-placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+input::placeholder,
+textarea::placeholder {
+  opacity: 1; /* 1 */
+  color: #9ca3af; /* 2 */
+}
+
+/*
+Set the default cursor for buttons.
+*/
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+/*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+:disabled {
+  cursor: default;
+}
+
+/*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+
+/*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Make elements with the HTML hidden attribute stay hidden by default */
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+  body {
+  --tw-bg-opacity: 1;
+  background-color: rgb(10 13 20 / var(--tw-bg-opacity, 1));
+  --tw-text-opacity: 1;
+  color: rgb(241 245 249 / var(--tw-text-opacity, 1));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+  * {
+  --tw-border-opacity: 1;
+  border-color: rgb(51 65 85 / var(--tw-border-opacity, 1));
+}
+.fixed {
+  position: fixed;
+}
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+.inset-0 {
+  inset: 0px;
+}
+.right-0 {
+  right: 0px;
+}
+.top-8 {
+  top: 2rem;
+}
+.z-10 {
+  z-index: 10;
+}
+.z-50 {
+  z-index: 50;
+}
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-6 {
+  margin-top: 1.5rem;
+}
+.block {
+  display: block;
+}
+.flex {
+  display: flex;
+}
+.\!table {
+  display: table !important;
+}
+.table {
+  display: table;
+}
+.grid {
+  display: grid;
+}
+.h-10 {
+  height: 2.5rem;
+}
+.h-12 {
+  height: 3rem;
+}
+.h-3 {
+  height: 0.75rem;
+}
+.h-4 {
+  height: 1rem;
+}
+.h-6 {
+  height: 1.5rem;
+}
+.h-8 {
+  height: 2rem;
+}
+.h-full {
+  height: 100%;
+}
+.h-screen {
+  height: 100vh;
+}
+.min-h-0 {
+  min-height: 0px;
+}
+.w-10 {
+  width: 2.5rem;
+}
+.w-12 {
+  width: 3rem;
+}
+.w-16 {
+  width: 4rem;
+}
+.w-3 {
+  width: 0.75rem;
+}
+.w-4 {
+  width: 1rem;
+}
+.w-6 {
+  width: 1.5rem;
+}
+.w-8 {
+  width: 2rem;
+}
+.w-96 {
+  width: 24rem;
+}
+.w-full {
+  width: 100%;
+}
+.min-w-\[120px\] {
+  min-width: 120px;
+}
+.flex-1 {
+  flex: 1 1 0%;
+}
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+.border-collapse {
+  border-collapse: collapse;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-end {
+  align-items: flex-end;
+}
+.items-center {
+  align-items: center;
+}
+.justify-end {
+  justify-content: flex-end;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.gap-1 {
+  gap: 0.25rem;
+}
+.gap-2 {
+  gap: 0.5rem;
+}
+.gap-4 {
+  gap: 1rem;
+}
+.space-y-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.5rem * var(--tw-space-y-reverse));
+}
+.space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
+}
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+.overflow-auto {
+  overflow: auto;
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-x-auto {
+  overflow-x: auto;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+.rounded {
+  border-radius: 0.25rem;
+}
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+.border {
+  border-width: 1px;
+}
+.border-y {
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+}
+.border-b {
+  border-bottom-width: 1px;
+}
+.border-l {
+  border-left-width: 1px;
+}
+.border-r {
+  border-right-width: 1px;
+}
+.border-t {
+  border-top-width: 1px;
+}
+.border-slate-700 {
+  --tw-border-opacity: 1;
+  border-color: rgb(51 65 85 / var(--tw-border-opacity, 1));
+}
+.border-slate-800 {
+  --tw-border-opacity: 1;
+  border-color: rgb(30 41 59 / var(--tw-border-opacity, 1));
+}
+.bg-black\/50 {
+  background-color: rgb(0 0 0 / 0.5);
+}
+.bg-blue-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1));
+}
+.bg-purple-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(147 51 234 / var(--tw-bg-opacity, 1));
+}
+.bg-purple-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(126 34 206 / var(--tw-bg-opacity, 1));
+}
+.bg-slate-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(51 65 85 / var(--tw-bg-opacity, 1));
+}
+.bg-slate-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+}
+.bg-slate-850 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 32 46 / var(--tw-bg-opacity, 1));
+}
+.bg-slate-900 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(15 20 25 / var(--tw-bg-opacity, 1));
+}
+.bg-slate-950 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(10 13 20 / var(--tw-bg-opacity, 1));
+}
+.p-0\.5 {
+  padding: 0.125rem;
+}
+.p-1 {
+  padding: 0.25rem;
+}
+.p-4 {
+  padding: 1rem;
+}
+.p-6 {
+  padding: 1.5rem;
+}
+.px-1\.5 {
+  padding-left: 0.375rem;
+  padding-right: 0.375rem;
+}
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.py-1\.5 {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+}
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.pb-1 {
+  padding-bottom: 0.25rem;
+}
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+.pb-8 {
+  padding-bottom: 2rem;
+}
+.pl-6 {
+  padding-left: 1.5rem;
+}
+.pr-3 {
+  padding-right: 0.75rem;
+}
+.pt-1 {
+  padding-top: 0.25rem;
+}
+.pt-2 {
+  padding-top: 0.5rem;
+}
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.font-bold {
+  font-weight: 700;
+}
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.lowercase {
+  text-transform: lowercase;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+.text-red-400 {
+  --tw-text-opacity: 1;
+  color: rgb(248 113 113 / var(--tw-text-opacity, 1));
+}
+.text-red-500 {
+  --tw-text-opacity: 1;
+  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
+}
+.text-slate-100 {
+  --tw-text-opacity: 1;
+  color: rgb(241 245 249 / var(--tw-text-opacity, 1));
+}
+.text-slate-200 {
+  --tw-text-opacity: 1;
+  color: rgb(226 232 240 / var(--tw-text-opacity, 1));
+}
+.text-slate-300 {
+  --tw-text-opacity: 1;
+  color: rgb(203 213 225 / var(--tw-text-opacity, 1));
+}
+.text-slate-400 {
+  --tw-text-opacity: 1;
+  color: rgb(148 163 184 / var(--tw-text-opacity, 1));
+}
+.text-slate-50 {
+  --tw-text-opacity: 1;
+  color: rgb(248 250 252 / var(--tw-text-opacity, 1));
+}
+.text-slate-500 {
+  --tw-text-opacity: 1;
+  color: rgb(100 116 139 / var(--tw-text-opacity, 1));
+}
+.text-slate-600 {
+  --tw-text-opacity: 1;
+  color: rgb(71 85 105 / var(--tw-text-opacity, 1));
+}
+.text-white {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+}
+.placeholder-slate-500::-moz-placeholder {
+  --tw-placeholder-opacity: 1;
+  color: rgb(100 116 139 / var(--tw-placeholder-opacity, 1));
+}
+.placeholder-slate-500::placeholder {
+  --tw-placeholder-opacity: 1;
+  color: rgb(100 116 139 / var(--tw-placeholder-opacity, 1));
+}
+.shadow-lg {
+  --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.shadow-xl {
+  --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.drop-shadow-\[0_0_8px_rgba\(148\2c 163\2c 184\2c 0\.5\)\] {
+  --tw-drop-shadow: drop-shadow(0 0 8px rgba(148,163,184,0.5));
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.filter {
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.duration-200 {
+  transition-duration: 200ms;
+}
+.duration-300 {
+  transition-duration: 300ms;
+}
+.ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar styles */
+body,
+.app-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #1f2937 #020617;
+}
+
+body::-webkit-scrollbar,
+.app-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body::-webkit-scrollbar-track,
+.app-scroll::-webkit-scrollbar-track {
+  background-color: #020617;
+}
+
+body::-webkit-scrollbar-thumb,
+.app-scroll::-webkit-scrollbar-thumb {
+  background-color: #1f2937;
+  border-radius: 9999px;
+}
+
+body::-webkit-scrollbar-button,
+.app-scroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Custom tooltip styles */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(156, 163, 175, 0.5);
+  color: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  text-align: center;
+  z-index: 9999;
+  pointer-events: none;
+  margin-bottom: 8px;
+  /* Prevent tooltip from going off right edge */
+  max-width: 300px;
+  white-space: pre-wrap;
+}
+
+/* Adjust tooltip position for elements near screen edges */
+[data-tooltip]:hover::after {
+  right: clamp(10px, auto, 10px);
+}
+
+/* Docking System Styles */
+:root {
+  --dock-color-background: #0f172a; /* slate-900 */
+  --dock-color-panel: #020617; /* slate-950 */
+  --dock-color-tab-bar: #1e293b; /* slate-800 */
+  --dock-color-tab: #334155; /* slate-700 */
+  --dock-color-tab-active: #0f172a; /* slate-900 */
+  --dock-color-tab-hover: #475569; /* slate-600 */
+  --dock-color-text: #94a3b8; /* slate-400 */
+  --dock-color-text-active: #e2e8f0; /* slate-200 */
+  --dock-border: #1e293b; /* slate-800 */
+  --dock-divider: #1e293b; /* slate-800 */
+}
+
+/* Override rc-dock styles for dark theme integration */
+.dock-theme-dark .dock-panel {
+  background: var(--dock-color-panel);
+  border: none;
+}
+
+.dock-theme-dark .dock-bar {
+  background: var(--dock-color-tab-bar);
+  border-bottom: 1px solid var(--dock-border);
+  padding: 0;
+  min-height: 32px;
+}
+
+.dock-theme-dark .dock-tab {
+  background: transparent;
+  color: var(--dock-color-text);
+  border: none;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+.dock-theme-dark .dock-tab:hover {
+  background: var(--dock-color-tab-hover);
+  color: var(--dock-color-text-active);
+}
+
+.dock-theme-dark .dock-tab-active {
+  background: var(--dock-color-tab-active);
+  color: var(--dock-color-text-active);
+  font-weight: 500;
+}
+
+.dock-theme-dark .dock-ink-bar {
+  background-color: #6366f1; /* indigo-500 for subtle accent */
+  height: 2px;
+}
+
+.dock-theme-dark .dock-divider {
+  background: var(--dock-divider);
+  width: 1px;
+  transition: background 0.2s ease;
+}
+
+.dock-theme-dark .dock-divider:hover {
+  background: #475569; /* slate-600 on hover for visibility */
+}
+
+.dock-theme-dark .dock-drop-layer .dock-drop-square {
+  background: rgba(99, 102, 241, 0.15); /* indigo with transparency */
+  border: 2px dashed #6366f1; /* indigo-500 */
+  border-radius: 4px;
+}
+
+.dock-theme-dark .dock-drop-layer .dock-drop-square-active {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: #818cf8; /* indigo-400 */
+}
+
+/* Close button styling */
+.dock-theme-dark .dock-tab-close-btn {
+  color: var(--dock-color-text);
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.dock-theme-dark .dock-tab-close-btn:hover {
+  opacity: 1;
+  color: var(--dock-color-text-active);
+}
+
+/* Panel content area */
+.dock-theme-dark .dock-panel-content {
+  background: var(--dock-color-background);
+}
+.last\:border-0:last-child {
+  border-width: 0px;
+}
+.hover\:bg-purple-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(147 51 234 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-purple-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(126 34 206 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-slate-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-slate-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(51 65 85 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-slate-800:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+}
+.hover\:bg-slate-850:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(26 32 46 / var(--tw-bg-opacity, 1));
+}
+.hover\:text-blue-400:hover {
+  --tw-text-opacity: 1;
+  color: rgb(96 165 250 / var(--tw-text-opacity, 1));
+}
+.hover\:text-slate-200:hover {
+  --tw-text-opacity: 1;
+  color: rgb(226 232 240 / var(--tw-text-opacity, 1));
+}
+.hover\:opacity-90:hover {
+  opacity: 0.9;
+}
+.hover\:drop-shadow-\[0_0_6px_rgba\(96\2c 165\2c 250\2c 0\.4\)\]:hover {
+  --tw-drop-shadow: drop-shadow(0 0 6px rgba(96,165,250,0.4));
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.focus\:border-blue-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(59 130 246 / var(--tw-border-opacity, 1));
+}
+.focus\:border-slate-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(100 116 139 / var(--tw-border-opacity, 1));
+}
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.focus\:ring-1:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+.focus\:ring-blue-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1));
+}
+.focus\:drop-shadow-\[0_0_10px_rgba\(96\2c 165\2c 250\2c 0\.6\)\]:focus {
+  --tw-drop-shadow: drop-shadow(0 0 10px rgba(96,165,250,0.6));
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+.disabled\:bg-slate-700:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(51 65 85 / var(--tw-bg-opacity, 1));
+}
+.disabled\:bg-slate-800:disabled {
+  --tw-bg-opacity: 1;
+  background-color: rgb(30 41 59 / var(--tw-bg-opacity, 1));
+}
+.disabled\:text-slate-500:disabled {
+  --tw-text-opacity: 1;
+  color: rgb(100 116 139 / var(--tw-text-opacity, 1));
+}

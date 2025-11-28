@@ -3,6 +3,7 @@ import { ResultsFullPane } from '../results/ResultsFullPane';
 import { EnvironmentsPane } from '../environments/EnvironmentsPane';
 import { OraclesPane } from '../oracles/OraclesPane';
 import { WeaveTool } from '../tools/weave/WeaveTool';
+import { GlobalLastResult } from '../results/GlobalLastResult';
 import { useToolStore } from '../../stores/useToolStore';
 
 export function RightLane() {
@@ -31,8 +32,16 @@ export function RightLane() {
   };
 
   return (
-    <div className="bg-slate-900 border-l border-slate-800 h-full">
-      {renderContent()}
+    <div className="bg-slate-900 border-l border-slate-800 h-full flex flex-col">
+      {/* Tool Panes Area - scrollable */}
+      <div className="flex-1 min-h-0 overflow-y-auto app-scroll">
+        {renderContent()}
+      </div>
+
+      {/* Last Result - Fixed at bottom of Tools panel */}
+      <div className="flex-shrink-0 border-t border-slate-800">
+        <GlobalLastResult />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Dices, TentTree, Eclipse, List, Infinity } from 'lucide-react';
 import { useToolStore, RightPaneMode } from '../../stores/useToolStore';
 import { IconButton } from '../ui/IconButton';
+import { DiceSettings } from '../settings/DiceSettings';
 
 export function TopBar() {
   const { rightPaneMode, setRightPaneMode, setActiveTool } = useToolStore();
@@ -28,35 +29,40 @@ export function TopBar() {
       <h1 className="text-lg font-semibold text-slate-200">My Campaign</h1>
 
       {/* Mode Buttons */}
-      <div className="flex items-center gap-1">
-        {modeButtons.map(({ mode, icon, label }) => (
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          {modeButtons.map(({ mode, icon, label }) => (
+            <IconButton
+              key={mode}
+              icon={icon}
+              size="xl"
+              active={rightPaneMode === mode}
+              onClick={() => handleModeClick(mode)}
+              tooltip={label}
+            />
+          ))}
+
+          {/* Weave Button */}
           <IconButton
-            key={mode}
-            icon={icon}
+            icon={Infinity}
             size="xl"
-            active={rightPaneMode === mode}
-            onClick={() => handleModeClick(mode)}
-            tooltip={label}
+            active={rightPaneMode === 'weave'}
+            onClick={handleWeaveClick}
+            tooltip="The Weave"
           />
-        ))}
 
-        {/* Weave Button */}
-        <IconButton
-          icon={Infinity}
-          size="xl"
-          active={rightPaneMode === 'weave'}
-          onClick={handleWeaveClick}
-          tooltip="The Weave"
-        />
+          {/* Results Button - Far Right */}
+          <IconButton
+            icon={List}
+            size="xl"
+            active={rightPaneMode === 'results'}
+            onClick={() => handleModeClick('results')}
+            tooltip="All Results"
+          />
+        </div>
 
-        {/* Results Button - Far Right */}
-        <IconButton
-          icon={List}
-          size="xl"
-          active={rightPaneMode === 'results'}
-          onClick={() => handleModeClick('results')}
-          tooltip="All Results"
-        />
+        {/* Dice Settings (Temporary) */}
+        <DiceSettings />
       </div>
     </div>
   );

@@ -102,6 +102,7 @@ _Source tags used below:_
 
 | Priority | Feature                                         | Source(s)                      | Tags                                   | Notes |
 |---------:|-------------------------------------------------|--------------------------------|----------------------------------------|-------|
+| P0       | Dice expression parser & roller   | Anvil & Loom     | #original  | Core dice engine for all rolls; powers Result Cards and feeds plugins/views (2D/3D). |
 | P0       | First-run Tapestry & Welcome Entry auto-creation | Anvil & Loom                 | #original                              | On first launch, create a starter Tapestry with a Welcome Entry and open it immediately. |
 | P0       | Onboarding Story Seed oracle                   | Anvil & Loom                   | #original                              | Roll once on a small Story Seed table and insert the result as an Oracle Result Card in the Welcome Entry. |
 | P0       | Guided “your turn” prompt in Welcome Entry     | Anvil & Loom                   | #original                              | Short, actionable text under the seed card that invites the user to write or roll again. |
@@ -109,9 +110,9 @@ _Source tags used below:_
 | P0       | Auto-logging Dice & Table results to Session   | Anvil & Loom                   | #original                              | Rolls from Dice/Oracles append structured cards into the active Session Entry. |
 | P0       | Basic progress / track support                 | Anvil & Loom, RPG systems      | #original                              | Generic clocks/vows/fronts that can be ticked in Play Mode and logged. |
 | P0       | Quick-create Entities from play                | Anvil & Loom                   | #original                              | Highlight text in a Session Entry to create a new linked Entry (NPC, place, etc.). |
+| P1       | 3D dice roller               | Anvil & Loom     | #original                  |  |
 | P1       | GM/Play dashboard (solo-focused)               | WA campaign manager            | #worldanvil #original                  | Pin current location, key NPCs, active tracks, and upcoming Reverberations for quick reference during play. |
 | P1       | Session recap tools (manual; AI optional later)| Anvil & Loom                   | #original #ai                          | Summarize a session’s key events, rolls, and loose threads; AI can expand into prose. |
-| P1       | Integrated dice roller                         | Multiple tools                 | #original                              | Already part of Anvil & Loom vision; ensure it’s fully wired into Play Mode and Result Cards. |
 | P1       | Connection Web view (named elements & threads) | Kanka, DnD Campaign Planner, Anvil & Loom | #kanka #dndplanner #original | Visual graph of named oracle results, locations, NPCs, and other nodes with labeled relationships; feeds Echo/Reverberation and Weave decisions. |
 | P1       | Reverberation / Echo management panel          | Anvil & Loom                   | #original                              | UI to surface the Reverberation/Echo queue during play and prompt the GM/solo player when past results should resurface. |
 | P1       | Initiative / turn tracker (optional)           | VTT-inspired                   | #vtt                                   | Lightweight tracker; avoid full combat simulator. |
@@ -170,6 +171,7 @@ A running list of things we want to argue about later:
 | Priority | Feature                                            | Source(s)                          | Tags                       | Notes |
 |---------:|----------------------------------------------------|------------------------------------|----------------------------|-------|
 | P0       | Local oracle & table roller                        | Anvil & Loom                       | #original                  | Core engine for d100 tables, Aspects/Domains, etc. |
+| P0       | Weave table support             | Anvil & Loom   | #original | Core support for The Weave: build and resolve combined Aspect/Domain tables (Atmosphere, Locations, Accoutrements, Banes, Boons) using macros like ACTION+ASPECT, DESCRIPTOR+FOCUS, CONNECTION WEB, and ROLL TWICE. The Weave must run locally alongside standard tables. |
 | P0       | AI-assisted oracle interpretation (optional API)   | Anvil & Loom + LLM integration     | #ai #original              | Take raw rolls and suggest narrative meaning in context. |
 | P1       | AI-powered tagging & link suggestions              | Obsidian-style + AI                | #ai #obsidian #original    | Suggest tags, backlinks, and related entries while writing. |
 | P1       | AI prompts from table results (“expand this”)      | Oracles + AI                       | #ai #original              | Click a result to generate 2–3 variations or elaborations. |

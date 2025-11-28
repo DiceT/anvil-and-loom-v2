@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useTabStore } from '../../stores/useTabStore';
 import { WeaveEditor } from '../weave/WeaveEditor';
+import { TapestryEditor } from '../tapestry/TapestryEditor';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
@@ -20,11 +21,7 @@ export function CenterLane() {
       case 'weave':
         return <WeaveEditor weaveId={activeTab.id} />;
       case 'entry':
-        return (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-slate-400">Entry editor coming soon...</div>
-          </div>
-        );
+        return <TapestryEditor />;
       default:
         return null;
     }
@@ -38,11 +35,10 @@ export function CenterLane() {
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`flex items-center gap-2 px-3 py-2 border-r border-slate-700 cursor-pointer transition-colors ${
-                activeTabId === tab.id
-                  ? 'bg-slate-900 text-slate-200'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-750'
-              }`}
+              className={`flex items-center gap-2 px-3 py-2 border-r border-slate-700 cursor-pointer transition-colors ${activeTabId === tab.id
+                ? 'bg-slate-900 text-slate-200'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-750'
+                }`}
               onClick={() => setActiveTab(tab.id)}
             >
               <span className="text-sm whitespace-nowrap">{tab.title}</span>
@@ -61,7 +57,7 @@ export function CenterLane() {
       )}
 
       {/* Tab Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 min-h-0">
         {renderTabContent()}
       </div>
     </div>
