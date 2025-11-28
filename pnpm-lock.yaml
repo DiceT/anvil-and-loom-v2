@@ -32,6 +32,9 @@ importers:
       '@milkdown/theme-nord':
         specifier: ^7.17.2
         version: 7.17.2
+      '@milkdown/utils':
+        specifier: ^7.17.2
+        version: 7.17.2
       '@react-three/cannon':
         specifier: ^6.6.0
         version: 6.6.0(@react-three/fiber@9.4.0(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.181.2))(react@19.2.0)(three@0.181.2)(typescript@5.9.3)

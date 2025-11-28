@@ -104,6 +104,7 @@ export function EnvironmentsPane() {
   const handleRollSubtable = (pack: TablePackMetadata, subtableIndex: number) => {
     const table = pack.tables[subtableIndex];
     const result = rollOnTable(table);
+    const category = pack.category === 'aspect' ? 'ASPECT' : 'DOMAIN';
 
     // Check if it's a macro
     if (result.isMacro) {
@@ -116,10 +117,10 @@ export function EnvironmentsPane() {
             formatComboOracleCard(macroResult, oracleLabel, registry);
             break;
           case 'repeat':
-            formatRollTwiceCard(macroResult, table.name);
+            formatRollTwiceCard(macroResult, table.name, category, pack.packName);
             break;
           case 'reference':
-            formatObjectivesCard(macroResult, table.name);
+            formatObjectivesCard(macroResult, table.name, category, pack.packName);
             break;
           case 'placeholder':
             formatTheWeaveCard();
@@ -128,7 +129,6 @@ export function EnvironmentsPane() {
       }
     } else {
       // Normal roll
-      const category = pack.category === 'aspect' ? 'ASPECT' : 'DOMAIN';
       formatTableRollCard(result, category, pack.packName, pack.packId);
     }
   };

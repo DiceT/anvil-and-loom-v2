@@ -1,10 +1,12 @@
-import { Dices, TentTree, Eclipse, List, Infinity } from 'lucide-react';
+import { useState } from 'react';
+import { Dices, TentTree, Eclipse, List, Infinity, Settings } from 'lucide-react';
 import { useToolStore, RightPaneMode } from '../../stores/useToolStore';
 import { IconButton } from '../ui/IconButton';
-import { DiceSettings } from '../settings/DiceSettings';
+import { SettingsModal } from '../settings/SettingsModal';
 
 export function TopBar() {
   const { rightPaneMode, setRightPaneMode, setActiveTool } = useToolStore();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const modeButtons: { mode: RightPaneMode; icon: typeof Dices; label: string }[] = [
     { mode: 'dice', icon: Dices, label: 'Dice' },
@@ -61,9 +63,19 @@ export function TopBar() {
           />
         </div>
 
-        {/* Dice Settings (Temporary) */}
-        <DiceSettings />
+        {/* Settings Button */}
+        <IconButton
+          icon={Settings}
+          size="xl"
+          onClick={() => setIsSettingsOpen(true)}
+          tooltip="Settings"
+        />
       </div>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 }

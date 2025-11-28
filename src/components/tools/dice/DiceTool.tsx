@@ -163,22 +163,20 @@ export function DiceTool() {
         </button>
         <button
           onClick={() => setAdvantageMode(advantageMode === 'disadvantage' ? 'none' : 'disadvantage')}
-          className={`px-3 py-1 text-xs rounded transition-colors ${
-            advantageMode === 'disadvantage'
+          className={`px-3 py-1 text-xs rounded transition-colors ${advantageMode === 'disadvantage'
               ? 'bg-blue-600 text-white'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-          }`}
+            }`}
           data-tooltip="Disadvantage"
         >
           DIS
         </button>
         <button
           onClick={() => setAdvantageMode(advantageMode === 'advantage' ? 'none' : 'advantage')}
-          className={`px-3 py-1 text-xs rounded transition-colors ${
-            advantageMode === 'advantage'
+          className={`px-3 py-1 text-xs rounded transition-colors ${advantageMode === 'advantage'
               ? 'bg-blue-600 text-white'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-          }`}
+            }`}
           data-tooltip="Advantage"
         >
           ADV

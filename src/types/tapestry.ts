@@ -74,7 +74,7 @@ export interface EditorState {
 }
 
 // Result Card types (for Phase 5)
-export type ResultCardType = 'dice' | 'oracle' | 'weave';
+export type ResultCardType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table';
 
 export interface ResultCardModel {
     id: string;          // uuid
@@ -82,6 +82,7 @@ export interface ResultCardModel {
     source: string;      // e.g. "Weave: Haunted Forest / Atmosphere"
     expression?: string; // dice expression, if any
     summary: string;     // short headline prompt
+    content?: string;    // detailed content (roll info, etc)
     payload: any;        // detailed data, JSON-serializable
 }
 

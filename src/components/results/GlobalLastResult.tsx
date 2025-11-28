@@ -1,11 +1,13 @@
 import { Eraser } from 'lucide-react';
 import { useResultsStore } from '../../stores/useResultsStore';
+import { useSettingsStore } from '../../stores/useSettingsStore';
 import { ResultCard } from './ResultCard';
 import { IconButton } from '../ui/IconButton';
 
 export function GlobalLastResult() {
   const cards = useResultsStore((state) => state.cards);
   const clearCards = useResultsStore((state) => state.clearCards);
+  const { settings, updateDiceSettings } = useSettingsStore();
   const lastCard = cards[cards.length - 1];
 
   if (!lastCard) {
@@ -29,12 +31,24 @@ export function GlobalLastResult() {
         <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
           Last Result
         </h3>
-        <IconButton
-          icon={Eraser}
-          size="s"
-          onClick={clearCards}
-          tooltip="Clear all results"
-        />
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => updateDiceSettings({ logToEntry: !settings.dice.logToEntry })}
+            className={`px-2 py-1 text-[10px] rounded transition-colors ${settings.dice.logToEntry
+              ? 'bg-purple-600 text-white'
+              : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
+              }`}
+            title="Log results to active entry"
+          >
+            LOG
+          </button>
+          <IconButton
+            icon={Eraser}
+            size="s"
+            onClick={clearCards}
+            tooltip="Clear all results"
+          />
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto app-scroll min-h-0">
         <ResultCard card={lastCard} defaultExpanded={true} />

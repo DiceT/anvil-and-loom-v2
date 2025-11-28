@@ -27,7 +27,7 @@ export function formatTableRollCard(
     ? `${category}: ${parentName}: ${roll.tableName}`.toUpperCase()
     : `${category}: ${roll.tableName}`.toUpperCase();
 
-  const content = `Roll: ${roll.roll}\nResult: ${roll.result}`;
+  const content = `Roll: ${roll.roll}`;
 
   // Determine source based on category
   let source: 'aspect' | 'domain' | 'oracle' | 'table' = 'table';
@@ -78,7 +78,7 @@ export function formatComboOracleCard(
   const tablesWithTag2 = getOraclesByTag(registry, tag2);
 
   const contentLines = [
-    `${roll1.tableName} (${roll1.roll}): ${roll1.result}`,
+    `${roll1.tableName}: ${roll1.roll}`,
   ];
 
   // Only show selection info if there's more than one table with this tag
@@ -87,14 +87,11 @@ export function formatComboOracleCard(
   }
 
   contentLines.push('');
-  contentLines.push(`${roll2.tableName} (${roll2.roll}): ${roll2.result}`);
+  contentLines.push(`${roll2.tableName}: ${roll2.roll}`);
 
   if (tablesWithTag2.length > 1) {
     contentLines.push(`  Selected ${roll2.tableName} from ${tablesWithTag2.length} tables with '${tag2}' tag`);
   }
-
-  contentLines.push('');
-  contentLines.push(`Prompt: "${roll1.result} ${roll2.result}"`);
 
   const content = contentLines.join('\n');
 
@@ -114,26 +111,39 @@ export function formatComboOracleCard(
 /**
  * Format a ROLL TWICE result
  */
-export function formatRollTwiceCard(macroResult: MacroResolutionResult, tableName: string): void {
+export function formatRollTwiceCard(
+  macroResult: MacroResolutionResult,
+  tableName: string,
+  category?: string,
+  parentName?: string
+): void {
   if (macroResult.type !== 'repeat') {
     console.error('Invalid ROLL TWICE result');
     return;
   }
 
-  const header = `TABLE: ${tableName} (ROLL TWICE)`.toUpperCase();
+  const header = parentName
+    ? `${category}: ${parentName}: ${tableName} (ROLL TWICE)`.toUpperCase()
+    : `TABLE: ${tableName} (ROLL TWICE)`.toUpperCase();
 
   const results = macroResult.rolls.map((r) => r.result);
   const result = results.join('\n');
 
   const content = macroResult.rolls
-    .map((roll, index) => `Roll ${index + 1} (${roll.roll}): ${roll.result}`)
+    .map((roll, index) => `Roll ${index + 1}: ${roll.roll}`)
     .join('\n');
+
+  // Determine source based on category
+  let source: 'aspect' | 'domain' | 'oracle' | 'table' = 'table';
+  if (category?.toUpperCase() === 'ASPECT') source = 'aspect';
+  else if (category?.toUpperCase() === 'DOMAIN') source = 'domain';
+  else if (category?.toUpperCase() === 'ORACLE') source = 'oracle';
 
   logResultCard({
     header,
     result,
     content,
-    source: 'table',
+    source,
     meta: {
       sourceTableId: macroResult.sourceTableId,
       rolls: macroResult.rolls,
@@ -146,7 +156,9 @@ export function formatRollTwiceCard(macroResult: MacroResolutionResult, tableNam
  */
 export function formatObjectivesCard(
   macroResult: MacroResolutionResult,
-  sourceTableName: string
+  sourceTableName: string,
+  category?: string,
+  parentName?: string
 ): void {
   if (macroResult.type !== 'reference' || macroResult.rolls.length === 0) {
     console.error('Invalid OBJECTIVES result');
@@ -155,16 +167,24 @@ export function formatObjectivesCard(
 
   const roll = macroResult.rolls[0];
 
-  const header = `TABLE: ${sourceTableName} → OBJECTIVES`.toUpperCase();
+  const header = parentName
+    ? `${category}: ${parentName}: OBJECTIVES`.toUpperCase()
+    : `TABLE: ${sourceTableName} → OBJECTIVES`.toUpperCase();
   const result = roll.result;
 
-  const content = `Triggered by: ${sourceTableName}\nObjectives Roll (${roll.roll}): ${roll.result}`;
+  const content = `Triggered by: ${sourceTableName}\nRoll: ${roll.roll}`;
+
+  // Determine source based on category
+  let source: 'aspect' | 'domain' | 'oracle' | 'table' = 'table';
+  if (category?.toUpperCase() === 'ASPECT') source = 'aspect';
+  else if (category?.toUpperCase() === 'DOMAIN') source = 'domain';
+  else if (category?.toUpperCase() === 'ORACLE') source = 'oracle';
 
   logResultCard({
     header,
     result,
     content,
-    source: 'table',
+    source,
     meta: {
       sourceTableId: macroResult.sourceTableId,
       objectivesTableId: roll.tableId,

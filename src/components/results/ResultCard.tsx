@@ -124,7 +124,7 @@ export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
     }
 
     // Default result without buttons
-    return <div className={`font-bold text-slate-100 ${card.source === 'dice' ? 'text-2xl' : 'text-base'}`}>
+    return <div className={`font-bold text-slate-100 whitespace-pre-line ${card.source === 'dice' ? 'text-2xl' : 'text-base'}`}>
       {card.result}
     </div>;
   };

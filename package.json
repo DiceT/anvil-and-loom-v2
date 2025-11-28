@@ -18,6 +18,7 @@
 		"@milkdown/preset-gfm": "^7.17.2",
 		"@milkdown/react": "^7.17.2",
 		"@milkdown/theme-nord": "^7.17.2",
+		"@milkdown/utils": "^7.17.2",
 		"@react-three/cannon": "^6.6.0",
 		"@react-three/drei": "^10.7.7",
 		"@react-three/fiber": "^9.4.0",
