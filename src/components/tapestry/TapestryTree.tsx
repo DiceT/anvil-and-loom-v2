@@ -182,7 +182,7 @@ export function TapestryTree() {
                         <button
                             onClick={() => handleNewEntry(tree.path)}
                             className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors"
-                            title="New Entry"
+                            title="New Panel"
                         >
                             <Plus className="w-4 h-4" />
                         </button>
@@ -214,10 +214,10 @@ export function TapestryTree() {
                 </div>
             </div>
 
-            {/* New Entry Dialog */}
+            {/* New Panel Dialog */}
             {showNewEntryDialog && (
                 <Dialog
-                    title="New Entry"
+                    title="New Panel"
                     onClose={() => setShowNewEntryDialog(false)}
                     onConfirm={confirmNewEntry}
                     confirmText="Create"
@@ -233,7 +233,7 @@ export function TapestryTree() {
                                 value={newEntryTitle}
                                 onChange={(e) => setNewEntryTitle(e.target.value)}
                                 className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                placeholder="Entry title..."
+                                placeholder="Panel title..."
                                 autoFocus
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && newEntryTitle.trim()) {

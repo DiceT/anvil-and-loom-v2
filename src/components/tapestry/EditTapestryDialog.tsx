@@ -47,6 +47,18 @@ export function EditTapestryDialog({ isOpen, tapestry, onClose, onSave }: EditTa
         onClose();
     };
 
+    const handlePickImage = async () => {
+        if (!tapestry) return;
+        try {
+            const path = await window.electron.tapestry.pickImage(tapestry.path);
+            if (path) {
+                setImagePath(path);
+            }
+        } catch (error) {
+            console.error('Failed to pick image:', error);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
@@ -119,8 +131,10 @@ export function EditTapestryDialog({ isOpen, tapestry, onClose, onSave }: EditTa
                                 type="text"
                                 value={imagePath}
                                 onChange={(e) => setImagePath(e.target.value)}
-                                className="w-full pl-10 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                placeholder="Optional image path or URL..."
+                                onClick={handlePickImage}
+                                className="w-full pl-10 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
+                                placeholder="Click to select image..."
+                                readOnly
                             />
                         </div>
                     </div>

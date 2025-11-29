@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Dice6, TentTree, Sparkles } from 'lucide-react';
-import { ResultCard as ResultCardType } from '../../core/results/types';
+import { TentTree, Sparkles } from 'lucide-react';
+import { Thread } from '../../core/results/types';
 import { useTableStore } from '../../stores/useTableStore';
 import { useToolStore } from '../../stores/useToolStore';
 import { resolveActionTheme, resolveDescriptorFocus } from '../../core/tables/macroResolver';
-import { formatComboOracleCard } from '../../core/tables/resultCardFormatter';
+import { formatComboOracleThread } from '../../core/tables/threadFormatter';
 
-interface ResultCardProps {
-  card: ResultCardType;
+interface ThreadCardProps {
+  card: Thread;
   defaultExpanded?: boolean;
 }
 
@@ -23,7 +23,7 @@ const sourceColors: Record<string, string> = {
   other: '#1e293b',
 };
 
-export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
+export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const { registry } = useTableStore();
   const { setRightPaneMode, setRequestExpandPack } = useToolStore();
@@ -37,12 +37,12 @@ export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
     if (type === 'action' || type === 'theme') {
       const result = resolveActionTheme(registry);
       if (result) {
-        formatComboOracleCard(result, 'Action + Theme', registry);
+        formatComboOracleThread(result, 'Action + Theme', registry);
       }
     } else {
       const result = resolveDescriptorFocus(registry);
       if (result) {
-        formatComboOracleCard(result, 'Descriptor + Focus', registry);
+        formatComboOracleThread(result, 'Descriptor + Focus', registry);
       }
     }
   };
@@ -68,7 +68,6 @@ export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
 
   // Check if this is an oracle combo result
   const isOracleCombo = card.source === 'oracle' && card.meta?.oracleType;
-  const oracleType = card.meta?.oracleType as string;
 
   // Check if this is an aspect/domain result
   const isAspectOrDomain = (card.source === 'aspect' || card.source === 'domain') && card.meta?.packId;

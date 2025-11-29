@@ -6,12 +6,12 @@ import { TablePackMetadata } from '../../core/tables/types';
 import { rollOnTable } from '../../core/tables/tableEngine';
 import { resolveMacro } from '../../core/tables/macroResolver';
 import {
-  formatTableRollCard,
-  formatComboOracleCard,
-  formatRollTwiceCard,
-  formatObjectivesCard,
-  formatTheWeaveCard,
-} from '../../core/tables/resultCardFormatter';
+  formatTableRollThread,
+  formatComboOracleThread,
+  formatRollTwiceThread,
+  formatObjectivesThread,
+  formatTheWeaveThread,
+} from '../../core/tables/threadFormatter';
 import type { WeaveRow } from '../../core/weave/weaveTypes';
 
 export function EnvironmentsPane() {
@@ -114,22 +114,22 @@ export function EnvironmentsPane() {
         switch (macroResult.type) {
           case 'combo':
             const oracleLabel = result.macroType === 'ACTION_THEME' ? 'Action + Theme' : 'Descriptor + Focus';
-            formatComboOracleCard(macroResult, oracleLabel, registry);
+            formatComboOracleThread(macroResult, oracleLabel, registry);
             break;
           case 'repeat':
-            formatRollTwiceCard(macroResult, table.name, category, pack.packName);
+            formatRollTwiceThread(macroResult, table.name, category, pack.packName);
             break;
           case 'reference':
-            formatObjectivesCard(macroResult, table.name, category, pack.packName);
+            formatObjectivesThread(macroResult, table.name, category, pack.packName);
             break;
           case 'placeholder':
-            formatTheWeaveCard();
+            formatTheWeaveThread();
             break;
         }
       }
     } else {
       // Normal roll
-      formatTableRollCard(result, category, pack.packName, pack.packId);
+      formatTableRollThread(result, category, pack.packName, pack.packId);
     }
   };
 

@@ -68,7 +68,7 @@ export function TreeContextMenu({
                         className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 flex items-center gap-2"
                     >
                         <FilePlus className="w-4 h-4" />
-                        New Entry
+                        New Panel
                     </button>
                     <button
                         onClick={() => {

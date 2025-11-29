@@ -288,134 +288,212 @@ function setupSettingsHandlers() {
   });
 }
 const REGISTRY_FILE = "tapestries.json";
-function getRegistryPath() {
+function getRegistryFilePath() {
   return path__namespace.join(electron.app.getPath("userData"), REGISTRY_FILE);
 }
-async function loadRegistry() {
-  const registryPath = getRegistryPath();
+async function readJsonFile(filePath, defaultValue) {
   try {
-    const data = await fs__namespace.readFile(registryPath, "utf-8");
+    const data = await fs__namespace.readFile(filePath, "utf-8");
     return JSON.parse(data);
   } catch (error) {
-    return { tapestries: [] };
+    if (error && error.code === "ENOENT") {
+      return defaultValue;
+    }
+    throw error;
   }
 }
-async function saveRegistry(registry) {
-  const registryPath = getRegistryPath();
-  await fs__namespace.writeFile(registryPath, JSON.stringify(registry, null, 2), "utf-8");
+async function writeJsonFile(filePath, data) {
+  await fs__namespace.mkdir(path__namespace.dirname(filePath), { recursive: true });
+  await fs__namespace.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
 }
-async function scaffoldTapestry(tapestryPath, config) {
-  await fs__namespace.mkdir(tapestryPath, { recursive: true });
-  const loomDir = path__namespace.join(tapestryPath, ".loom");
-  await fs__namespace.mkdir(loomDir, { recursive: true });
-  const configPath = path__namespace.join(loomDir, "tapestry.json");
-  await fs__namespace.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
-  const entriesDir = path__namespace.join(tapestryPath, "entries");
-  await fs__namespace.mkdir(entriesDir, { recursive: true });
-  const welcomeId = uuid.v4();
-  const welcomeFrontmatter = {
-    id: welcomeId,
-    title: "The First Thread",
-    category: "session",
-    tags: ["intro"]
-  };
-  const welcomeContent = `# The First Thread
-
-Welcome to your new Tapestry!
-
-This is your first entry. You can edit this text, add new entries, and organize your world.
-
-**What's next?**
-- Roll some dice or oracles to generate story seeds
-- Create new entries for NPCs, locations, or lore
-- Start weaving your narrative
-
-The journey begins here.
-`;
-  const welcomeMarkdown = matter.stringify(welcomeContent, welcomeFrontmatter);
-  const welcomePath = path__namespace.join(entriesDir, "The First Thread.md");
-  await fs__namespace.writeFile(welcomePath, welcomeMarkdown, "utf-8");
+async function readRegistry() {
+  const filePath = getRegistryFilePath();
+  return readJsonFile(filePath, { tapestries: [] });
 }
-async function parseEntry(filePath) {
-  const fileContent = await fs__namespace.readFile(filePath, "utf-8");
-  const { data, content } = matter(fileContent);
+async function writeRegistry(registry) {
+  const filePath = getRegistryFilePath();
+  await writeJsonFile(filePath, registry);
+}
+function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "tapestry";
+}
+async function ensureDir(dirPath) {
+  await fs__namespace.mkdir(dirPath, { recursive: true });
+}
+function getTapestryPaths(root) {
+  const loomDir = path__namespace.join(root, ".loom");
   return {
-    frontmatter: data,
-    content
+    loomDir,
+    configPath: path__namespace.join(loomDir, "tapestry.json"),
+    entriesDir: path__namespace.join(root, "entries")
   };
 }
-async function buildTree(dirPath, orderPath) {
-  const items = await fs__namespace.readdir(dirPath, { withFileTypes: true });
-  let order = [];
-  if (orderPath) {
-    try {
-      const orderData = await fs__namespace.readFile(orderPath, "utf-8");
-      const orderJson = JSON.parse(orderData);
-      order = orderJson.entries || [];
-    } catch {
+async function loadTapestryConfig(root) {
+  const { configPath } = getTapestryPaths(root);
+  try {
+    const data = await fs__namespace.readFile(configPath, "utf-8");
+    return JSON.parse(data);
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+async function saveTapestryConfig(root, config) {
+  const { loomDir, configPath } = getTapestryPaths(root);
+  await ensureDir(loomDir);
+  await writeJsonFile(configPath, config);
+}
+async function ensureFrontmatterId(filePath, frontmatter, content) {
+  if (frontmatter.id) {
+    return frontmatter;
+  }
+  const updated = {
+    ...frontmatter,
+    id: uuid.v4()
+  };
+  const full = matter.stringify(content, updated);
+  await fs__namespace.writeFile(filePath, full, "utf-8");
+  return updated;
+}
+async function loadEntryDoc(filePath) {
+  try {
+    const raw = await fs__namespace.readFile(filePath, "utf-8");
+    const parsed = matter(raw);
+    const fm = parsed.data;
+    const frontmatter = await ensureFrontmatterId(filePath, fm, parsed.content);
+    const title = frontmatter.title || path__namespace.basename(filePath, path__namespace.extname(filePath));
+    return {
+      id: frontmatter.id,
+      path: filePath,
+      title,
+      category: frontmatter.category,
+      content: parsed.content,
+      frontmatter,
+      isDirty: false
+    };
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+async function saveEntryDoc(doc) {
+  const full = matter.stringify(doc.content, doc.frontmatter);
+  await fs__namespace.writeFile(doc.path, full, "utf-8");
+}
+async function readFolderOrder(folderPath) {
+  const orderPath = path__namespace.join(folderPath, ".loom", "order.json");
+  try {
+    const data = await fs__namespace.readFile(orderPath, "utf-8");
+    return JSON.parse(data);
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+async function writeFolderOrder(folderPath, order) {
+  const loomDir = path__namespace.join(folderPath, ".loom");
+  await ensureDir(loomDir);
+  const orderPath = path__namespace.join(loomDir, "order.json");
+  await writeJsonFile(orderPath, order);
+}
+function sortNodesByOrder(nodes, order) {
+  if (!order || !order.entries?.length) {
+    return [...nodes].sort((a, b) => a.name.localeCompare(b.name));
+  }
+  const byName = new Map(nodes.map((node) => [path__namespace.basename(node.path), node]));
+  const ordered = [];
+  for (const name of order.entries) {
+    const node = byName.get(name);
+    if (node) {
+      ordered.push(node);
     }
   }
+  const remaining = nodes.filter((n) => !ordered.includes(n));
+  remaining.sort((a, b) => a.name.localeCompare(b.name));
+  return [...ordered, ...remaining];
+}
+async function buildFolderTree(folderPath) {
+  const dirents = await fs__namespace.readdir(folderPath, { withFileTypes: true });
   const nodes = [];
-  const processedNames = /* @__PURE__ */ new Set();
-  for (const name of order) {
-    const item = items.find((i) => i.name === name);
-    if (item) {
-      const node = await buildNode(dirPath, item);
-      if (node) {
-        nodes.push(node);
-        processedNames.add(name);
+  for (const dirent of dirents) {
+    if (dirent.name === ".loom") continue;
+    const fullPath = path__namespace.join(folderPath, dirent.name);
+    if (dirent.isDirectory()) {
+      const children = await buildFolderTree(fullPath);
+      nodes.push({
+        id: fullPath,
+        type: "folder",
+        name: dirent.name,
+        path: fullPath,
+        children
+      });
+    } else if (dirent.isFile()) {
+      const ext = path__namespace.extname(dirent.name).toLowerCase();
+      if (ext === ".md") {
+        const doc = await loadEntryDoc(fullPath);
+        if (doc) {
+          nodes.push({
+            id: doc.id,
+            type: "entry",
+            name: doc.title,
+            path: fullPath,
+            category: doc.category
+          });
+        }
+      } else {
+        nodes.push({
+          id: fullPath,
+          type: "asset",
+          name: dirent.name,
+          path: fullPath
+        });
       }
     }
   }
-  const remaining = items.filter((item) => !processedNames.has(item.name) && !item.name.startsWith(".")).sort((a, b) => a.name.localeCompare(b.name));
-  for (const item of remaining) {
-    const node = await buildNode(dirPath, item);
-    if (node) {
-      nodes.push(node);
-    }
-  }
-  return nodes;
+  const order = await readFolderOrder(folderPath);
+  return sortNodesByOrder(nodes, order);
 }
-async function buildNode(parentPath, item) {
-  const itemPath = path__namespace.join(parentPath, item.name);
-  if (item.isDirectory()) {
-    if (item.name === ".loom") return null;
-    const children = await buildTree(itemPath, path__namespace.join(itemPath, ".loom", "order.json"));
+async function buildTapestryTree(root) {
+  const { entriesDir } = getTapestryPaths(root);
+  try {
+    const children = await buildFolderTree(entriesDir);
     return {
-      id: itemPath,
+      id: entriesDir,
       type: "folder",
-      name: item.name,
-      path: itemPath,
+      name: "entries",
+      path: entriesDir,
       children
     };
-  } else if (item.isFile() && item.name.endsWith(".md")) {
-    try {
-      const { frontmatter } = await parseEntry(itemPath);
-      return {
-        id: frontmatter.id,
-        type: "entry",
-        name: frontmatter.title || item.name.replace(".md", ""),
-        path: itemPath,
-        category: frontmatter.category
-      };
-    } catch (error) {
-      console.error(`Error parsing entry ${itemPath}:`, error);
+  } catch (error) {
+    if (error && error.code === "ENOENT") {
       return null;
     }
+    throw error;
   }
-  return null;
+}
+async function deletePath(targetPath) {
+  await fs__namespace.rm(targetPath, { recursive: true, force: true });
 }
 function registerTapestryHandlers() {
   electron.ipcMain.handle("tapestry:loadRegistry", async () => {
-    return await loadRegistry();
+    return readRegistry();
   });
-  electron.ipcMain.handle("tapestry:create", async (_, data) => {
-    const registry = await loadRegistry();
+  electron.ipcMain.handle("tapestry:create", async (_event, data) => {
+    const registry = await readRegistry();
     const id = uuid.v4();
-    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const slug = slugify(data.name);
     const basePath = data.basePath || path__namespace.join(electron.app.getPath("documents"), "Anvil and Loom", "Tapestries");
-    const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    const tapestryPath = path__namespace.join(basePath, slug);
+    const root = path__namespace.join(basePath, slug);
+    const { loomDir, entriesDir } = getTapestryPaths(root);
+    await ensureDir(loomDir);
+    await ensureDir(entriesDir);
+    const createdAt = (/* @__PURE__ */ new Date()).toISOString();
     const config = {
       id,
       name: data.name,
@@ -423,162 +501,229 @@ function registerTapestryHandlers() {
       imagePath: data.imagePath,
       defaultEntryCategory: "session"
     };
-    await scaffoldTapestry(tapestryPath, config);
-    const entry = {
+    await saveTapestryConfig(root, config);
+    const firstEntryId = uuid.v4();
+    const firstEntryFrontmatter = {
+      id: firstEntryId,
+      title: "The First Thread",
+      category: config.defaultEntryCategory || "session",
+      tags: ["intro"]
+    };
+    const initialContent = `# The First Thread
+
+Welcome to your new Tapestry. This is your first Panel.
+Roll some dice or pull on The Weave, then write your first Thread of the story.`;
+    const firstEntryMarkdown = matter.stringify(initialContent, firstEntryFrontmatter);
+    const firstEntryPath = path__namespace.join(entriesDir, "The First Thread.md");
+    await fs__namespace.writeFile(firstEntryPath, firstEntryMarkdown, "utf-8");
+    const registryEntry = {
       id,
       name: data.name,
-      path: tapestryPath,
+      path: root,
       description: data.description,
       imagePath: data.imagePath,
-      createdAt: now,
-      updatedAt: now
+      createdAt,
+      updatedAt: createdAt,
+      lastOpenedAt: createdAt
     };
-    registry.tapestries.push(entry);
-    await saveRegistry(registry);
+    registry.tapestries.push(registryEntry);
+    await writeRegistry(registry);
     return id;
   });
-  electron.ipcMain.handle("tapestry:open", async (_, id) => {
-    const registry = await loadRegistry();
+  electron.ipcMain.handle("tapestry:open", async (_event, id) => {
+    const registry = await readRegistry();
     const entry = registry.tapestries.find((t) => t.id === id);
     if (!entry) return null;
-    const configPath = path__namespace.join(entry.path, ".loom", "tapestry.json");
-    try {
-      const configData = await fs__namespace.readFile(configPath, "utf-8");
-      const config = JSON.parse(configData);
-      entry.lastOpenedAt = (/* @__PURE__ */ new Date()).toISOString();
-      await saveRegistry(registry);
-      return config;
-    } catch (error) {
-      console.error(`Error loading tapestry config:`, error);
-      return null;
-    }
+    const config = await loadTapestryConfig(entry.path);
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    entry.lastOpenedAt = now;
+    entry.updatedAt = now;
+    await writeRegistry(registry);
+    return config;
   });
-  electron.ipcMain.handle("tapestry:update", async (_, id, updates) => {
-    const registry = await loadRegistry();
+  electron.ipcMain.handle("tapestry:update", async (_event, id, updates) => {
+    const registry = await readRegistry();
     const entry = registry.tapestries.find((t) => t.id === id);
-    if (!entry) throw new Error("Tapestry not found");
-    if (updates.name) entry.name = updates.name;
-    if (updates.description !== void 0) entry.description = updates.description;
-    if (updates.imagePath !== void 0) entry.imagePath = updates.imagePath;
+    if (!entry) return;
+    const oldPath = entry.path;
+    const nameChanged = updates.name && updates.name !== entry.name;
+    entry.name = updates.name ?? entry.name;
+    entry.description = updates.description ?? entry.description;
+    entry.imagePath = updates.imagePath ?? entry.imagePath;
     entry.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
-    await saveRegistry(registry);
-    const configPath = path__namespace.join(entry.path, ".loom", "tapestry.json");
-    const configData = await fs__namespace.readFile(configPath, "utf-8");
-    const config = JSON.parse(configData);
-    if (updates.name) config.name = updates.name;
-    if (updates.description !== void 0) config.description = updates.description;
-    if (updates.imagePath !== void 0) config.imagePath = updates.imagePath;
-    await fs__namespace.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
-  });
-  electron.ipcMain.handle("tapestry:remove", async (_, id) => {
-    const registry = await loadRegistry();
-    registry.tapestries = registry.tapestries.filter((t) => t.id !== id);
-    await saveRegistry(registry);
-  });
-  electron.ipcMain.handle("tapestry:delete", async (_, id) => {
-    const registry = await loadRegistry();
-    const entry = registry.tapestries.find((t) => t.id === id);
-    if (!entry) throw new Error("Tapestry not found");
-    await fs__namespace.rm(entry.path, { recursive: true, force: true });
-    registry.tapestries = registry.tapestries.filter((t) => t.id !== id);
-    await saveRegistry(registry);
-  });
-  electron.ipcMain.handle("tapestry:loadTree", async (_, tapestryId) => {
-    const registry = await loadRegistry();
-    const entry = registry.tapestries.find((t) => t.id === tapestryId);
-    if (!entry) return null;
-    const entriesPath = path__namespace.join(entry.path, "entries");
-    const children = await buildTree(entriesPath, path__namespace.join(entriesPath, ".loom", "order.json"));
-    return {
-      id: entry.id,
-      type: "folder",
-      name: entry.name,
-      path: entriesPath,
-      children
-    };
-  });
-  electron.ipcMain.handle("tapestry:loadEntry", async (_, entryPath) => {
-    try {
-      const { frontmatter, content } = await parseEntry(entryPath);
-      return {
-        id: frontmatter.id,
-        path: entryPath,
-        title: frontmatter.title,
-        category: frontmatter.category,
-        content,
-        frontmatter,
-        isDirty: false
-      };
-    } catch (error) {
-      console.error(`Error loading entry:`, error);
-      return null;
-    }
-  });
-  electron.ipcMain.handle("tapestry:saveEntry", async (_, entry) => {
-    const markdown = matter.stringify(entry.content, entry.frontmatter);
-    await fs__namespace.writeFile(entry.path, markdown, "utf-8");
-  });
-  electron.ipcMain.handle("tapestry:createEntry", async (_, parentPath, title, category) => {
-    const id = uuid.v4();
-    const frontmatter = {
-      id,
-      title,
-      category,
-      tags: []
-    };
-    const content = `# ${title}
-
-Your content here...
-`;
-    const markdown = matter.stringify(content, frontmatter);
-    const fileName = `${title}.md`;
-    const filePath = path__namespace.join(parentPath, fileName);
-    await fs__namespace.writeFile(filePath, markdown, "utf-8");
-    return id;
-  });
-  electron.ipcMain.handle("tapestry:createFolder", async (_, parentPath, name) => {
-    const folderPath = path__namespace.join(parentPath, name);
-    await fs__namespace.mkdir(folderPath, { recursive: true });
-  });
-  electron.ipcMain.handle("tapestry:rename", async (_, oldPath, newName) => {
-    const parentDir = path__namespace.dirname(oldPath);
-    const ext = path__namespace.extname(oldPath);
-    let finalName = newName;
-    if (ext && !newName.endsWith(ext)) {
-      finalName += ext;
-    }
-    const newPath = path__namespace.join(parentDir, finalName);
-    await fs__namespace.rename(oldPath, newPath);
-    if (finalName.endsWith(".md")) {
+    if (nameChanged) {
+      const parentDir = path__namespace.dirname(oldPath);
+      const newSlug = slugify(entry.name);
+      let newPath = path__namespace.join(parentDir, newSlug);
+      let counter = 2;
+      while (true) {
+        try {
+          await fs__namespace.access(newPath);
+          newPath = path__namespace.join(parentDir, `${newSlug}-${counter}`);
+          counter++;
+        } catch {
+          break;
+        }
+      }
       try {
-        const fileContent = await fs__namespace.readFile(newPath, "utf-8");
-        const { data, content } = matter(fileContent);
-        data.title = newName.replace(".md", "");
-        const updatedMarkdown = matter.stringify(content, data);
-        await fs__namespace.writeFile(newPath, updatedMarkdown, "utf-8");
+        await fs__namespace.rename(oldPath, newPath);
+        entry.path = newPath;
+        console.log(`[tapestry:update] Renamed directory: ${oldPath} → ${newPath}`);
       } catch (error) {
-        console.error("Failed to update frontmatter title after rename:", error);
+        console.error("[tapestry:update] Failed to rename directory:", error);
       }
     }
-  });
-  electron.ipcMain.handle("tapestry:deleteNode", async (_, nodePath) => {
-    const stats = await fs__namespace.stat(nodePath);
-    if (stats.isDirectory()) {
-      await fs__namespace.rm(nodePath, { recursive: true, force: true });
-    } else {
-      await fs__namespace.unlink(nodePath);
+    await writeRegistry(registry);
+    const config = await loadTapestryConfig(entry.path);
+    if (config) {
+      const newConfig = {
+        ...config,
+        name: entry.name,
+        description: entry.description,
+        imagePath: entry.imagePath
+      };
+      await saveTapestryConfig(entry.path, newConfig);
     }
   });
-  electron.ipcMain.handle("tapestry:move", async (_, sourcePath, destinationFolder, itemName) => {
-    const destinationPath = path__namespace.join(destinationFolder, itemName);
-    await fs__namespace.rename(sourcePath, destinationPath);
+  electron.ipcMain.handle("tapestry:remove", async (_event, id) => {
+    const registry = await readRegistry();
+    registry.tapestries = registry.tapestries.filter((t) => t.id !== id);
+    await writeRegistry(registry);
   });
-  electron.ipcMain.handle("tapestry:updateOrder", async (_, folderPath, order) => {
-    const loomDir = path__namespace.join(folderPath, ".loom");
-    await fs__namespace.mkdir(loomDir, { recursive: true });
-    const orderPath = path__namespace.join(loomDir, "order.json");
-    const orderData = { entries: order };
-    await fs__namespace.writeFile(orderPath, JSON.stringify(orderData, null, 2), "utf-8");
+  electron.ipcMain.handle("tapestry:delete", async (_event, id) => {
+    const registry = await readRegistry();
+    const entry = registry.tapestries.find((t) => t.id === id);
+    if (entry) {
+      await deletePath(entry.path);
+    }
+    registry.tapestries = registry.tapestries.filter((t) => t.id !== id);
+    await writeRegistry(registry);
+  });
+  electron.ipcMain.handle("tapestry:loadTree", async (_event, tapestryId) => {
+    const registry = await readRegistry();
+    const entry = registry.tapestries.find((t) => t.id === tapestryId);
+    if (!entry) return null;
+    return buildTapestryTree(entry.path);
+  });
+  electron.ipcMain.handle("tapestry:loadEntry", async (_event, entryPath) => {
+    return loadEntryDoc(entryPath);
+  });
+  electron.ipcMain.handle("tapestry:saveEntry", async (_event, entry) => {
+    await saveEntryDoc(entry);
+  });
+  electron.ipcMain.handle(
+    "tapestry:createEntry",
+    async (_event, parentPath, title, category) => {
+      await ensureDir(parentPath);
+      const safeTitle = title.trim() || "Untitled Panel";
+      const slug = slugify(safeTitle);
+      let fileName = `${slug}.md`;
+      let targetPath = path__namespace.join(parentPath, fileName);
+      let counter = 1;
+      while (true) {
+        try {
+          await fs__namespace.access(targetPath);
+          counter += 1;
+          fileName = `${slug}-${counter}.md`;
+          targetPath = path__namespace.join(parentPath, fileName);
+        } catch {
+          break;
+        }
+      }
+      const id = uuid.v4();
+      const frontmatter = {
+        id,
+        title: safeTitle,
+        category
+      };
+      const content = `# ${safeTitle}
+
+`;
+      const markdown = matter.stringify(content, frontmatter);
+      await fs__namespace.writeFile(targetPath, markdown, "utf-8");
+      const currentOrder = await readFolderOrder(parentPath) ?? { entries: [] };
+      currentOrder.entries.push(fileName);
+      await writeFolderOrder(parentPath, currentOrder);
+      return id;
+    }
+  );
+  electron.ipcMain.handle("tapestry:createFolder", async (_event, parentPath, name) => {
+    const folderPath = path__namespace.join(parentPath, name);
+    await ensureDir(folderPath);
+    const currentOrder = await readFolderOrder(parentPath) ?? { entries: [] };
+    if (!currentOrder.entries.includes(name)) {
+      currentOrder.entries.push(name);
+      await writeFolderOrder(parentPath, currentOrder);
+    }
+  });
+  electron.ipcMain.handle("tapestry:rename", async (_event, oldPath, newName) => {
+    const parentDir = path__namespace.dirname(oldPath);
+    const ext = path__namespace.extname(oldPath);
+    const isFile = !!ext;
+    const newPath = path__namespace.join(parentDir, isFile ? `${newName}${ext}` : newName);
+    await fs__namespace.rename(oldPath, newPath);
+    if (isFile && ext.toLowerCase() === ".md") {
+      const doc = await loadEntryDoc(newPath);
+      if (doc) {
+        doc.frontmatter.title = newName;
+        doc.title = newName;
+        await saveEntryDoc(doc);
+      }
+    }
+    const order = await readFolderOrder(parentDir) ?? { entries: [] };
+    const baseOld = path__namespace.basename(oldPath);
+    const baseNew = path__namespace.basename(newPath);
+    order.entries = order.entries.map((e) => e === baseOld ? baseNew : e);
+    await writeFolderOrder(parentDir, order);
+  });
+  electron.ipcMain.handle("tapestry:deleteNode", async (_event, targetPath) => {
+    const parentDir = path__namespace.dirname(targetPath);
+    await deletePath(targetPath);
+    const order = await readFolderOrder(parentDir) ?? { entries: [] };
+    const base = path__namespace.basename(targetPath);
+    order.entries = order.entries.filter((e) => e !== base);
+    await writeFolderOrder(parentDir, order);
+  });
+  electron.ipcMain.handle(
+    "tapestry:move",
+    async (_event, sourcePath, destinationFolder, itemName) => {
+      await ensureDir(destinationFolder);
+      const targetPath = path__namespace.join(destinationFolder, itemName);
+      await fs__namespace.rename(sourcePath, targetPath);
+      const sourceParent = path__namespace.dirname(sourcePath);
+      const sourceOrder = await readFolderOrder(sourceParent) ?? { entries: [] };
+      const baseSource = path__namespace.basename(sourcePath);
+      sourceOrder.entries = sourceOrder.entries.filter((e) => e !== baseSource);
+      await writeFolderOrder(sourceParent, sourceOrder);
+      const destOrder = await readFolderOrder(destinationFolder) ?? { entries: [] };
+      if (!destOrder.entries.includes(itemName)) {
+        destOrder.entries.push(itemName);
+        await writeFolderOrder(destinationFolder, destOrder);
+      }
+    }
+  );
+  electron.ipcMain.handle(
+    "tapestry:updateOrder",
+    async (_event, folderPath, order) => {
+      const folderOrder = { entries: order };
+      await writeFolderOrder(folderPath, folderOrder);
+    }
+  );
+  electron.ipcMain.handle("tapestry:pickImage", async (_event, defaultPath) => {
+    const pickerPath = defaultPath || path__namespace.join(electron.app.getPath("documents"), "Anvil and Loom", "Tapestries");
+    const result = await electron.dialog.showOpenDialog({
+      title: "Select Tapestry Image",
+      defaultPath: pickerPath,
+      properties: ["openFile"],
+      filters: [
+        { name: "Images", extensions: ["png", "jpg", "jpeg", "gif", "webp"] },
+        { name: "All Files", extensions: ["*"] }
+      ]
+    });
+    if (result.canceled || !result.filePaths?.length) {
+      return null;
+    }
+    return result.filePaths[0];
   });
 }
 const __filename$1 = url.fileURLToPath(require("url").pathToFileURL(__filename).href);
@@ -611,6 +756,40 @@ electron.app.whenReady().then(() => {
   setupWeaveHandlers();
   setupSettingsHandlers();
   registerTapestryHandlers();
+  electron.session.defaultSession.protocol.handle("media", async (request) => {
+    let filePath = request.url.replace("media://", "");
+    if (filePath.startsWith("/") && filePath.length > 2 && filePath[2] === ":") {
+      filePath = filePath.substring(1);
+    }
+    try {
+      filePath = decodeURIComponent(filePath);
+    } catch (e) {
+      console.error("[media protocol] Failed to decode path:", filePath, e);
+    }
+    if (filePath.endsWith("/")) {
+      filePath = filePath.slice(0, -1);
+    }
+    console.log("[media protocol] Attempting to load:", filePath);
+    try {
+      const data = await fs.readFile(filePath);
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes = {
+        ".png": "image/png",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".gif": "image/gif",
+        ".webp": "image/webp"
+      };
+      const contentType = mimeTypes[ext] || "application/octet-stream";
+      console.log("[media protocol] Successfully loaded:", filePath);
+      return new Response(data, {
+        headers: { "Content-Type": contentType }
+      });
+    } catch (error) {
+      console.error("[media protocol] Failed to read file:", filePath, error);
+      return new Response("Not Found", { status: 404 });
+    }
+  });
   createWindow();
   electron.app.on("activate", () => {
     if (electron.BrowserWindow.getAllWindows().length === 0) {

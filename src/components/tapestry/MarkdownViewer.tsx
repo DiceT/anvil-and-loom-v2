@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ResultCard } from './ResultCard';
-import { ResultCardModel } from '../../types/tapestry';
+import { PanelThreadCard } from './PanelThreadCard';
+import { ThreadModel } from '../../types/tapestry';
 
 interface MarkdownViewerProps {
     markdown: string;
@@ -24,17 +24,12 @@ export function MarkdownViewer({ markdown }: MarkdownViewerProps) {
                                 const match = /language-([\w-]+)/.exec(className);
                                 const lang = match ? match[1] : '';
 
-                                console.log('[MarkdownViewer] Pre block detected:', { lang, className });
-
                                 if (lang === 'result-card') {
                                     try {
                                         const jsonString = String(codeProps.children).replace(/\n$/, '');
-                                        console.log('[MarkdownViewer] Parsing result card JSON');
-                                        const card = JSON.parse(jsonString) as ResultCardModel;
-                                        console.log('[MarkdownViewer] Successfully parsed result card:', card.type);
-                                        return <ResultCard card={card} />;
+                                        const card = JSON.parse(jsonString) as ThreadModel;
+                                        return <PanelThreadCard card={card} />;
                                     } catch (e) {
-                                        console.error('[MarkdownViewer] Failed to parse result card:', e);
                                         return (
                                             <div className="p-4 text-red-500 bg-red-900/20 rounded border border-red-900/50">
                                                 Invalid Result Card Data: {String(e)}

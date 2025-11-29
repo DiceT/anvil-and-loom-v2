@@ -27,7 +27,7 @@ export function TapestryEditor() {
     if (!activeEntry) {
         return (
             <div className="flex-1 flex items-center justify-center bg-slate-900">
-                <div className="text-slate-400">No entry selected</div>
+                <div className="text-slate-400">No panel selected. Open a panel from the Tapestry tree.</div>
             </div>
         );
     }

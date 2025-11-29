@@ -1,12 +1,12 @@
 /**
- * Result Card Formatter for Tables
+ * Thread Formatter for Tables
  *
- * Formats table roll results into Result Cards
+ * Formats table roll results into Threads (formerly Result Cards).
  */
-
+ 
 import { TableRollResult, TableRegistry } from './types';
 import { MacroResolutionResult } from './macroResolver';
-import { logResultCard } from '../results/resultCardEngine';
+import { logThread } from '../results/threadEngine';
 import { getOraclesByTag } from './tableLoader';
 
 /**
@@ -17,7 +17,7 @@ import { getOraclesByTag } from './tableLoader';
  * @param parentName - For subtables: "Haunted", "Forest", etc.
  * @param packId - The pack ID for aspect/domain results (e.g., "haunted", "forest")
  */
-export function formatTableRollCard(
+export function formatTableRollThread(
   roll: TableRollResult,
   category: string,
   parentName?: string,
@@ -35,7 +35,7 @@ export function formatTableRollCard(
   else if (category.toUpperCase() === 'DOMAIN') source = 'domain';
   else if (category.toUpperCase() === 'ORACLE') source = 'oracle';
 
-  logResultCard({
+  logThread({
     header,
     result: roll.result,
     content,
@@ -52,7 +52,7 @@ export function formatTableRollCard(
 /**
  * Format a combo oracle result (Action + Theme, Descriptor + Focus)
  */
-export function formatComboOracleCard(
+export function formatComboOracleThread(
   macroResult: MacroResolutionResult,
   oracleLabel: string,
   registry: TableRegistry
@@ -95,7 +95,7 @@ export function formatComboOracleCard(
 
   const content = contentLines.join('\n');
 
-  logResultCard({
+  logThread({
     header,
     result,
     content,
@@ -111,7 +111,7 @@ export function formatComboOracleCard(
 /**
  * Format a ROLL TWICE result
  */
-export function formatRollTwiceCard(
+export function formatRollTwiceThread(
   macroResult: MacroResolutionResult,
   tableName: string,
   category?: string,
@@ -139,7 +139,7 @@ export function formatRollTwiceCard(
   else if (category?.toUpperCase() === 'DOMAIN') source = 'domain';
   else if (category?.toUpperCase() === 'ORACLE') source = 'oracle';
 
-  logResultCard({
+  logThread({
     header,
     result,
     content,
@@ -154,7 +154,7 @@ export function formatRollTwiceCard(
 /**
  * Format an OBJECTIVES result
  */
-export function formatObjectivesCard(
+export function formatObjectivesThread(
   macroResult: MacroResolutionResult,
   sourceTableName: string,
   category?: string,
@@ -180,7 +180,7 @@ export function formatObjectivesCard(
   else if (category?.toUpperCase() === 'DOMAIN') source = 'domain';
   else if (category?.toUpperCase() === 'ORACLE') source = 'oracle';
 
-  logResultCard({
+  logThread({
     header,
     result,
     content,
@@ -196,8 +196,8 @@ export function formatObjectivesCard(
 /**
  * Format a THE WEAVE placeholder result
  */
-export function formatTheWeaveCard(): void {
-  logResultCard({
+export function formatTheWeaveThread(): void {
+  logThread({
     header: 'THE WEAVE',
     result: 'Not yet implemented',
     content: 'THE WEAVE macro was rolled, but this feature is not yet implemented.',

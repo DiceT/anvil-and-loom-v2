@@ -1,9 +1,9 @@
 import { ToolPanel } from '../tools/ToolPanel';
-import { ResultsFullPane } from '../results/ResultsFullPane';
+import { ThreadsFullPane } from '../results/ThreadsFullPane';
 import { EnvironmentsPane } from '../environments/EnvironmentsPane';
 import { OraclesPane } from '../oracles/OraclesPane';
 import { WeaveTool } from '../tools/weave/WeaveTool';
-import { GlobalLastResult } from '../results/GlobalLastResult';
+import { GlobalLastThread } from '../results/GlobalLastThread';
 import { useToolStore } from '../../stores/useToolStore';
 
 export function RightLane() {
@@ -21,7 +21,7 @@ export function RightLane() {
         return <OraclesPane />;
 
       case 'results':
-        return <ResultsFullPane />;
+        return <ThreadsFullPane />;
 
       case 'weave':
         return <WeaveTool />;
@@ -38,9 +38,9 @@ export function RightLane() {
         {renderContent()}
       </div>
 
-      {/* Last Result - Fixed at bottom of Tools panel */}
+      {/* Last Thread - Fixed at bottom of Tools panel */}
       <div className="flex-shrink-0 border-t border-slate-800">
-        <GlobalLastResult />
+        <GlobalLastThread />
       </div>
     </div>
   );

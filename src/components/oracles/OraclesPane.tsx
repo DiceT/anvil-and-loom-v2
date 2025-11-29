@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Sparkles, Dices, ChevronRight, ChevronDown } from 'lucide-react';
+import { Dices, ChevronRight, ChevronDown } from 'lucide-react';
 import { useTableStore } from '../../stores/useTableStore';
 import { OracleTableMetadata } from '../../core/tables/types';
 import { rollOnTable } from '../../core/tables/tableEngine';
 import { resolveActionTheme, resolveDescriptorFocus } from '../../core/tables/macroResolver';
-import { formatComboOracleCard, formatTableRollCard } from '../../core/tables/resultCardFormatter';
+import { formatComboOracleThread, formatTableRollThread } from '../../core/tables/threadFormatter';
 
 export function OraclesPane() {
   const { registry, loadTables } = useTableStore();
@@ -28,19 +28,19 @@ export function OraclesPane() {
     if (type === 'action-theme') {
       const result = resolveActionTheme(registry);
       if (result) {
-        formatComboOracleCard(result, 'Action + Theme', registry);
+        formatComboOracleThread(result, 'Action + Theme', registry);
       }
     } else {
       const result = resolveDescriptorFocus(registry);
       if (result) {
-        formatComboOracleCard(result, 'Descriptor + Focus', registry);
+        formatComboOracleThread(result, 'Descriptor + Focus', registry);
       }
     }
   };
 
   const handleRollOracle = (oracle: OracleTableMetadata) => {
     const result = rollOnTable(oracle.table);
-    formatTableRollCard(result, 'ORACLE');
+    formatTableRollThread(result, 'ORACLE');
   };
 
   const toggleSection = (section: string) => {

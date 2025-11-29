@@ -9,7 +9,13 @@ export type ResultSource =
   | 'weave'
   | 'other';
 
-export interface ResultCard {
+/**
+ * Thread
+ *
+ * Canonical model for a single outcome/beat in play.
+ * Historically called ResultCard; ResultCard is now an alias of Thread.
+ */
+export interface Thread {
   id: string;
   timestamp: string; // ISO format
   header: string; // e.g., "Dice Roll", "Oracle: Action + Theme"
@@ -18,3 +24,9 @@ export interface ResultCard {
   source?: ResultSource;
   meta?: Record<string, unknown>;
 }
+
+/**
+ * Legacy alias: ResultCard is now defined as a Thread.
+ * Prefer Thread in new code.
+ */
+export type ResultCard = Thread;

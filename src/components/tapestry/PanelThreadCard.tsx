@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Dice1, Scroll, Sparkles } from 'lucide-react';
-import { ResultCardModel } from '../../types/tapestry';
+import { ThreadModel } from '../../types/tapestry';
 
-interface ResultCardProps {
-    card: ResultCardModel;
+interface PanelThreadCardProps {
+    card: ThreadModel;
     defaultExpanded?: boolean;
 }
 
@@ -16,12 +16,12 @@ const sourceColors: Record<string, string> = {
     table: '#224422',
 };
 
-export function ResultCard({ card, defaultExpanded = false }: ResultCardProps) {
+export function PanelThreadCard({ card, defaultExpanded = false }: PanelThreadCardProps) {
     const [isExpanded, setIsExpanded] = useState(defaultExpanded);
     const headerBgColor = sourceColors[card.type] || '#1e293b';
 
-    // Generate timestamp from card ID (which includes timestamp)
-    const timestamp = new Date().toLocaleTimeString();
+    // Generate timestamp from card timestamp
+    const timestamp = new Date(card.timestamp).toLocaleTimeString();
 
     return (
         <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden flex flex-col my-2">

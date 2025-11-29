@@ -12,7 +12,7 @@ import {
   Info,
 } from 'lucide-react';
 import { rollDiceExpression } from '../../../core/dice/diceEngine';
-import { logResultCard } from '../../../core/results/resultCardEngine';
+import { logThread } from '../../../core/results/threadEngine';
 import { IconButton } from '../../ui/IconButton';
 
 type AdvantageMode = 'none' | 'advantage' | 'disadvantage';
@@ -78,8 +78,8 @@ export function DiceTool() {
         ? ` ${result.modifier > 0 ? '+' : ''}${result.modifier}`
         : '';
 
-      // Create a result card using the result card engine
-      logResultCard({
+      // Create a Thread using the Thread engine
+      logThread({
         header: `DICE: ${expression}`,
         result: `${result.total}`,
         content: `Expression: ${expression}\nRolls: ${rollsText}${modifierText}`,

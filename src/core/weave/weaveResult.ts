@@ -1,4 +1,4 @@
-import { logResultCard } from '../results/resultCardEngine';
+import { logThread } from '../results/threadEngine';
 import type { Weave, WeaveRow } from './weaveTypes';
 
 function capitalize(str: string): string {
@@ -23,7 +23,7 @@ function getRowLabel(row: WeaveRow): string {
 export function logWeaveResult(weave: Weave, roll: number, row: WeaveRow): void {
   const targetLabel = getRowLabel(row);
 
-  logResultCard({
+  logThread({
     header: `Weave: ${weave.name}`,
     result: targetLabel,
     content: `Roll: ${roll}`,
@@ -35,7 +35,7 @@ export function logWeaveResult(weave: Weave, roll: number, row: WeaveRow): void 
       roll,
       maxRoll: weave.maxRoll,
       targetType: row.targetType,
-      targetId: row.targetId
-    }
+      targetId: row.targetId,
+    },
   });
 }

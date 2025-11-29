@@ -32,6 +32,7 @@ export interface ElectronAPI {
     deleteNode: (path: string) => Promise<void>;
     move: (sourcePath: string, destinationFolder: string, itemName: string) => Promise<void>;
     updateOrder: (folderPath: string, order: string[]) => Promise<void>;
+    pickImage: (defaultPath?: string) => Promise<string | null>;
   };
   tables: {
     loadAll: () => Promise<{

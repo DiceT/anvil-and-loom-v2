@@ -73,18 +73,29 @@ export interface EditorState {
     activeEntryId?: string;
 }
 
-// Result Card types (for Phase 5)
-export type ResultCardType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table';
+/**
+ * Panel Thread types
+ *
+ * Embedded Threads stored inside Panels (historically called ResultCardModel).
+ */
+export type ThreadType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table';
 
-export interface ResultCardModel {
+export interface PanelThreadModel {
     id: string;          // uuid
-    type: ResultCardType;
+    type: ThreadType;
     source: string;      // e.g. "Weave: Haunted Forest / Atmosphere"
     expression?: string; // dice expression, if any
     summary: string;     // short headline prompt
     content?: string;    // detailed content (roll info, etc)
     payload: any;        // detailed data, JSON-serializable
+    timestamp: string;   // ISO datetime for when the thread was created
 }
+
+/**
+ * Domain alias: embedded panel threads are Threads within Panels.
+ * Prefer ThreadModel / PanelThread language in new code.
+ */
+export type ThreadModel = PanelThreadModel;
 
 // Helper types for IPC
 export interface CreateTapestryData {
@@ -99,3 +110,5 @@ export interface UpdateTapestryData {
     description?: string;
     imagePath?: string;
 }
+
+export type PanelDoc = EntryDoc;

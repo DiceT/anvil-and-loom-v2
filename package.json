@@ -1,6 +1,6 @@
 {
 	"name": "anvil-and-loom-v2",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "A story-first TTRPG engine for journaling, dice, and oracles",
 	"main": "out/main/main.cjs",
 	"type": "module",
