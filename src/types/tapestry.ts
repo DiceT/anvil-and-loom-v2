@@ -32,22 +32,26 @@ export interface TapestryConfig {
     };
 }
 
-export interface EntryFrontmatter {
+export interface PanelFrontmatter {
     id: string;
     title: string;
     category: EntryCategory;
     tags?: string[];
 }
 
-export interface EntryDoc {
+export interface PanelDoc {
     id: string;
     path: string;
     title: string;
     category: EntryCategory;
     content: string;         // raw markdown, frontmatter stripped
-    frontmatter: EntryFrontmatter;
+    frontmatter: PanelFrontmatter;
     isDirty: boolean;
 }
+
+// Legacy alias for compatibility
+export type EntryFrontmatter = PanelFrontmatter;
+export type EntryDoc = PanelDoc;
 
 export type NodeType = 'folder' | 'entry' | 'asset';
 
@@ -57,6 +61,7 @@ export interface TapestryNode {
     name: string;              // display name
     path: string;              // absolute path
     category?: EntryCategory;  // for 'entry' type nodes
+    tags?: string[];           // for 'entry' type nodes
     children?: TapestryNode[];
 }
 
@@ -110,5 +115,3 @@ export interface UpdateTapestryData {
     description?: string;
     imagePath?: string;
 }
-
-export type PanelDoc = EntryDoc;

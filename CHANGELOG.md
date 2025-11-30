@@ -1,6 +1,38 @@
 # Changelog
 
+## 0.2.1 - 2025-11-29
+
+### Added
+- Themed confirmation dialogs using global `useDialogStore` (replaced native browser confirm dialogs)
+- "Change Badge" context menu option for panels (right-click to change category)  
+- "Rebuild Index" button in Stitchboard for manual index rebuilding
+- Support for escaped wiki link brackets (`\[\[...\]\]`) in stitch parser
+- **Tagging System:** Comprehensive tag management for panels
+  - Tags stored in frontmatter with add/remove UI in panel headers
+  - Inline `#hashtag` detection and styling in markdown content
+  - Click-to-filter: Click any tag to filter tree to matching panels
+  - Tag indexing for fast lookups (`useTagStore`)
+  - Filter indicator with clear button in tree header
+- **Panel Title Improvements:**
+  - Auto-open newly created panels in editor
+  - Real-time header title updates on panel rename
+  - Removed redundant H1 title from new panel content
+
+### Fixed
+- Panel tab switching now correctly syncs with editor and Stitchboard
+- Wiki link navigation now opens/activates corresponding tabs
+- Stitchboard now populates correctly with stitches and backstitches
+- Wiki link protocol (`wiki:`) no longer stripped by react-markdown
+- Tab system and editor state now stay synchronized
+- Panel header titles now update immediately when renamed (no app restart needed)
+- New panels now automatically open and focus in the editor
+
+### Changed
+- Renamed "Outgoing" to "Stitches" in Stitchboard
+- All confirmation dialogs now use consistent slate-800/900 theme
+
 ## 0.2.0 - 2025-11-28
+
 
 ### Added
 - Tapestry system for managing worlds/campaigns as on-disk folders with a registry, metadata, and entry tree.

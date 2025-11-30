@@ -443,7 +443,8 @@ async function buildFolderTree(folderPath) {
             type: "entry",
             name: doc.title,
             path: fullPath,
-            category: doc.category
+            category: doc.category,
+            tags: doc.frontmatter.tags
           });
         }
       } else {
@@ -509,9 +510,7 @@ function registerTapestryHandlers() {
       category: config.defaultEntryCategory || "session",
       tags: ["intro"]
     };
-    const initialContent = `# The First Thread
-
-Welcome to your new Tapestry. This is your first Panel.
+    const initialContent = `Welcome to your new Tapestry. This is your first Panel.
 Roll some dice or pull on The Weave, then write your first Thread of the story.`;
     const firstEntryMarkdown = matter.stringify(initialContent, firstEntryFrontmatter);
     const firstEntryPath = path__namespace.join(entriesDir, "The First Thread.md");
@@ -636,15 +635,14 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
         title: safeTitle,
         category
       };
-      const content = `# ${safeTitle}
-
-`;
+      const content = "\n";
       const markdown = matter.stringify(content, frontmatter);
       await fs__namespace.writeFile(targetPath, markdown, "utf-8");
       const currentOrder = await readFolderOrder(parentPath) ?? { entries: [] };
       currentOrder.entries.push(fileName);
       await writeFolderOrder(parentPath, currentOrder);
-      return id;
+      await writeFolderOrder(parentPath, currentOrder);
+      return { id, path: targetPath };
     }
   );
   electron.ipcMain.handle("tapestry:createFolder", async (_event, parentPath, name) => {
@@ -675,6 +673,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
     const baseNew = path__namespace.basename(newPath);
     order.entries = order.entries.map((e) => e === baseOld ? baseNew : e);
     await writeFolderOrder(parentDir, order);
+    return newPath;
   });
   electron.ipcMain.handle("tapestry:deleteNode", async (_event, targetPath) => {
     const parentDir = path__namespace.dirname(targetPath);
@@ -709,6 +708,40 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
       await writeFolderOrder(folderPath, folderOrder);
     }
   );
+  electron.ipcMain.handle("tapestry:getAllPanels", async (_event, tapestryId) => {
+    const registry = await readRegistry();
+    const entry = registry.tapestries.find((t) => t.id === tapestryId);
+    if (!entry) return [];
+    const { entriesDir } = getTapestryPaths(entry.path);
+    async function getMarkdownFiles(dir) {
+      const dirents = await fs__namespace.readdir(dir, { withFileTypes: true });
+      const files = [];
+      for (const dirent of dirents) {
+        if (dirent.name === ".loom") continue;
+        const fullPath = path__namespace.join(dir, dirent.name);
+        if (dirent.isDirectory()) {
+          files.push(...await getMarkdownFiles(fullPath));
+        } else if (dirent.isFile() && path__namespace.extname(dirent.name).toLowerCase() === ".md") {
+          const doc = await loadEntryDoc(fullPath);
+          if (doc) {
+            files.push({
+              id: doc.id,
+              title: doc.title,
+              content: doc.content,
+              path: doc.path
+            });
+          }
+        }
+      }
+      return files;
+    }
+    try {
+      return await getMarkdownFiles(entriesDir);
+    } catch (error) {
+      console.error("Failed to get all entries:", error);
+      return [];
+    }
+  });
   electron.ipcMain.handle("tapestry:pickImage", async (_event, defaultPath) => {
     const pickerPath = defaultPath || path__namespace.join(electron.app.getPath("documents"), "Anvil and Loom", "Tapestries");
     const result = await electron.dialog.showOpenDialog({

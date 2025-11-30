@@ -4,6 +4,7 @@ import { EnvironmentsPane } from '../environments/EnvironmentsPane';
 import { OraclesPane } from '../oracles/OraclesPane';
 import { WeaveTool } from '../tools/weave/WeaveTool';
 import { GlobalLastThread } from '../results/GlobalLastThread';
+import { Stitchboard } from '../stitches/Stitchboard';
 import { useToolStore } from '../../stores/useToolStore';
 
 export function RightLane() {
@@ -25,6 +26,9 @@ export function RightLane() {
 
       case 'weave':
         return <WeaveTool />;
+
+      case 'stitchboard':
+        return <Stitchboard />;
 
       default:
         return null;

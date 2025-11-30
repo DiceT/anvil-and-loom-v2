@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import type {
     TapestryRegistry,
@@ -25,13 +26,21 @@ interface TapestryState {
     removeTapestry: (id: string) => Promise<void>;
     deleteTapestry: (id: string) => Promise<void>;
     loadTree: () => Promise<void>;
+    createEntry: (title: string, category?: string) => Promise<{ id: string; path: string }>;
     clearError: () => void;
+
+    // Tag Filtering
+    activeTagFilter: string | null;
+    setTagFilter: (tag: string | null) => void;
 }
 
 export const useTapestryStore = create<TapestryState>((set, get) => ({
     // Initial state
     registry: { tapestries: [] },
     isLoading: false,
+    activeTagFilter: null,
+
+    setTagFilter: (tag) => set({ activeTagFilter: tag }),
 
     // Load registry from disk
     loadRegistry: async () => {
@@ -189,11 +198,68 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
         try {
             const tree = await window.electron.tapestry.loadTree(activeTapestryId);
             set({ tree: tree || undefined, isLoading: false });
+
+            // Build tag index
+            if (tree) {
+                const { useTagStore } = await import('./useTagStore');
+                const panels: Array<{ id: string; tags?: string[] }> = [];
+
+                const traverse = (node: TapestryNode) => {
+                    if (node.type === 'entry') {
+                        panels.push({ id: node.id, tags: node.tags });
+                    }
+                    if (node.children) {
+                        node.children.forEach(traverse);
+                    }
+                };
+
+                traverse(tree);
+                useTagStore.getState().buildIndex(panels);
+            }
         } catch (error) {
             set({
                 error: error instanceof Error ? error.message : 'Failed to load tree',
                 isLoading: false
             });
+        }
+    },
+
+    // Create new entry in the active tapestry
+    createEntry: async (title: string, category: string = 'session') => {
+        const { activeTapestryId, registry } = get();
+        if (!activeTapestryId) {
+            throw new Error('No active tapestry');
+        }
+
+        const tapestry = registry.tapestries.find(t => t.id === activeTapestryId);
+        if (!tapestry) {
+            throw new Error('Tapestry not found in registry');
+        }
+
+        set({ isLoading: true, error: undefined });
+        try {
+            // Default to root entries folder for now
+            // In future we might want to allow specifying folder or use current folder
+            const entriesDir = `${tapestry.path}\\entries`;
+
+            const result = await window.electron.tapestry.createEntry(entriesDir, title, category);
+
+            // Update stitch index
+            const { useStitchStore } = await import('./useStitchStore');
+            const content = '\n';
+            useStitchStore.getState().updatePanel(result.id, title.trim() || 'Untitled Panel', content, result.path);
+
+            // Reload tree
+            await get().loadTree();
+
+            set({ isLoading: false });
+            return result;
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : 'Failed to create entry',
+                isLoading: false
+            });
+            throw error;
         }
     },
 

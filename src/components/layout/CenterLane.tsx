@@ -1,10 +1,12 @@
 import { X } from 'lucide-react';
 import { useTabStore } from '../../stores/useTabStore';
+import { useEditorStore } from '../../stores/useEditorStore';
 import { WeaveEditor } from '../weave/WeaveEditor';
 import { TapestryEditor } from '../tapestry/TapestryEditor';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
+  const { setActiveEntry } = useEditorStore();
 
   const activeTab = tabs.find((t) => t.id === activeTabId);
 
@@ -39,7 +41,12 @@ export function CenterLane() {
                 ? 'bg-slate-900 text-slate-200'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-750'
                 }`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.type === 'entry') {
+                  setActiveEntry(tab.id);
+                }
+              }}
             >
               <span className="text-sm whitespace-nowrap">{tab.title}</span>
               <button

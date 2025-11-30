@@ -2,6 +2,7 @@ import { TopBar } from './TopBar';
 import { DockContainer } from '../docking/DockContainer';
 import { TapestryManager } from '../tapestry/TapestryManager';
 import { useTapestryStore } from '../../stores/useTapestryStore';
+import { GlobalDialogManager } from '../ui/GlobalDialogManager';
 
 export function AppLayout() {
   const activeTapestryId = useTapestryStore((state) => state.activeTapestryId);
@@ -20,6 +21,9 @@ export function AppLayout() {
       <div className="flex-1 min-h-0 relative">
         <DockContainer />
       </div>
+
+      {/* Global Dialogs */}
+      <GlobalDialogManager />
     </div>
   );
 }

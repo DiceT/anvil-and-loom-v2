@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('electron', {
     updateOrder: (folderPath: string, order: string[]) =>
       ipcRenderer.invoke('tapestry:updateOrder', folderPath, order),
     pickImage: (defaultPath?: string) => ipcRenderer.invoke('tapestry:pickImage', defaultPath),
+    getAllPanels: (tapestryId: string) => ipcRenderer.invoke('tapestry:getAllPanels', tapestryId),
   },
   tables: {
     loadAll: () => ipcRenderer.invoke('tables:loadAll'),

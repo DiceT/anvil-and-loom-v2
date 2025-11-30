@@ -523,3 +523,60 @@ const handleOpen = async (id: string) => {
 Ready for you to build the UI! 🎨
 
 ---
+
+### [2025-11-29 12:58] - Loomwright - ✅
+**Topic:** Wiki Links, Stitchboard, UI Polish Complete
+**Status:** ✅ Multiple Features Complete
+**Changes:**
+- **FIXED:** `src/components/layout/CenterLane.tsx` (Tab click now syncs with editor)
+- **FIXED:** `src/components/tapestry/WikiLink.tsx` (Wiki link click now syncs with tabs)
+- **FIXED:** `src/core/stitches/stitchParser.ts` (Parser now handles escaped brackets `\[\[...\]\]`)
+- **FIXED:** `src/components/tapestry/MarkdownViewer.tsx` (Added `urlTransform` to preserve `wiki:` protocol)
+- **FIXED:** `src/stores/useStitchStore.ts` (Added logging for buildIndex)
+- **CREATED:** `src/stores/useDialogStore.ts` (Global confirmation dialog state)
+- **CREATED:** `src/components/ui/ConfirmationDialog.tsx` (Themed confirmation dialog)
+- **CREATED:** `src/components/ui/GlobalDialogManager.tsx` (Dialog manager component)
+- **MODIFIED:** `src/components/layout/AppLayout.tsx` (Added GlobalDialogManager)
+- **MODIFIED:** `src/components/stitches/Stitchboard.tsx` (Renamed "Outgoing" to "Stitches", added rebuild button)
+- **MODIFIED:** `src/components/tapestry/TreeContextMenu.tsx` (Added "Change Badge" option)
+- **MODIFIED:** `src/components/tapestry/TreeNode.tsx` (Passed onChangeBadge handler)
+- **MODIFIED:** `src/components/tapestry/TapestryTree.tsx` (Implemented badge change logic & dialog)
+
+**Action Needed:** None - All features working
+
+**Notes:**
+Today's session focused on fixing and polishing the wiki link and panel system:
+
+**Fixed Issues:**
+1. **Panel Tab Switching:** Clicking a tab now correctly updates the active editor entry and Stitchboard context. Fixed by synchronizing `useTabStore.setActiveTab` with `useEditorStore.setActiveEntry`.
+
+2. **Wiki Link Navigation:** Clicking a wiki link now opens or activates the corresponding tab. Fixed by calling `useTabStore.openTab` in `WikiLink.tsx` after opening the entry.
+
+3. **Stitchboard Not Populating:** The Stitchboard was showing 0 stitches despite visible links. Root cause: Milkdown was saving wiki links with escaped brackets (`\[\[Target\]\]`) instead of plain brackets (`[[Target]]`). Fixed by updating the regex in `extractStitches` to: `/(?:\\?\[){2}(.*?)(?:\|(.*?))?(?:\\?\]){2}/g`.
+
+4. **Wiki Link Protocol Stripping:** `react-markdown` was stripping the `wiki:` protocol. Fixed by adding `urlTransform` prop to preserve custom protocols.
+
+**New Features:**
+1. **Themed Confirmation Dialogs:** Created a global `useDialogStore` and reusable `ConfirmationDialog` component to replace native `confirm()` dialogs. The "Create New Panel" prompt now matches the app's dark theme.
+
+2. **Change Badge Context Menu:** Added "Change Badge" option to the panel context menu (right-click on any panel in the tree). Opens a dialog where users can change the category/badge (Session, World, NPC, Lore, Mechanics, Other). Updates the frontmatter and refreshes the tree.
+
+**Technical Details:**
+- The global dialog system uses promises to await user input asynchronously, making it easy to use: `const confirmed = await useDialogStore.getState().confirm({...})`.
+- Badge changes are persisted by loading the entry, modifying `entry.frontmatter.category`, and saving it back.
+- Added a "Rebuild Index" button to Stitchboard for debugging (with refresh icon).
+
+**UI Improvements:**
+- Renamed "Outgoing" to "Stitches" in Stitchboard
+- All dialogs now consistently use the slate-800/900 theme
+
+**Testing:**
+- ✅ Tab switching updates editor and Stitchboard
+- ✅ Wiki link clicks open/activate tabs
+- ✅ Stitchboard populates with stitches and backstitches  
+- ✅ Themed confirmation dialog appears for new panels
+- ✅ Badge change dialog works and persists
+
+The system is now much more polished and user-friendly!
+
+---

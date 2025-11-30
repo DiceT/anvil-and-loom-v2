@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dices, TentTree, Eclipse, List, Infinity, Settings } from 'lucide-react';
+import { Dices, TentTree, Eclipse, List, Infinity, Settings, Link } from 'lucide-react';
 import { useToolStore, RightPaneMode } from '../../stores/useToolStore';
 import { IconButton } from '../ui/IconButton';
 import { SettingsModal } from '../settings/SettingsModal';
@@ -12,6 +12,7 @@ export function TopBar() {
     { mode: 'dice', icon: Dices, label: 'Dice' },
     { mode: 'environments', icon: TentTree, label: 'Environments' },
     { mode: 'oracles', icon: Eclipse, label: 'Oracles' },
+    { mode: 'stitchboard', icon: Link, label: 'Stitchboard' },
   ];
 
   const handleModeClick = (mode: RightPaneMode) => {

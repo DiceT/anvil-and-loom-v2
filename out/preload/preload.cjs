@@ -21,7 +21,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     deleteNode: (path) => electron.ipcRenderer.invoke("tapestry:deleteNode", path),
     move: (sourcePath, destinationFolder, itemName) => electron.ipcRenderer.invoke("tapestry:move", sourcePath, destinationFolder, itemName),
     updateOrder: (folderPath, order) => electron.ipcRenderer.invoke("tapestry:updateOrder", folderPath, order),
-    pickImage: (defaultPath) => electron.ipcRenderer.invoke("tapestry:pickImage", defaultPath)
+    pickImage: (defaultPath) => electron.ipcRenderer.invoke("tapestry:pickImage", defaultPath),
+    getAllPanels: (tapestryId) => electron.ipcRenderer.invoke("tapestry:getAllPanels", tapestryId)
   },
   tables: {
     loadAll: () => electron.ipcRenderer.invoke("tables:loadAll"),

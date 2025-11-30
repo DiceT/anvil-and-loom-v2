@@ -24,15 +24,16 @@ export interface ElectronAPI {
     // Entry management
     loadEntry: (path: string) => Promise<EntryDoc | null>;
     saveEntry: (entry: EntryDoc) => Promise<void>;
-    createEntry: (parentPath: string, title: string, category: string) => Promise<string>;
+    createEntry: (parentPath: string, title: string, category: string) => Promise<{ id: string; path: string }>;
 
     // File operations
     createFolder: (parentPath: string, name: string) => Promise<void>;
-    rename: (oldPath: string, newName: string) => Promise<void>;
+    rename: (oldPath: string, newName: string) => Promise<string>;
     deleteNode: (path: string) => Promise<void>;
     move: (sourcePath: string, destinationFolder: string, itemName: string) => Promise<void>;
     updateOrder: (folderPath: string, order: string[]) => Promise<void>;
     pickImage: (defaultPath?: string) => Promise<string | null>;
+    getAllPanels: (tapestryId: string) => Promise<Array<{ id: string; title: string; content: string; path: string }>>;
   };
   tables: {
     loadAll: () => Promise<{

@@ -1,5 +1,7 @@
+
 import { create } from 'zustand';
 import type { EntryDoc, EditorMode } from '../types/tapestry';
+import { normalizeTag, deduplicateTags, extractInlineTags } from '../utils/tags';
 
 interface EditorState {
     // State
@@ -18,6 +20,12 @@ interface EditorState {
     saveEntry: (id: string) => Promise<void>;
     saveAllEntries: () => Promise<void>;
     clearError: () => void;
+
+    // Tag management
+    addTag: (entryId: string, tag: string) => void;
+    removeTag: (entryId: string, tag: string) => void;
+    updateTags: (entryId: string, tags: string[]) => void;
+    handleRename: (oldPath: string, newPath: string, newTitle: string) => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -46,6 +54,19 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             const existing = get().openEntries.find(e => e.path === path);
             if (existing) {
                 set({ activeEntryId: existing.id, isLoading: false });
+                // Also activate the tab
+                const { useTabStore } = await import('./useTabStore');
+                const tabStore = useTabStore.getState();
+                const existingTab = tabStore.tabs.find(t => t.id === existing.id);
+                if (existingTab) {
+                    tabStore.setActiveTab(existing.id);
+                } else {
+                    tabStore.openTab({
+                        id: existing.id,
+                        type: 'entry',
+                        title: existing.title
+                    });
+                }
                 return;
             }
 
@@ -61,6 +82,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 activeEntryId: entry.id,
                 isLoading: false,
             }));
+
+            // Create and activate tab
+            const { useTabStore } = await import('./useTabStore');
+            useTabStore.getState().openTab({
+                id: entry.id,
+                type: 'entry',
+                title: entry.title
+            });
         } catch (error) {
             set({
                 error: error instanceof Error ? error.message : 'Failed to open entry',
@@ -148,12 +177,32 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
         set({ isLoading: true, error: undefined });
         try {
+            // Extract inline tags from content
+            const inlineTags = extractInlineTags(entry.content);
+
+            // Merge with frontmatter tags (deduplicate)
+            const allTags = deduplicateTags([
+                ...(entry.frontmatter.tags || []),
+                ...inlineTags
+            ]);
+
+            // Update frontmatter tags
+            entry.frontmatter.tags = allTags;
+
             await window.electron.tapestry.saveEntry(entry);
+
+            // Update stitch index
+            const { useStitchStore } = await import('./useStitchStore');
+            useStitchStore.getState().updatePanel(entry.id, entry.title, entry.content, entry.path);
+
+            // Update tag index
+            const { useTagStore } = await import('./useTagStore');
+            useTagStore.getState().updatePanelTags(entry.id, allTags);
 
             // Mark as clean
             set(state => ({
                 openEntries: state.openEntries.map(e =>
-                    e.id === id ? { ...e, isDirty: false } : e
+                    e.id === id ? { ...e, isDirty: false, frontmatter: { ...e.frontmatter, tags: allTags } } : e
                 ),
                 isLoading: false,
             }));
@@ -178,6 +227,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 dirtyEntries.map(entry => window.electron.tapestry.saveEntry(entry))
             );
 
+            // Update stitch index for all saved entries
+            const { useStitchStore } = await import('./useStitchStore');
+            dirtyEntries.forEach(entry => {
+                useStitchStore.getState().updatePanel(entry.id, entry.title, entry.content, entry.path);
+            });
+
             // Mark all as clean
             set(state => ({
                 openEntries: state.openEntries.map(e => ({ ...e, isDirty: false })),
@@ -194,4 +249,59 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     // Clear error
     clearError: () => set({ error: undefined }),
+
+    // Add tag to a panel
+    addTag: (entryId: string, tag: string) => {
+        const entry = get().openEntries.find(e => e.id === entryId);
+        if (!entry) return;
+
+        const normalized = normalizeTag(tag);
+        const tags = entry.frontmatter.tags || [];
+
+        if (!tags.includes(normalized)) {
+            entry.frontmatter.tags = [...tags, normalized];
+            entry.isDirty = true;
+            set({ openEntries: [...get().openEntries] });
+        }
+    },
+
+    // Remove tag from a panel
+    removeTag: (entryId: string, tag: string) => {
+        const entry = get().openEntries.find(e => e.id === entryId);
+        if (!entry) return;
+
+        const normalized = normalizeTag(tag);
+        entry.frontmatter.tags = (entry.frontmatter.tags || []).filter(t => t !== normalized);
+        entry.isDirty = true;
+        set({ openEntries: [...get().openEntries] });
+    },
+
+    // Update all tags for a panel
+    updateTags: (entryId: string, tags: string[]) => {
+        const entry = get().openEntries.find(e => e.id === entryId);
+        if (!entry) return;
+
+        entry.frontmatter.tags = deduplicateTags(tags);
+        entry.isDirty = true;
+        set({ openEntries: [...get().openEntries] });
+    },
+
+    handleRename: (oldPath: string, newPath: string, newTitle: string) => {
+        set(state => ({
+            openEntries: state.openEntries.map(entry => {
+                if (entry.path === oldPath) {
+                    return {
+                        ...entry,
+                        path: newPath,
+                        title: newTitle,
+                        frontmatter: {
+                            ...entry.frontmatter,
+                            title: newTitle
+                        }
+                    };
+                }
+                return entry;
+            })
+        }));
+    },
 }));

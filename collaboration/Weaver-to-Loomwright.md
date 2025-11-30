@@ -704,3 +704,130 @@ When you're done, test:
 **Ready to build!** Let me know if you have questions. 🌲
 
 ---
+
+### [2025-11-29 18:50] - Loomwright - ✅
+**Topic:** Tagging System Complete + Panel Title Improvements
+**Status:** ✅ Complete & User Verified
+**Changes:**
+- **CREATED:** `src/stores/useTagStore.ts` (tag indexing and filtering)
+- **CREATED:** `src/components/tags/TagList.tsx` (tag management UI)
+- **CREATED:** `src/components/tags/TagChip.tsx` (individual tag display)
+- **CREATED:** `src/utils/tags.ts` (tag normalization and utilities)
+- **MODIFIED:** `src/types/tapestry.ts` (added tags to TapestryNode)
+- **MODIFIED:** `electron/ipc/tapestry.ts` (populate tags in tree, removed H1 from new panels)
+- **MODIFIED:** `src/stores/useTapestryStore.ts` (build tag index on tree load)
+- **MODIFIED:** `src/stores/useEditorStore.ts` (tag management actions, handleRename for title sync, tab creation)
+- **MODIFIED:** `src/components/tapestry/TapestryEditor.tsx` (integrated TagList in header)
+- **MODIFIED:** `src/components/tapestry/TapestryTree.tsx` (tag filter UI, auto-open new panels, rename sync)
+- **MODIFIED:** `src/core/markdown/remarkWikiLinks.ts` (inline tag detection and styling)
+
+**Action Needed:** None - all features complete and verified
+
+**Notes:**
+Completed comprehensive tagging system with filtering plus several panel UX improvements requested by user.
+
+**Tagging System Features:**
+
+1. **Tag Management:**
+   - Tags stored in entry frontmatter (`tags: ['tag1', 'tag2']`)
+   - TagList component in panel header (view + edit modes)
+   - Add tags via input field or inline `#hashtags` in content
+   - Remove tags with click (edit mode) or filter (view mode)
+   - Tag normalization: lowercase, trimmed, deduplicated
+
+2. **Tag Indexing:**
+   - `useTagStore` maintains panel→tags and tag→panels indices
+   - Auto-builds index when tree loads (`useTapestryStore.loadTree`)
+   - Updates index on panel save/create/edit
+   - Fast lookups for filtering (no tree traversal needed)
+
+3. **Tag Filtering:**
+   - Click any tag chip → filters tapestry tree to matching panels
+   - Filter indicator in tree header with tag name + clear button
+   - Non-matching panels hidden in tree view
+   - Click tag again or use X button to clear filter
+
+4. **Inline Tag Styling:**
+   - Markdown content scans for `#tag` syntax
+   - Styled with slate-400 color and subtle background
+   - Auto-detects and adds to frontmatter on save
+   - Works in both edit and view modes
+
+5. **Visual Design:**
+   - Tag chips use slate-700 background with slate-300 text
+   - Hover states with slate-600 background
+   - Purple ring on focus for add input
+   - Compact pill design with smooth transitions
+   - Filter indicator uses purple-500 accent
+
+**Panel Title Improvements:**
+
+1. **Removed Redundant H1:**
+   - New panels no longer generate `# Title` at top of content
+   - Applies to both new panels and "First Thread" seed panel
+   - Only header shows title (no duplication in document)
+
+2. **Real-Time Rename Sync:**
+   - Panel header updates immediately when renamed
+   - Added `handleRename` action to `useEditorStore`
+   - Updates path, title, and frontmatter for open panels
+   - Syncs before tree reload to ensure instant UI update
+
+3. **Auto-Open New Panels:**
+   - Creating a panel now automatically opens it in editor
+   - Added tab creation to `useEditorStore.openEntry`
+   - Integrates with `useTabStore` for CenterLane display
+   - Smooth workflow: create → automatically focus
+
+**Technical Implementation:**
+
+**Tag Store Pattern:**
+```typescript
+// Building index from tree
+traverse(tree);  // Collects all panel IDs + tags
+useTagStore.getState().buildIndex(panels);
+
+// Filtering
+const panelIds = useTagStore.getState().getPanelsWithTag('combat');
+// Returns ['id1', 'id2', ...] for filtering tree
+```
+
+**Tag Component Integration:**
+```typescript
+<TagList
+  tags={entry.frontmatter.tags || []}
+  onAdd={(tag) => addTag(entry.id, tag)}
+  onRemove={(tag) => removeTag(entry.id, tag)}
+  onTagClick={(tag) => setTagFilter(tag)}
+  editable={mode === 'edit'}
+/>
+```
+
+**Inline Tag Detection:**
+```typescript
+// In remarkWikiLinks plugin
+const hashtagMatch = text.match(/#[a-zA-Z0-9_-]+/g);
+// Creates styled span nodes for each hashtag
+```
+
+**Design Decisions:**
+
+- **Dual Tag Sources:** Both frontmatter tags and inline `#tags` supported
+- **Click-to-Filter:** Tags in view mode are clickable for filtering (no edit)
+- **Normalization:** All tags lowercase for consistent matching
+- **Non-Destructive:** Removing tag from list doesn't affect inline hashtags
+- **Fast Indexing:** Built once on tree load, updated incrementally on save
+
+**All Console Logs Cleaned:**
+- Removed debug logs from `useStitchStore.ts`
+- Removed debug logs from `remarkWikiLinks.ts`
+- Removed debug log from `MarkdownViewer.tsx`
+- Removed auto-open debug logs from `TapestryTree.tsx`
+
+**User Verification:** ✅ "We can sign off on tags now"
+
+The tagging system provides powerful organization and filtering capabilities while maintaining clean UX and fast performance. Combined with the panel title improvements, the workflow for creating and managing panels is now seamless.
+
+---
+
+*Last Updated: 2025-11-29 18:50 by Loomwright*

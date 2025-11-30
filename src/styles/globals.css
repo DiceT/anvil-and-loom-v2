@@ -182,3 +182,53 @@ body::-webkit-scrollbar-button,
 .dock-theme-dark .dock-panel-content {
   background: var(--dock-color-background);
 }
+
+/* Wiki Link Styles - Override prose typography */
+.wiki-link {
+  text-decoration: none !important;
+}
+
+.wiki-link[data-resolved="true"] {
+  color: #ccccff !important;
+}
+
+.wiki-link[data-resolved="false"] {
+  color: #cccccc !important;
+}
+
+.wiki-link[data-resolved="true"]:hover {
+  color: #aaaaff !important;
+  filter: drop-shadow(0 0 8px rgba(170, 170, 255, 0.6));
+}
+
+/* Override Tailwind prose link styles */
+.prose .wiki-link {
+  color: inherit;
+  text-decoration: none !important;
+  font-weight: inherit;
+}
+
+.prose .wiki-link:hover {
+  text-decoration: none !important;
+}
+
+/* Inline tag styles */
+.inline-tag {
+  color: #a78bfa;
+  /* purple-400 */
+  font-weight: 500;
+  cursor: default;
+  padding: 0 2px;
+}
+
+.inline-tag:hover {
+  color: #c4b5fd;
+  /* purple-300 */
+}
+
+/* Make inline tags in prose stand out */
+.prose .inline-tag {
+  color: #a78bfa;
+  text-decoration: none;
+  font-weight: 500;
+}

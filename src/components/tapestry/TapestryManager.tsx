@@ -41,6 +41,9 @@ export function TapestryManager() {
     const handleOpen = async (id: string) => {
         try {
             await openTapestry(id);
+            // Build stitch index
+            const { useStitchStore } = await import('../../stores/useStitchStore');
+            useStitchStore.getState().buildIndex(id);
         } catch (err) {
             console.error('Failed to open tapestry:', err);
         }

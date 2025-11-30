@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { FilePlus, FolderPlus, Edit2, Trash2, MoveVertical } from 'lucide-react';
+import { FilePlus, FolderPlus, Edit2, Trash2, MoveVertical, Tag } from 'lucide-react';
 import { TapestryNode } from '../../types/tapestry';
 
 interface TreeContextMenuProps {
@@ -11,6 +11,7 @@ interface TreeContextMenuProps {
     onRename: () => void;
     onDelete: () => void;
     onMove: () => void;
+    onChangeBadge?: () => void;
 }
 
 export function TreeContextMenu({
@@ -21,7 +22,8 @@ export function TreeContextMenu({
     onNewFolder,
     onRename,
     onDelete,
-    onMove
+    onMove,
+    onChangeBadge
 }: TreeContextMenuProps) {
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +107,19 @@ export function TreeContextMenu({
                 <MoveVertical className="w-4 h-4" />
                 Move
             </button>
+
+            {!isFolder && onChangeBadge && (
+                <button
+                    onClick={() => {
+                        onChangeBadge();
+                        onClose();
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+                >
+                    <Tag className="w-4 h-4" />
+                    Change Badge
+                </button>
+            )}
 
             <div className="border-t border-slate-700 my-1" />
 

@@ -15,6 +15,7 @@ interface TreeNodeProps {
     onRename: (path: string, currentName: string) => void;
     onDelete: (path: string, name: string) => void;
     onMove: (path: string, name: string) => void;
+    onChangeBadge?: (path: string, currentCategory: string) => void;
 }
 
 export function TreeNode({
@@ -27,7 +28,8 @@ export function TreeNode({
     onNewFolder,
     onRename,
     onDelete,
-    onMove
+    onMove,
+    onChangeBadge
 }: TreeNodeProps) {
     const [isExpanded, setIsExpanded] = useState(true);
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -104,6 +106,7 @@ export function TreeNode({
                             onRename={onRename}
                             onDelete={onDelete}
                             onMove={onMove}
+                            onChangeBadge={onChangeBadge}
                         />
                     ))}
                 </div>
@@ -120,6 +123,7 @@ export function TreeNode({
                     onRename={() => onRename(node.path, node.name)}
                     onDelete={() => onDelete(node.path, node.name)}
                     onMove={() => onMove(node.path, node.name)}
+                    onChangeBadge={node.type === 'entry' && onChangeBadge ? () => onChangeBadge(node.path, node.category || '') : undefined}
                 />
             )}
         </>

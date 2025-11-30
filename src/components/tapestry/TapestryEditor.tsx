@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { useEditorStore } from '../../stores/useEditorStore';
+import { useTapestryStore } from '../../stores/useTapestryStore';
 import { MilkdownEditor } from './MilkdownEditor';
 import { MarkdownViewer } from './MarkdownViewer';
 import { EditorModeToggle } from './EditorModeToggle';
+import { TagList } from '../tags/TagList';
 
 export function TapestryEditor() {
-    const { mode, openEntries, activeEntryId, updateEntryContent, saveEntry } = useEditorStore();
+    const { mode, openEntries, activeEntryId, updateEntryContent, saveEntry, addTag, removeTag } = useEditorStore();
+    const { setTagFilter } = useTapestryStore();
 
     const activeEntry = openEntries.find(e => e.id === activeEntryId);
 
@@ -36,6 +39,18 @@ export function TapestryEditor() {
         <div className="flex flex-col bg-slate-900" style={{ height: '100%' }}>
             {/* Mode Toggle Bar */}
             <EditorModeToggle />
+
+            {/* Panel Header with Tags */}
+            <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/50">
+                <h1 className="text-xl font-semibold text-white mb-2">{activeEntry.title}</h1>
+                <TagList
+                    tags={activeEntry.frontmatter.tags || []}
+                    onAdd={mode === 'edit' ? (tag) => addTag(activeEntry.id, tag) : undefined}
+                    onRemove={mode === 'edit' ? (tag) => removeTag(activeEntry.id, tag) : undefined}
+                    onTagClick={(tag) => setTagFilter(tag)}
+                    editable={mode === 'edit'}
+                />
+            </div>
 
             {/* Editor Content - scroll container with explicit height */}
             <div className="flex-1 app-scroll" style={{ overflow: 'auto' }}>

@@ -199,6 +199,7 @@ async function buildFolderTree(folderPath: string): Promise<TapestryNode[]> {
                         name: doc.title,
                         path: fullPath,
                         category: doc.category,
+                        tags: doc.frontmatter.tags,
                     });
                 }
             } else {
@@ -281,9 +282,7 @@ export function registerTapestryHandlers() {
         };
 
         const initialContent =
-            `# The First Thread
-
-Welcome to your new Tapestry. This is your first Panel.
+            `Welcome to your new Tapestry. This is your first Panel.
 Roll some dice or pull on The Weave, then write your first Thread of the story.`;
 
         const firstEntryMarkdown = matter.stringify(initialContent, firstEntryFrontmatter);
@@ -449,7 +448,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
                 category: category as EntryFrontmatter['category'],
             };
 
-            const content = `# ${safeTitle}\n\n`;
+            const content = '\n';
             const markdown = matter.stringify(content, frontmatter);
             await fs.writeFile(targetPath, markdown, 'utf-8');
 
@@ -458,7 +457,9 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
             currentOrder.entries.push(fileName);
             await writeFolderOrder(parentPath, currentOrder);
 
-            return id;
+            await writeFolderOrder(parentPath, currentOrder);
+
+            return { id, path: targetPath };
         },
     );
 
@@ -499,6 +500,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
         const baseNew = path.basename(newPath);
         order.entries = order.entries.map((e) => (e === baseOld ? baseNew : e));
         await writeFolderOrder(parentDir, order);
+        return newPath;
     });
 
     // Delete entry or folder
@@ -542,6 +544,47 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
             await writeFolderOrder(folderPath, folderOrder);
         },
     );
+
+    // Get all panels for indexing
+    ipcMain.handle('tapestry:getAllPanels', async (_event, tapestryId: string) => {
+        const registry = await readRegistry();
+        const entry = registry.tapestries.find((t) => t.id === tapestryId);
+        if (!entry) return [];
+
+        const { entriesDir } = getTapestryPaths(entry.path);
+
+        async function getMarkdownFiles(dir: string): Promise<Array<{ id: string; title: string; content: string; path: string }>> {
+            const dirents = await fs.readdir(dir, { withFileTypes: true });
+            const files: Array<{ id: string; title: string; content: string; path: string }> = [];
+
+            for (const dirent of dirents) {
+                if (dirent.name === '.loom') continue;
+                const fullPath = path.join(dir, dirent.name);
+
+                if (dirent.isDirectory()) {
+                    files.push(...(await getMarkdownFiles(fullPath)));
+                } else if (dirent.isFile() && path.extname(dirent.name).toLowerCase() === '.md') {
+                    const doc = await loadEntryDoc(fullPath);
+                    if (doc) {
+                        files.push({
+                            id: doc.id,
+                            title: doc.title,
+                            content: doc.content,
+                            path: doc.path,
+                        });
+                    }
+                }
+            }
+            return files;
+        }
+
+        try {
+            return await getMarkdownFiles(entriesDir);
+        } catch (error) {
+            console.error('Failed to get all entries:', error);
+            return [];
+        }
+    });
 
     // Image picker for tapestry artwork
     ipcMain.handle('tapestry:pickImage', async (_event, defaultPath?: string) => {
