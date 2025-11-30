@@ -5,6 +5,7 @@ import { MilkdownEditor } from './MilkdownEditor';
 import { MarkdownViewer } from './MarkdownViewer';
 import { EditorModeToggle } from './EditorModeToggle';
 import { TagList } from '../tags/TagList';
+import { PlaceHeader } from './PlaceHeader';
 
 export function TapestryEditor() {
     const { mode, openEntries, activeEntryId, updateEntryContent, saveEntry, addTag, removeTag } = useEditorStore();
@@ -52,10 +53,16 @@ export function TapestryEditor() {
                 />
             </div>
 
+            {/* Place Header (if applicable) */}
+            {activeEntry.category === 'place' && (
+                <PlaceHeader panel={activeEntry} />
+            )}
+
             {/* Editor Content - scroll container with explicit height */}
             <div className="flex-1 app-scroll" style={{ overflow: 'auto' }}>
                 {mode === 'edit' ? (
                     <MilkdownEditor
+                        key={activeEntry.id}
                         markdown={activeEntry.content}
                         onMarkdownChange={(content) => updateEntryContent(activeEntry.id, content)}
                     />

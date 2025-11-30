@@ -69,7 +69,7 @@ export function MilkdownEditor({ markdown, onMarkdownChange }: MilkdownEditorPro
     return (
         <div
             ref={rootRef}
-            className="milkdown-editor-container p-8 bg-slate-900"
+            className="milkdown-editor-container p-2 bg-slate-900"
         />
     );
 }

@@ -24,7 +24,9 @@
       "Bash(timeout /t 2 /nobreak)",
       "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D4.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD6.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")",
       "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D8.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD10.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")",
-      "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D12.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD20.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")"
+      "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D12.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD20.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")",
+      "Bash(pnpm build)",
+      "Bash(ls \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\components\\layout\"\" | findstr /i \"right \")"
     ],
     "deny": [],
     "ask": []

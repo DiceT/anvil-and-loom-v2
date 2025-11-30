@@ -16,6 +16,7 @@ export interface TapestryRegistry {
 export type EntryCategory =
     | 'world'
     | 'session'
+    | 'place'
     | 'npc'
     | 'lore'
     | 'mechanics'
@@ -37,6 +38,11 @@ export interface PanelFrontmatter {
     title: string;
     category: EntryCategory;
     tags?: string[];
+    // Place-specific fields
+    weaveRef?: string;       // ID of the selected Weave
+    aspects?: string[];      // IDs of selected Aspect packs
+    domains?: string[];      // IDs of selected Domain packs
+    firstLookDone?: boolean; // Whether First Look has been run
 }
 
 export interface PanelDoc {

@@ -232,3 +232,8 @@ body::-webkit-scrollbar-button,
   text-decoration: none;
   font-weight: 500;
 }
+
+/* Override Milkdown ProseMirror padding */
+.milkdown .ProseMirror {
+  padding: 30px 60px;
+}

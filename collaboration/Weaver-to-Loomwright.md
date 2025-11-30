@@ -830,4 +830,108 @@ The tagging system provides powerful organization and filtering capabilities whi
 
 ---
 
-*Last Updated: 2025-11-29 18:50 by Loomwright*
+### [2025-11-29 19:00] - Weaver - ✅
+**Topic:** UI Layout Refactoring Complete - Pane System & Toolbar Improvements
+**Status:** ✅ Complete & Ready for Testing
+**Changes:**
+- **MODIFIED:** `src/components/layout/AppLayout.tsx` (removed creation buttons, added dice tool activation)
+- **MODIFIED:** `src/components/layout/LeftSidebar.tsx` (removed collapse button)
+- **MODIFIED:** `src/components/layout/RightSidebar.tsx` (removed collapse button and dice icon)
+- **MODIFIED:** `src/components/tapestry/TapestryTree.tsx` (positioned folder/panel buttons together, made them functional)
+- **UPDATED:** `CHANGELOG.md` (documented all UI refactoring changes)
+
+**Action Needed:** Test the layout and toolbar functionality
+
+**Notes:**
+Completed comprehensive UI layout refactoring that improves navigation and toolbar organization:
+
+**Layout Changes:**
+
+1. **Pane System Cleanup:**
+   - Removed collapse buttons from vertical sidebars (LeftSidebar, RightSidebar)
+   - All collapse functionality now in top toolbar (◀/▶ buttons in corners)
+   - Cleaner sidebar layout focused only on essential tools
+   - Settings button remains in LeftSidebar bottom section
+
+2. **Toolbar Reorganization:**
+   - Removed FolderPlus and Plus icons from top toolbar (were misplaced)
+   - Left pane mode switchers (Tapestry/Tags/Bookmarks) stay in top toolbar left section
+   - Right pane mode switchers stay in top toolbar right section
+   - Collapse buttons positioned in top-left (◀) and top-right (▶) of toolbar
+
+3. **Tapestry Tree Toolbar:**
+   - FolderTree (New Folder) and Plus (New Panel) buttons moved to tree header toolbar
+   - Both buttons positioned together on left side with `-space-x-1` (tightly grouped)
+   - FolderTree button now functional: creates new folder
+   - Plus button now functional: creates new panel
+   - Folder icon creates new folder dialog
+   - Plus icon creates new panel dialog with category selection
+
+4. **Dice Tray Fix:**
+   - Fixed Dices icon in top toolbar to properly activate dice tool
+   - When Dices icon clicked: sets rightPaneMode to 'dice' AND setActiveTool('dice')
+   - This ensures ToolPanel displays DiceTool component (was returning null before)
+   - Dice tray now appears in right pane when icon clicked
+
+**Technical Details:**
+
+**TapestryTree Toolbar:**
+```typescript
+<div className="flex items-center gap-0 -space-x-1">
+  <button onClick={() => handleNewFolder(tree?.path || '')}>
+    <FolderTree className="w-4 h-4" />
+  </button>
+  <button onClick={() => handleNewEntry(tree?.path || '')}>
+    <Plus className="w-4 h-4" />
+  </button>
+</div>
+```
+
+**Dice Tool Activation:**
+```typescript
+onClick={() => {
+  setRightPaneMode(mode);
+  if (mode === 'dice') {
+    useToolStore.getState().setActiveTool('dice');
+  }
+  if (isRightPaneCollapsed) {
+    usePaneStore.setState({ isRightPaneCollapsed: false });
+  }
+}}
+```
+
+**Design Rationale:**
+
+- **Sidebar Simplification:** Removing redundant collapse buttons reduces visual clutter
+- **Single Collapse Point:** All collapse controls in one place (top toolbar) for consistency
+- **Toolbar Focus:** Top toolbar handles all view switching and pane management
+- **Tree Integration:** Creation tools live in context where they're used (tree header)
+- **Tool State Management:** Dice tray fix ensures rightPaneMode and activeTool stay synchronized
+
+**Testing Checklist:**
+
+- [ ] Left pane collapses/expands with top-left ◀ button
+- [ ] Right pane collapses/expands with top-right ▶ button
+- [ ] FolderTree button in tree header opens "Create Folder" dialog
+- [ ] Plus button in tree header opens "Create Panel" dialog with category
+- [ ] Dices icon in top toolbar opens dice tray in right pane
+- [ ] Right pane auto-expands when dice icon clicked (if collapsed)
+- [ ] All other toolbar buttons work as before
+- [ ] Settings button accessible in left sidebar bottom
+
+**What's Still Needed:**
+
+- Vertical sidebars now just have: Plus (LeftSidebar top) and Settings (LeftSidebar bottom)
+- The Plus buttons in sidebars are still placeholders (noted in comments)
+- These could be connected to additional features in future phases
+
+**No Breaking Changes:**
+
+- All existing functionality preserved
+- Clean, organized toolbars
+- Improved user mental model (creation tools near where they're used)
+- Consistent collapse controls
+
+---
+
+*Last Updated: 2025-11-29 19:00 by Weaver*

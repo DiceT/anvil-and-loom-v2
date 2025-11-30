@@ -36,7 +36,7 @@ _Source tags used below:_
 | Priority | Feature                                   | Source(s)                        | Tags                                               | Notes |
 |---------:|-------------------------------------------|----------------------------------|----------------------------------------------------|-------|
 | P0       | **Markdown-based editor**                 | Obsidian                         | #obsidian                                          | Core text editing for everything. |
-| P0       | **Internal Stitches (links) between entries**          | Obsidian, LK, WA, Kanka          | #obsidian #legendkeeper #worldanvil #kanka         | `[[wikilinks]]` style linking. |
+| P0       | **Internal Stitches (links) between Panels**          | Obsidian, LK, WA, Kanka          | #obsidian #legendkeeper #worldanvil #kanka         | `[[wikilinks]]` style linking. |
 | P0       | **Backstitches panel**                         | Obsidian                         | #obsidian                                          | See where an entry is referenced. |
 | P1       | Block/section embeds (transclusion)       | Obsidian                         | #obsidian                                          | Reuse sections across entries. |
 | P1       | Templated Panel creation                  | Obsidian, LK, WA, Kanka          | #obsidian #legendkeeper #worldanvil #kanka         | Templates per type (NPC, place, etc.). |

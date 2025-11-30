@@ -30,17 +30,18 @@ export function CenterLane() {
   };
 
   return (
-    <div className="bg-slate-900 h-full flex flex-col">
-      {/* Tab Bar */}
-      {tabs.length > 0 && (
-        <div className="flex items-center gap-1 bg-slate-800 border-b border-slate-700 px-2 overflow-x-auto">
+    <div className="bg-slate-950 h-full flex flex-col">
+      {/* Tab Bar - Only show if multiple tabs */}
+      {tabs.length > 1 && (
+        <div className="flex items-center gap-0 bg-slate-950 border-b border-slate-800 px-2 overflow-x-auto">
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`flex items-center gap-2 px-3 py-2 border-r border-slate-700 cursor-pointer transition-colors ${activeTabId === tab.id
-                ? 'bg-slate-900 text-slate-200'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-750'
-                }`}
+              className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors border-b-2 ${
+                activeTabId === tab.id
+                  ? 'border-b-purple-500 text-slate-200'
+                  : 'border-b-transparent text-slate-400 hover:text-slate-200'
+              }`}
               onClick={() => {
                 setActiveTab(tab.id);
                 if (tab.type === 'entry') {
@@ -54,7 +55,7 @@ export function CenterLane() {
                   e.stopPropagation();
                   closeTab(tab.id);
                 }}
-                className="p-0.5 hover:bg-slate-700 rounded transition-colors"
+                className="p-0.5 hover:bg-slate-700 rounded transition-colors ml-1"
               >
                 <X className="w-3 h-3" />
               </button>

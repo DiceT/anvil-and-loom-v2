@@ -7,7 +7,9 @@ import { useTagStore } from '../../stores/useTagStore';
 import { TreeNode } from './TreeNode';
 import { EntryCategory, TapestryNode } from '../../types/tapestry';
 import { MoveNodeDialog } from './MoveNodeDialog';
-import { TagBrowser } from '../tags/TagBrowser';
+
+
+import { Dialog } from '../ui/Dialog';
 
 export function TapestryTree() {
     const { tree, loadTree, isLoading, activeTagFilter, setTagFilter } = useTapestryStore();
@@ -18,7 +20,8 @@ export function TapestryTree() {
     const [showNewEntryDialog, setShowNewEntryDialog] = useState(false);
     const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
     const [showRenameDialog, setShowRenameDialog] = useState(false);
-    const [showMoveDialog, setShowMoveDialog] = useState(false); const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showMoveDialog, setShowMoveDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showChangeBadgeDialog, setShowChangeBadgeDialog] = useState(false);
 
     const [currentParentPath, setCurrentParentPath] = useState('');
@@ -257,16 +260,22 @@ export function TapestryTree() {
     return (
         <div className="h-full flex flex-col bg-slate-900 border-r border-slate-800">
             <div className="flex items-center justify-between p-3 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                    <FolderTree className="w-4 h-4" />
+                <div className="flex items-center gap-0 -space-x-1">
+                    <button
+                        onClick={() => handleNewFolder(tree?.path || '')}
+                        className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-slate-100 transition-colors"
+                        title="New Folder"
+                    >
+                        <FolderTree className="w-4 h-4" />
+                    </button>
+                    <button
+                        onClick={() => handleNewEntry(tree?.path || '')}
+                        className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-slate-100 transition-colors"
+                        title="New Panel"
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
                 </div>
-                <button
-                    onClick={() => handleNewEntry(tree?.path || '')}
-                    className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-slate-100 transition-colors"
-                    title="New Panel"
-                >
-                    <Plus className="w-4 h-4" />
-                </button>
             </div>
 
             {/* Active Filter Bar */}
@@ -418,7 +427,7 @@ export function TapestryTree() {
             )}
 
             {/* Move Dialog */}
-            {showMoveDialog && (
+            {showMoveDialog && tree && (
                 <MoveNodeDialog
                     nodePath={currentPath}
                     nodeName={currentName}
@@ -479,49 +488,4 @@ export function TapestryTree() {
 }
 
 
-// Simple Dialog Component
-interface DialogProps {
-    title: string;
-    children: React.ReactNode;
-    onClose: () => void;
-    onConfirm: () => void;
-    confirmText: string;
-    confirmDisabled?: boolean;
-    confirmDanger?: boolean;
-}
 
-function Dialog({ title, children, onClose, onConfirm, confirmText, confirmDisabled, confirmDanger }: DialogProps) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-            <div className="relative bg-slate-800 rounded-lg shadow-2xl border border-slate-700 w-full max-w-md mx-4">
-                <div className="p-6 border-b border-slate-700">
-                    <h2 className="text-xl font-semibold text-white">{title}</h2>
-                </div>
-                <div className="p-6">
-                    {children}
-                </div>
-                <div className="flex gap-3 p-6 border-t border-slate-700">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        disabled={confirmDisabled}
-                        className={`flex-1 px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${confirmDanger
-                            ? 'bg-red-600 hover:bg-red-500 text-white'
-                            : 'bg-purple-600 hover:bg-purple-500 text-white'
-                            }`}
-                    >
-                        {confirmText}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}

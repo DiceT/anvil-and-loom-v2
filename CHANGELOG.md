@@ -1,6 +1,21 @@
 # Changelog
 
-## 0.2.1 - 2025-11-29
+## Unreleased
+
+### Changed
+- **Layout Refactoring:** Transitioned from docking system (rc-dock) to Obsidian-style pane system
+  - Left and right panes now collapsible with collapse buttons in top toolbar
+  - Resizable panes with drag handles for customizable layout
+  - Vertical sidebars on left and right with focused toolbar sections
+- **Toolbar Reorganization:**
+  - Left pane mode switchers (Tapestry/Tags/Bookmarks) now in top horizontal toolbar
+  - Right pane mode switchers (Dice/Environments/Oracles/Stitchboard/Weave/Results) in top toolbar
+  - Collapse buttons positioned in top-left and top-right of toolbar
+- **Tapestry Tree Toolbar:**
+  - New Folder button (FolderTree icon) now creates folders when clicked
+  - New Panel button (Plus icon) creates panels when clicked
+  - Both icons positioned together in tree header toolbar
+- **Dice Tray Access:** Fixed Dice icon in top toolbar to properly open dice tray in right pane
 
 ### Added
 - Themed confirmation dialogs using global `useDialogStore` (replaced native browser confirm dialogs)

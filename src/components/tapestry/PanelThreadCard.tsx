@@ -81,7 +81,7 @@ export function PanelThreadCard({ card, defaultExpanded = false }: PanelThreadCa
 
             {/* Footer - Always Visible */}
             <div className="px-3 py-1.5 border-t border-slate-700">
-                <div className="font-bold text-slate-100 text-xl">
+                <div className="text-slate-100 text-sm whitespace-pre-wrap">
                     {card.summary}
                 </div>
             </div>
