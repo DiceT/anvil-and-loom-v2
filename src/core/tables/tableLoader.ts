@@ -35,15 +35,6 @@ function validateTable(data: unknown): data is RollTable {
 }
 
 /**
- * Validate an Aspect/Domain pack (must have 6 subtables)
- */
-function validateTablePack(data: unknown): boolean {
-  if (!Array.isArray(data)) return false;
-  if (data.length !== 6) return false;
-  return data.every((table) => validateTable(table));
-}
-
-/**
  * Get expected subtable order for Aspects
  */
 function getAspectSubtableOrder(): string[] {
@@ -70,12 +61,26 @@ function processTablePack(
   source: TableSource,
   category: 'aspect' | 'domain'
 ): TablePackMetadata | null {
-  if (!validateTablePack(packData)) {
-    console.error(`Invalid ${category} pack structure`);
+  let tables: RollTable[];
+  let description: string | undefined;
+
+  // Check if it's a ForgeFilePayload (object with tables array)
+  if (packData && typeof packData === 'object' && 'tables' in packData && Array.isArray((packData as any).tables)) {
+    tables = (packData as any).tables as RollTable[];
+    description = (packData as any).description;
+  } else if (Array.isArray(packData)) {
+    // Legacy/Core format: raw array of tables
+    tables = packData as RollTable[];
+  } else {
+    console.error(`Invalid ${category} pack structure: expected array or ForgeFilePayload`);
     return null;
   }
 
-  const tables = packData as RollTable[];
+  // Validate the tables array
+  if (tables.length !== 6 || !tables.every((table) => validateTable(table))) {
+    console.error(`Invalid ${category} pack structure: validation failed`);
+    return null;
+  }
 
   // Get pack name from filename (e.g., "haunted" -> "Haunted")
   const packName = filename.charAt(0).toUpperCase() + filename.slice(1);
@@ -104,7 +109,7 @@ function processTablePack(
     category,
     packId,
     packName,
-    description: firstTable.description,
+    description: description || firstTable.description,
     tables: processedTables,
   };
 }
@@ -115,15 +120,27 @@ function processTablePack(
 function processOracleTable(
   tableData: unknown,
   _filename: string,
-  source: TableSource
+  source: TableSource,
+  subCategory: 'core' | 'more'
 ): OracleTableMetadata | null {
-  // Oracle JSON files contain an array with a single table
-  if (!Array.isArray(tableData) || tableData.length === 0) {
-    console.error('Invalid oracle table structure: expected array');
+  let tableDataArray: any[];
+
+  // Check if it's a ForgeFilePayload (object with tables array)
+  if (tableData && typeof tableData === 'object' && 'tables' in tableData && Array.isArray((tableData as any).tables)) {
+    tableDataArray = (tableData as any).tables;
+  } else if (Array.isArray(tableData)) {
+    tableDataArray = tableData;
+  } else {
+    console.error('Invalid oracle table structure: expected array or ForgeFilePayload');
     return null;
   }
 
-  const table = tableData[0];
+  if (tableDataArray.length === 0) {
+    console.error('Invalid oracle table structure: empty array');
+    return null;
+  }
+
+  const table = tableDataArray[0];
 
   if (!validateTable(table)) {
     console.error('Invalid oracle table data');
@@ -143,6 +160,7 @@ function processOracleTable(
 
   return {
     source,
+    subCategory,
     table: processedTable,
   };
 }
@@ -165,7 +183,9 @@ export function buildTableRegistry(loadedData: {
   };
   oracles: {
     core: Array<{ filename: string; data: unknown }>;
+    coreMore: Array<{ filename: string; data: unknown }>;
     user: Array<{ filename: string; data: unknown }>;
+    userMore: Array<{ filename: string; data: unknown }>;
   };
 }): TableRegistry {
   const registry: TableRegistry = {
@@ -206,10 +226,16 @@ export function buildTableRegistry(loadedData: {
     }
   });
 
-  // Process Oracles (core + user)
-  [...loadedData.oracles.core, ...loadedData.oracles.user].forEach((item, index) => {
-    const source: TableSource = index < loadedData.oracles.core.length ? 'core' : 'user';
-    const oracle = processOracleTable(item.data, item.filename, source);
+  // Process Oracles (core, coreMore, user, userMore)
+  const allOracles = [
+    ...loadedData.oracles.core.map((item) => ({ ...item, source: 'core' as TableSource, subCategory: 'core' as const })),
+    ...loadedData.oracles.coreMore.map((item) => ({ ...item, source: 'core' as TableSource, subCategory: 'more' as const })),
+    ...loadedData.oracles.user.map((item) => ({ ...item, source: 'user' as TableSource, subCategory: 'core' as const })),
+    ...loadedData.oracles.userMore.map((item) => ({ ...item, source: 'user' as TableSource, subCategory: 'more' as const })),
+  ];
+
+  allOracles.forEach((item) => {
+    const oracle = processOracleTable(item.data, item.filename, item.source, item.subCategory);
 
     if (oracle) {
       const oracleId = oracle.table.id.replace('oracle:', '');

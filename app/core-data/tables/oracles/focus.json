@@ -1,71 +1,521 @@
 [
   {
-    "sourcePath": "core-data/tables/oracles/focus.json",
+    "sourcePath": "forge",
+    "category": "Oracle",
     "name": "Focus",
     "tags": [
       "oracle",
       "focus"
     ],
+    "description": "This table generates single-word foci that name what attention, action, or risk centers on. Each result must be exactly one word, usually a noun referring to a person, place, object, or entity (for example: Relic, Outpost, Witness). These results are designed to pair with the Descriptor table to form Descriptor + Focus combinations (for example: Hidden + Passage). Each word should feel concrete enough to immediately bring into a scene and work well with a wide range of Descriptor words.",
     "headers": [
       "d100",
       "Result"
     ],
     "tableData": [
-      { "floor": 1,  "ceiling": 2,  "result": "Altar" },
-      { "floor": 3,  "ceiling": 4,  "result": "Blade" },
-      { "floor": 5,  "ceiling": 6,  "result": "Chains" },
-      { "floor": 7,  "ceiling": 8,  "result": "Door" },
-      { "floor": 9,  "ceiling": 10, "result": "Eyes" },
-      { "floor": 11, "ceiling": 12, "result": "Fire" },
-      { "floor": 13, "ceiling": 14, "result": "Grove" },
-      { "floor": 15, "ceiling": 16, "result": "Hands" },
-      { "floor": 17, "ceiling": 18, "result": "Icon" },
-      { "floor": 19, "ceiling": 20, "result": "Jewel" },
-      { "floor": 21, "ceiling": 22, "result": "Key" },
-      { "floor": 23, "ceiling": 24, "result": "Light" },
-      { "floor": 25, "ceiling": 26, "result": "Mask" },
-      { "floor": 27, "ceiling": 28, "result": "Needle" },
-      { "floor": 29, "ceiling": 30, "result": "Oath" },
-      { "floor": 31, "ceiling": 32, "result": "Path" },
-      { "floor": 33, "ceiling": 34, "result": "Queen" },
-      { "floor": 35, "ceiling": 36, "result": "Roots" },
-      { "floor": 37, "ceiling": 38, "result": "Shadows" },
-      { "floor": 39, "ceiling": 40, "result": "Tower" },
-      { "floor": 41, "ceiling": 42, "result": "Undead" },
-      { "floor": 43, "ceiling": 44, "result": "Veil" },
-      { "floor": 45, "ceiling": 46, "result": "Water" },
-      { "floor": 47, "ceiling": 48, "result": "Wound" },
-      { "floor": 49, "ceiling": 50, "result": "Beast" },
-      { "floor": 51, "ceiling": 52, "result": "Blood" },
-      { "floor": 53, "ceiling": 54, "result": "Bone" },
-      { "floor": 55, "ceiling": 56, "result": "Bridge" },
-      { "floor": 57, "ceiling": 58, "result": "Child" },
-      { "floor": 59, "ceiling": 60, "result": "Crown" },
-      { "floor": 61, "ceiling": 62, "result": "Darkness" },
-      { "floor": 63, "ceiling": 64, "result": "Earth" },
-      { "floor": 65, "ceiling": 66, "result": "Flame" },
-      { "floor": 67, "ceiling": 68, "result": "Ghost" },
-      { "floor": 69, "ceiling": 70, "result": "Heart" },
-      { "floor": 71, "ceiling": 72, "result": "Iron" },
-      { "floor": 73, "ceiling": 74, "result": "Mirror" },
-      { "floor": 75, "ceiling": 76, "result": "Moon" },
-      { "floor": 77, "ceiling": 78, "result": "Name" },
-      { "floor": 79, "ceiling": 80, "result": "Pact" },
-      { "floor": 81, "ceiling": 82, "result": "Priest" },
-      { "floor": 83, "ceiling": 84, "result": "Relic" },
-      { "floor": 85, "ceiling": 86, "result": "Ritual" },
-      { "floor": 87, "ceiling": 88, "result": "Scroll" },
-      { "floor": 89, "ceiling": 90, "result": "Skull" },
-      { "floor": 91, "ceiling": 92, "result": "Sword" },
-      { "floor": 93, "ceiling": 94, "result": "Throne" },
-      { "floor": 95, "ceiling": 96, "result": "Tomb" },
-      { "floor": 97, "ceiling": 98, "result": "Voice" },
-      { "floor": 99, "ceiling": 100, "result": "Witch" }
+      {
+        "floor": 1,
+        "ceiling": 1,
+        "result": "Relic"
+      },
+      {
+        "floor": 2,
+        "ceiling": 2,
+        "result": "Outpost"
+      },
+      {
+        "floor": 3,
+        "ceiling": 3,
+        "result": "Witness"
+      },
+      {
+        "floor": 4,
+        "ceiling": 4,
+        "result": "Passage"
+      },
+      {
+        "floor": 5,
+        "ceiling": 5,
+        "result": "Tomb"
+      },
+      {
+        "floor": 6,
+        "ceiling": 6,
+        "result": "Sword"
+      },
+      {
+        "floor": 7,
+        "ceiling": 7,
+        "result": "King"
+      },
+      {
+        "floor": 8,
+        "ceiling": 8,
+        "result": "Thief"
+      },
+      {
+        "floor": 9,
+        "ceiling": 9,
+        "result": "Ghost"
+      },
+      {
+        "floor": 10,
+        "ceiling": 10,
+        "result": "Dragon"
+      },
+      {
+        "floor": 11,
+        "ceiling": 11,
+        "result": "Village"
+      },
+      {
+        "floor": 12,
+        "ceiling": 12,
+        "result": "Castle"
+      },
+      {
+        "floor": 13,
+        "ceiling": 13,
+        "result": "Forest"
+      },
+      {
+        "floor": 14,
+        "ceiling": 14,
+        "result": "River"
+      },
+      {
+        "floor": 15,
+        "ceiling": 15,
+        "result": "Cave"
+      },
+      {
+        "floor": 16,
+        "ceiling": 16,
+        "result": "Mountain"
+      },
+      {
+        "floor": 17,
+        "ceiling": 17,
+        "result": "Altar"
+      },
+      {
+        "floor": 18,
+        "ceiling": 18,
+        "result": "Book"
+      },
+      {
+        "floor": 19,
+        "ceiling": 19,
+        "result": "Ring"
+      },
+      {
+        "floor": 20,
+        "ceiling": 20,
+        "result": "Amulet"
+      },
+      {
+        "floor": 21,
+        "ceiling": 21,
+        "result": "Beast"
+      },
+      {
+        "floor": 22,
+        "ceiling": 22,
+        "result": "Warrior"
+      },
+      {
+        "floor": 23,
+        "ceiling": 23,
+        "result": "Mage"
+      },
+      {
+        "floor": 24,
+        "ceiling": 24,
+        "result": "Priest"
+      },
+      {
+        "floor": 25,
+        "ceiling": 25,
+        "result": "Corpse"
+      },
+      {
+        "floor": 26,
+        "ceiling": 26,
+        "result": "Blood"
+      },
+      {
+        "floor": 27,
+        "ceiling": 27,
+        "result": "Shadow"
+      },
+      {
+        "floor": 28,
+        "ceiling": 28,
+        "result": "Flame"
+      },
+      {
+        "floor": 29,
+        "ceiling": 29,
+        "result": "Portal"
+      },
+      {
+        "floor": 30,
+        "ceiling": 30,
+        "result": "Tower"
+      },
+      {
+        "floor": 31,
+        "ceiling": 31,
+        "result": "Dungeon"
+      },
+      {
+        "floor": 32,
+        "ceiling": 32,
+        "result": "Crypt"
+      },
+      {
+        "floor": 33,
+        "ceiling": 33,
+        "result": "Ruins"
+      },
+      {
+        "floor": 34,
+        "ceiling": 34,
+        "result": "Bridge"
+      },
+      {
+        "floor": 35,
+        "ceiling": 35,
+        "result": "Gate"
+      },
+      {
+        "floor": 36,
+        "ceiling": 36,
+        "result": "Wall"
+      },
+      {
+        "floor": 37,
+        "ceiling": 37,
+        "result": "Key"
+      },
+      {
+        "floor": 38,
+        "ceiling": 38,
+        "result": "Lock"
+      },
+      {
+        "floor": 39,
+        "ceiling": 39,
+        "result": "Treasure"
+      },
+      {
+        "floor": 40,
+        "ceiling": 40,
+        "result": "Ally"
+      },
+      {
+        "floor": 41,
+        "ceiling": 41,
+        "result": "Enemy"
+      },
+      {
+        "floor": 42,
+        "ceiling": 42,
+        "result": "Secret"
+      },
+      {
+        "floor": 43,
+        "ceiling": 43,
+        "result": "Curse"
+      },
+      {
+        "floor": 44,
+        "ceiling": 44,
+        "result": "Blessing"
+      },
+      {
+        "floor": 45,
+        "ceiling": 45,
+        "result": "Storm"
+      },
+      {
+        "floor": 46,
+        "ceiling": 46,
+        "result": "Fog"
+      },
+      {
+        "floor": 47,
+        "ceiling": 47,
+        "result": "Wind"
+      },
+      {
+        "floor": 48,
+        "ceiling": 48,
+        "result": "Rain"
+      },
+      {
+        "floor": 49,
+        "ceiling": 49,
+        "result": "Snow"
+      },
+      {
+        "floor": 50,
+        "ceiling": 50,
+        "result": "Fire"
+      },
+      {
+        "floor": 51,
+        "ceiling": 51,
+        "result": "Water"
+      },
+      {
+        "floor": 52,
+        "ceiling": 52,
+        "result": "Earth"
+      },
+      {
+        "floor": 53,
+        "ceiling": 53,
+        "result": "Air"
+      },
+      {
+        "floor": 54,
+        "ceiling": 54,
+        "result": "Spirit"
+      },
+      {
+        "floor": 55,
+        "ceiling": 55,
+        "result": "Demon"
+      },
+      {
+        "floor": 56,
+        "ceiling": 56,
+        "result": "Angel"
+      },
+      {
+        "floor": 57,
+        "ceiling": 57,
+        "result": "God"
+      },
+      {
+        "floor": 58,
+        "ceiling": 58,
+        "result": "Idol"
+      },
+      {
+        "floor": 59,
+        "ceiling": 59,
+        "result": "Statue"
+      },
+      {
+        "floor": 60,
+        "ceiling": 60,
+        "result": "Painting"
+      },
+      {
+        "floor": 61,
+        "ceiling": 61,
+        "result": "Map"
+      },
+      {
+        "floor": 62,
+        "ceiling": 62,
+        "result": "Letter"
+      },
+      {
+        "floor": 63,
+        "ceiling": 63,
+        "result": "Diary"
+      },
+      {
+        "floor": 64,
+        "ceiling": 64,
+        "result": "Weapon"
+      },
+      {
+        "floor": 65,
+        "ceiling": 65,
+        "result": "Armor"
+      },
+      {
+        "floor": 66,
+        "ceiling": 66,
+        "result": "Shield"
+      },
+      {
+        "floor": 67,
+        "ceiling": 67,
+        "result": "Helm"
+      },
+      {
+        "floor": 68,
+        "ceiling": 68,
+        "result": "Boots"
+      },
+      {
+        "floor": 69,
+        "ceiling": 69,
+        "result": "Cloak"
+      },
+      {
+        "floor": 70,
+        "ceiling": 70,
+        "result": "Potion"
+      },
+      {
+        "floor": 71,
+        "ceiling": 71,
+        "result": "Herb"
+      },
+      {
+        "floor": 72,
+        "ceiling": 72,
+        "result": "Crystal"
+      },
+      {
+        "floor": 73,
+        "ceiling": 73,
+        "result": "Gem"
+      },
+      {
+        "floor": 74,
+        "ceiling": 74,
+        "result": "Coin"
+      },
+      {
+        "floor": 75,
+        "ceiling": 75,
+        "result": "Chest"
+      },
+      {
+        "floor": 76,
+        "ceiling": 76,
+        "result": "Door"
+      },
+      {
+        "floor": 77,
+        "ceiling": 77,
+        "result": "Window"
+      },
+      {
+        "floor": 78,
+        "ceiling": 78,
+        "result": "Stair"
+      },
+      {
+        "floor": 79,
+        "ceiling": 79,
+        "result": "Path"
+      },
+      {
+        "floor": 80,
+        "ceiling": 80,
+        "result": "Road"
+      },
+      {
+        "floor": 81,
+        "ceiling": 81,
+        "result": "Trail"
+      },
+      {
+        "floor": 82,
+        "ceiling": 82,
+        "result": "Camp"
+      },
+      {
+        "floor": 83,
+        "ceiling": 83,
+        "result": "Inn"
+      },
+      {
+        "floor": 84,
+        "ceiling": 84,
+        "result": "Market"
+      },
+      {
+        "floor": 85,
+        "ceiling": 85,
+        "result": "Ship"
+      },
+      {
+        "floor": 86,
+        "ceiling": 86,
+        "result": "Boat"
+      },
+      {
+        "floor": 87,
+        "ceiling": 87,
+        "result": "Horse"
+      },
+      {
+        "floor": 88,
+        "ceiling": 88,
+        "result": "Cart"
+      },
+      {
+        "floor": 89,
+        "ceiling": 89,
+        "result": "Wagon"
+      },
+      {
+        "floor": 90,
+        "ceiling": 90,
+        "result": "Tower"
+      },
+      {
+        "floor": 91,
+        "ceiling": 91,
+        "result": "Forge"
+      },
+      {
+        "floor": 92,
+        "ceiling": 92,
+        "result": "Mill"
+      },
+      {
+        "floor": 93,
+        "ceiling": 93,
+        "result": "Well"
+      },
+      {
+        "floor": 94,
+        "ceiling": 94,
+        "result": "Fountain"
+      },
+      {
+        "floor": 95,
+        "ceiling": 95,
+        "result": "Garden"
+      },
+      {
+        "floor": 96,
+        "ceiling": 96,
+        "result": "Throne"
+      },
+      {
+        "floor": 97,
+        "ceiling": 97,
+        "result": "Crown"
+      },
+      {
+        "floor": 98,
+        "ceiling": 98,
+        "result": "Scepter"
+      },
+      {
+        "floor": 99,
+        "ceiling": 99,
+        "result": "Orb"
+      },
+      {
+        "floor": 100,
+        "ceiling": 100,
+        "result": "Mirror"
+      }
     ],
     "maxRoll": 100,
-    "category": "Oracle",
     "oracle_type": "Focus",
-    "description": "The Focus oracle provides concrete nouns that anchor situations, representing key subjects, objects, or entities.",
-    "summary": "Focus oracle"
+    "summary": "Focus"
   }
 ]

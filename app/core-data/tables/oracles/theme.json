@@ -1,71 +1,521 @@
 [
   {
     "sourcePath": "core-data/tables/oracles/theme.json",
+    "category": "Oracle",
     "name": "Theme",
     "tags": [
       "oracle",
       "theme"
     ],
+    "description": "This table generates single-word themes that capture the core idea, conflict, or mood in play. Each result must be exactly one word, usually a noun that suggests an abstract concept or driving force (for example: Betrayal, Hunger, Resentment). These results are designed to pair with the Action table to form Action + Theme combinations (for example: Expose + Corruption). Each word should be broadly reusable on its own and also feel strong when combined with many different Action words.",
     "headers": [
       "d100",
       "Result"
     ],
     "tableData": [
-      { "floor": 1,  "ceiling": 2,  "result": "Duty" },
-      { "floor": 3,  "ceiling": 4,  "result": "Rebellion" },
-      { "floor": 5,  "ceiling": 6,  "result": "Corruption" },
-      { "floor": 7,  "ceiling": 8,  "result": "Redemption" },
-      { "floor": 9,  "ceiling": 10, "result": "Survival" },
-      { "floor": 11, "ceiling": 12, "result": "Greed" },
-      { "floor": 13, "ceiling": 14, "result": "Faith" },
-      { "floor": 15, "ceiling": 16, "result": "Despair" },
-      { "floor": 17, "ceiling": 18, "result": "Hope" },
-      { "floor": 19, "ceiling": 20, "result": "Sacrifice" },
-      { "floor": 21, "ceiling": 22, "result": "Ambition" },
-      { "floor": 23, "ceiling": 24, "result": "Love" },
-      { "floor": 25, "ceiling": 26, "result": "Betrayal" },
-      { "floor": 27, "ceiling": 28, "result": "Honor" },
-      { "floor": 29, "ceiling": 30, "result": "Secrets" },
-      { "floor": 31, "ceiling": 32, "result": "Knowledge" },
-      { "floor": 33, "ceiling": 34, "result": "Madness" },
-      { "floor": 35, "ceiling": 36, "result": "Nature" },
-      { "floor": 37, "ceiling": 38, "result": "Decay" },
-      { "floor": 39, "ceiling": 40, "result": "Order" },
-      { "floor": 41, "ceiling": 42, "result": "Chaos" },
-      { "floor": 43, "ceiling": 44, "result": "Justice" },
-      { "floor": 45, "ceiling": 46, "result": "Injustice" },
-      { "floor": 47, "ceiling": 48, "result": "War" },
-      { "floor": 49, "ceiling": 50, "result": "Peace" },
-      { "floor": 51, "ceiling": 52, "result": "Family" },
-      { "floor": 53, "ceiling": 54, "result": "Debt" },
-      { "floor": 55, "ceiling": 56, "result": "Freedom" },
-      { "floor": 57, "ceiling": 58, "result": "Oppression" },
-      { "floor": 59, "ceiling": 60, "result": "Magic" },
-      { "floor": 61, "ceiling": 62, "result": "Technology" },
-      { "floor": 63, "ceiling": 64, "result": "Religion" },
-      { "floor": 65, "ceiling": 66, "result": "Tradition" },
-      { "floor": 67, "ceiling": 68, "result": "Change" },
-      { "floor": 69, "ceiling": 70, "result": "Legacy" },
-      { "floor": 71, "ceiling": 72, "result": "Time" },
-      { "floor": 73, "ceiling": 74, "result": "Death" },
-      { "floor": 75, "ceiling": 76, "result": "Life" },
-      { "floor": 77, "ceiling": 78, "result": "Dreams" },
-      { "floor": 79, "ceiling": 80, "result": "Nightmares" },
-      { "floor": 81, "ceiling": 82, "result": "Fate" },
-      { "floor": 83, "ceiling": 84, "result": "Chance" },
-      { "floor": 85, "ceiling": 86, "result": "Wealth" },
-      { "floor": 87, "ceiling": 88, "result": "Poverty" },
-      { "floor": 89, "ceiling": 90, "result": "Glory" },
-      { "floor": 91, "ceiling": 92, "result": "Shame" },
-      { "floor": 93, "ceiling": 94, "result": "Duty to Past" },
-      { "floor": 95, "ceiling": 96, "result": "Duty to Future" },
-      { "floor": 97, "ceiling": 98, "result": "Isolation" },
-      { "floor": 99, "ceiling": 100, "result": "Community" }
+      {
+        "floor": 1,
+        "ceiling": 1,
+        "result": "Betrayal"
+      },
+      {
+        "floor": 2,
+        "ceiling": 2,
+        "result": "Hunger"
+      },
+      {
+        "floor": 3,
+        "ceiling": 3,
+        "result": "Resentment"
+      },
+      {
+        "floor": 4,
+        "ceiling": 4,
+        "result": "Corruption"
+      },
+      {
+        "floor": 5,
+        "ceiling": 5,
+        "result": "Revenge"
+      },
+      {
+        "floor": 6,
+        "ceiling": 6,
+        "result": "Despair"
+      },
+      {
+        "floor": 7,
+        "ceiling": 7,
+        "result": "Madness"
+      },
+      {
+        "floor": 8,
+        "ceiling": 8,
+        "result": "Power"
+      },
+      {
+        "floor": 9,
+        "ceiling": 9,
+        "result": "Fear"
+      },
+      {
+        "floor": 10,
+        "ceiling": 10,
+        "result": "Ambition"
+      },
+      {
+        "floor": 11,
+        "ceiling": 11,
+        "result": "Decay"
+      },
+      {
+        "floor": 12,
+        "ceiling": 12,
+        "result": "Secrets"
+      },
+      {
+        "floor": 13,
+        "ceiling": 13,
+        "result": "Loss"
+      },
+      {
+        "floor": 14,
+        "ceiling": 14,
+        "result": "Rage"
+      },
+      {
+        "floor": 15,
+        "ceiling": 15,
+        "result": "Isolation"
+      },
+      {
+        "floor": 16,
+        "ceiling": 16,
+        "result": "Sacrifice"
+      },
+      {
+        "floor": 17,
+        "ceiling": 17,
+        "result": "Deception"
+      },
+      {
+        "floor": 18,
+        "ceiling": 18,
+        "result": "Obsession"
+      },
+      {
+        "floor": 19,
+        "ceiling": 19,
+        "result": "Curse"
+      },
+      {
+        "floor": 20,
+        "ceiling": 20,
+        "result": "Redemption"
+      },
+      {
+        "floor": 21,
+        "ceiling": 21,
+        "result": "Fate"
+      },
+      {
+        "floor": 22,
+        "ceiling": 22,
+        "result": "Shadow"
+      },
+      {
+        "floor": 23,
+        "ceiling": 23,
+        "result": "Blood"
+      },
+      {
+        "floor": 24,
+        "ceiling": 24,
+        "result": "Honor"
+      },
+      {
+        "floor": 25,
+        "ceiling": 25,
+        "result": "Greed"
+      },
+      {
+        "floor": 26,
+        "ceiling": 26,
+        "result": "Loyalty"
+      },
+      {
+        "floor": 27,
+        "ceiling": 27,
+        "result": "Torment"
+      },
+      {
+        "floor": 28,
+        "ceiling": 28,
+        "result": "Illusion"
+      },
+      {
+        "floor": 29,
+        "ceiling": 29,
+        "result": "Vengeance"
+      },
+      {
+        "floor": 30,
+        "ceiling": 30,
+        "result": "Plague"
+      },
+      {
+        "floor": 31,
+        "ceiling": 31,
+        "result": "Exile"
+      },
+      {
+        "floor": 32,
+        "ceiling": 32,
+        "result": "Forbidden"
+      },
+      {
+        "floor": 33,
+        "ceiling": 33,
+        "result": "Ritual"
+      },
+      {
+        "floor": 34,
+        "ceiling": 34,
+        "result": "Whispers"
+      },
+      {
+        "floor": 35,
+        "ceiling": 35,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 36,
+        "ceiling": 36,
+        "result": "Ruin"
+      },
+      {
+        "floor": 37,
+        "ceiling": 37,
+        "result": "Temptation"
+      },
+      {
+        "floor": 38,
+        "ceiling": 38,
+        "result": "Haunting"
+      },
+      {
+        "floor": 39,
+        "ceiling": 39,
+        "result": "Dominance"
+      },
+      {
+        "floor": 40,
+        "ceiling": 40,
+        "result": "Sorrow"
+      },
+      {
+        "floor": 41,
+        "ceiling": 41,
+        "result": "Chaos"
+      },
+      {
+        "floor": 42,
+        "ceiling": 42,
+        "result": "Prophecy"
+      },
+      {
+        "floor": 43,
+        "ceiling": 43,
+        "result": "Betrayal"
+      },
+      {
+        "floor": 44,
+        "ceiling": 44,
+        "result": "Envy"
+      },
+      {
+        "floor": 45,
+        "ceiling": 45,
+        "result": "Pact"
+      },
+      {
+        "floor": 46,
+        "ceiling": 46,
+        "result": "Desolation"
+      },
+      {
+        "floor": 47,
+        "ceiling": 47,
+        "result": "Intrigue"
+      },
+      {
+        "floor": 48,
+        "ceiling": 48,
+        "result": "Nightmare"
+      },
+      {
+        "floor": 49,
+        "ceiling": 49,
+        "result": "Ascension"
+      },
+      {
+        "floor": 50,
+        "ceiling": 50,
+        "result": "Burden"
+      },
+      {
+        "floor": 51,
+        "ceiling": 51,
+        "result": "Fury"
+      },
+      {
+        "floor": 52,
+        "ceiling": 52,
+        "result": "Mystery"
+      },
+      {
+        "floor": 53,
+        "ceiling": 53,
+        "result": "Doom"
+      },
+      {
+        "floor": 54,
+        "ceiling": 54,
+        "result": "Legacy"
+      },
+      {
+        "floor": 55,
+        "ceiling": 55,
+        "result": "Treachery"
+      },
+      {
+        "floor": 56,
+        "ceiling": 56,
+        "result": "Wrath"
+      },
+      {
+        "floor": 57,
+        "ceiling": 57,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 58,
+        "ceiling": 58,
+        "result": "Heresy"
+      },
+      {
+        "floor": 59,
+        "ceiling": 59,
+        "result": "Desire"
+      },
+      {
+        "floor": 60,
+        "ceiling": 60,
+        "result": "Covenant"
+      },
+      {
+        "floor": 61,
+        "ceiling": 61,
+        "result": "Abyss"
+      },
+      {
+        "floor": 62,
+        "ceiling": 62,
+        "result": "Strife"
+      },
+      {
+        "floor": 63,
+        "ceiling": 63,
+        "result": "Melancholy"
+      },
+      {
+        "floor": 64,
+        "ceiling": 64,
+        "result": "Conquest"
+      },
+      {
+        "floor": 65,
+        "ceiling": 65,
+        "result": "Affliction"
+      },
+      {
+        "floor": 66,
+        "ceiling": 66,
+        "result": "Revelation"
+      },
+      {
+        "floor": 67,
+        "ceiling": 67,
+        "result": "Tyranny"
+      },
+      {
+        "floor": 68,
+        "ceiling": 68,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 69,
+        "ceiling": 69,
+        "result": "Malice"
+      },
+      {
+        "floor": 70,
+        "ceiling": 70,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 71,
+        "ceiling": 71,
+        "result": "Suffering"
+      },
+      {
+        "floor": 72,
+        "ceiling": 72,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 73,
+        "ceiling": 73,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 74,
+        "ceiling": 74,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 75,
+        "ceiling": 75,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 76,
+        "ceiling": 76,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 77,
+        "ceiling": 77,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 78,
+        "ceiling": 78,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 79,
+        "ceiling": 79,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 80,
+        "ceiling": 80,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 81,
+        "ceiling": 81,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 82,
+        "ceiling": 82,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 83,
+        "ceiling": 83,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 84,
+        "ceiling": 84,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 85,
+        "ceiling": 85,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 86,
+        "ceiling": 86,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 87,
+        "ceiling": 87,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 88,
+        "ceiling": 88,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 89,
+        "ceiling": 89,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 90,
+        "ceiling": 90,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 91,
+        "ceiling": 91,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 92,
+        "ceiling": 92,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 93,
+        "ceiling": 93,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 94,
+        "ceiling": 94,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 95,
+        "ceiling": 95,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 96,
+        "ceiling": 96,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 97,
+        "ceiling": 97,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 98,
+        "ceiling": 98,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 99,
+        "ceiling": 99,
+        "result": "Eclipse"
+      },
+      {
+        "floor": 100,
+        "ceiling": 100,
+        "result": "Eclipse"
+      }
     ],
     "maxRoll": 100,
-    "category": "Oracle",
     "oracle_type": "Theme",
-    "description": "The Theme oracle provides broad narrative currents or motivations that color situations and goals.",
-    "summary": "Theme oracle"
+    "summary": "Theme"
   }
 ]

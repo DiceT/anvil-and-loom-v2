@@ -1,0 +1,522 @@
+[
+  {
+    "sourcePath": "forge",
+    "category": "Oracle",
+    "name": "Exploration Details",
+    "tags": [
+      "oracle",
+      "exploration-details",
+      "exploration"
+    ],
+    "description": "This table generates overland Exploration Details: environmental moments and features encountered along wilderness paths, roads, and frontier routes. Each result is a single sentence between 7 and 16 words that describes only what physically exists or occurs in the scene right now—landscape features, weather, traces of passage, brief events, sightings, or encounters. Do not state or imply outcomes, benefits, risks, safety, or usefulness in any way: avoid words and ideas like “could”, “might”, “offering”, “ready for use”, “edible”, “medicinal”, “fertile”, “drinkable”, “shelter”, “safe”, “dangerous”, “helpful”, or anything that evaluates how good or bad something is for travelers. Describe the world as if seen through a neutral lens that does not care about survival or advantage; any sense of opportunity, threat, or value must come entirely from later interpretation at the table.",
+    "headers": [
+      "d100",
+      "Result"
+    ],
+    "tableData": [
+      {
+        "floor": 1,
+        "ceiling": 1,
+        "result": "A clear stream winds through the meadow, its waters sparkling under the midday sun."
+      },
+      {
+        "floor": 2,
+        "ceiling": 2,
+        "result": "Ancient ruins peek from overgrown vines along the forgotten trail."
+      },
+      {
+        "floor": 3,
+        "ceiling": 3,
+        "result": "Birds flock to berry bushes heavy with ripe fruit beside the path."
+      },
+      {
+        "floor": 4,
+        "ceiling": 4,
+        "result": "A sturdy bridge spans a rushing river, built from weathered stone."
+      },
+      {
+        "floor": 5,
+        "ceiling": 5,
+        "result": "Sunlight filters through a canopy of tall oaks lining the road."
+      },
+      {
+        "floor": 6,
+        "ceiling": 6,
+        "result": "Wild horses graze in an open field near the frontier route."
+      },
+      {
+        "floor": 7,
+        "ceiling": 7,
+        "result": "A cluster of mushrooms sprouts from decaying logs in the forest."
+      },
+      {
+        "floor": 8,
+        "ceiling": 8,
+        "result": "Footprints of large animals mark the muddy ground ahead."
+      },
+      {
+        "floor": 9,
+        "ceiling": 9,
+        "result": "Smoke rises from a distant chimney in a secluded valley."
+      },
+      {
+        "floor": 10,
+        "ceiling": 10,
+        "result": "Ripe apples hang from branches in an abandoned orchard."
+      },
+      {
+        "floor": 11,
+        "ceiling": 11,
+        "result": "A narrow cave entrance yawns in the rocky hillside."
+      },
+      {
+        "floor": 12,
+        "ceiling": 12,
+        "result": "Bees buzz around hives nestled in hollow trees."
+      },
+      {
+        "floor": 13,
+        "ceiling": 13,
+        "result": "A fallen tree blocks the path, its trunk covered in moss."
+      },
+      {
+        "floor": 14,
+        "ceiling": 14,
+        "result": "Deer bound across the trail into dense underbrush."
+      },
+      {
+        "floor": 15,
+        "ceiling": 15,
+        "result": "Wildflowers bloom vibrantly along the sunlit meadow edge."
+      },
+      {
+        "floor": 16,
+        "ceiling": 16,
+        "result": "A small pond reflects the sky, surrounded by reeds."
+      },
+      {
+        "floor": 17,
+        "ceiling": 17,
+        "result": "Rabbits dart from burrows scattered across the grassy knoll."
+      },
+      {
+        "floor": 18,
+        "ceiling": 18,
+        "result": "Tall grass sways in the wind over rolling hills."
+      },
+      {
+        "floor": 19,
+        "ceiling": 19,
+        "result": "A flock of geese flies overhead toward a nearby lake."
+      },
+      {
+        "floor": 20,
+        "ceiling": 20,
+        "result": "Berry vines entwine old fence posts by the roadside."
+      },
+      {
+        "floor": 21,
+        "ceiling": 21,
+        "result": "A gentle breeze carries the scent of pine from the woods."
+      },
+      {
+        "floor": 22,
+        "ceiling": 22,
+        "result": "Foxes play near their den in the shaded glen."
+      },
+      {
+        "floor": 23,
+        "ceiling": 23,
+        "result": "A wide river bends lazily through fertile plains."
+      },
+      {
+        "floor": 24,
+        "ceiling": 24,
+        "result": "Clusters of nuts litter the ground under chestnut trees."
+      },
+      {
+        "floor": 25,
+        "ceiling": 25,
+        "result": "Butterflies flutter around wild herbs growing profusely."
+      },
+      {
+        "floor": 26,
+        "ceiling": 26,
+        "result": "A wooden signpost points to multiple diverging paths."
+      },
+      {
+        "floor": 27,
+        "ceiling": 27,
+        "result": "Squirrels chatter while gathering acorns in the grove."
+      },
+      {
+        "floor": 28,
+        "ceiling": 28,
+        "result": "A shallow ford crosses the stream with smooth stones."
+      },
+      {
+        "floor": 29,
+        "ceiling": 29,
+        "result": "Herds of sheep wander the open pastures freely."
+      },
+      {
+        "floor": 30,
+        "ceiling": 30,
+        "result": "Fragrant herbs grow thickly in the sunny clearing."
+      },
+      {
+        "floor": 31,
+        "ceiling": 31,
+        "result": "A lone oak stands tall in the middle of the field."
+      },
+      {
+        "floor": 32,
+        "ceiling": 32,
+        "result": "Fish jump in the clear waters of the brook."
+      },
+      {
+        "floor": 33,
+        "ceiling": 33,
+        "result": "Bird nests fill the branches of elderberry bushes."
+      },
+      {
+        "floor": 34,
+        "ceiling": 34,
+        "result": "A dirt road curves gently through golden wheat fields."
+      },
+      {
+        "floor": 35,
+        "ceiling": 35,
+        "result": "Moss-covered boulders line the edge of the cliff."
+      },
+      {
+        "floor": 36,
+        "ceiling": 36,
+        "result": "Wild grapes climb over ancient stone walls."
+      },
+      {
+        "floor": 37,
+        "ceiling": 37,
+        "result": "A rainbow arches over mist from a nearby waterfall."
+      },
+      {
+        "floor": 38,
+        "ceiling": 38,
+        "result": "Hares nibble on clover in the dewy morning grass."
+      },
+      {
+        "floor": 39,
+        "ceiling": 39,
+        "result": "A grove of birch trees whispers in the wind."
+      },
+      {
+        "floor": 40,
+        "ceiling": 40,
+        "result": "Colorful leaves carpet the forest floor in autumn."
+      },
+      {
+        "floor": 41,
+        "ceiling": 41,
+        "result": "A pack of wolves howls from the distant ridge."
+      },
+      {
+        "floor": 42,
+        "ceiling": 42,
+        "result": "Sunbeams pierce the fog in the early dawn."
+      },
+      {
+        "floor": 43,
+        "ceiling": 43,
+        "result": "Edible roots push through the soft earth patches."
+      },
+      {
+        "floor": 44,
+        "ceiling": 44,
+        "result": "A caravan of travelers camps by the roadside."
+      },
+      {
+        "floor": 45,
+        "ceiling": 45,
+        "result": "Beavers build dams in the slow-moving creek."
+      },
+      {
+        "floor": 46,
+        "ceiling": 46,
+        "result": "Wild boars root around in the undergrowth nearby."
+      },
+      {
+        "floor": 47,
+        "ceiling": 47,
+        "result": "A field of sunflowers turns toward the light."
+      },
+      {
+        "floor": 48,
+        "ceiling": 48,
+        "result": "Owls hoot from perches in the ancient elms."
+      },
+      {
+        "floor": 49,
+        "ceiling": 49,
+        "result": "A crystal-clear spring bubbles up from rocky ground."
+      },
+      {
+        "floor": 50,
+        "ceiling": 50,
+        "result": "Hawks circle above a meadow teeming with rodents."
+      },
+      {
+        "floor": 51,
+        "ceiling": 51,
+        "result": "Lavender fields stretch out under the blue sky."
+      },
+      {
+        "floor": 52,
+        "ceiling": 52,
+        "result": "A forgotten well stands amid tall grasses."
+      },
+      {
+        "floor": 53,
+        "ceiling": 53,
+        "result": "Ducks paddle in a serene pond fringed with cattails."
+      },
+      {
+        "floor": 54,
+        "ceiling": 54,
+        "result": "Acorns drop steadily from overhanging oak branches."
+      },
+      {
+        "floor": 55,
+        "ceiling": 55,
+        "result": "A narrow path leads to a hidden glade."
+      },
+      {
+        "floor": 56,
+        "ceiling": 56,
+        "result": "Frogs croak from lily pads in the marsh."
+      },
+      {
+        "floor": 57,
+        "ceiling": 57,
+        "result": "Wild strawberries dot the hillside with red spots."
+      },
+      {
+        "floor": 58,
+        "ceiling": 58,
+        "result": "A sturdy log serves as a natural bridge over a ditch."
+      },
+      {
+        "floor": 59,
+        "ceiling": 59,
+        "result": "Beetles scuttle across fallen leaves on the trail."
+      },
+      {
+        "floor": 60,
+        "ceiling": 60,
+        "result": "A vast prairie extends endlessly under vast skies."
+      },
+      {
+        "floor": 61,
+        "ceiling": 61,
+        "result": "Pheasants burst from cover in the brushy field."
+      },
+      {
+        "floor": 62,
+        "ceiling": 62,
+        "result": "A cluster of beehives hums in the wildflower patch."
+      },
+      {
+        "floor": 63,
+        "ceiling": 63,
+        "result": "Ravens perch on fence posts along the route."
+      },
+      {
+        "floor": 64,
+        "ceiling": 64,
+        "result": "A gentle rain falls on blooming heather moors."
+      },
+      {
+        "floor": 65,
+        "ceiling": 65,
+        "result": "Saplings sprout vigorously from recently cleared land."
+      },
+      {
+        "floor": 66,
+        "ceiling": 66,
+        "result": "A wide bay opens to calm coastal waters."
+      },
+      {
+        "floor": 67,
+        "ceiling": 67,
+        "result": "Geese honk as they land on the glassy lake."
+      },
+      {
+        "floor": 68,
+        "ceiling": 68,
+        "result": "Thick ferns cover the forest floor densely."
+      },
+      {
+        "floor": 69,
+        "ceiling": 69,
+        "result": "A stone cairn marks the summit of the hill."
+      },
+      {
+        "floor": 70,
+        "ceiling": 70,
+        "result": "Wild onions grow in clusters by the stream."
+      },
+      {
+        "floor": 71,
+        "ceiling": 71,
+        "result": "Buttercups blanket the meadow in yellow hues."
+      },
+      {
+        "floor": 72,
+        "ceiling": 72,
+        "result": "A herd of elk crosses the open tundra."
+      },
+      {
+        "floor": 73,
+        "ceiling": 73,
+        "result": "Mushrooms cluster on the bark of fallen birches."
+      },
+      {
+        "floor": 74,
+        "ceiling": 74,
+        "result": "A wooden hut stands empty in the clearing."
+      },
+      {
+        "floor": 75,
+        "ceiling": 75,
+        "result": "Sparrows chirp from nests in thorny bushes."
+      },
+      {
+        "floor": 76,
+        "ceiling": 76,
+        "result": "A bubbling brook cascades over smooth pebbles."
+      },
+      {
+        "floor": 77,
+        "ceiling": 77,
+        "result": "Foxgloves sway tall along the woodland edge."
+      },
+      {
+        "floor": 78,
+        "ceiling": 78,
+        "result": "A massive boulder rests precariously on the slope."
+      },
+      {
+        "floor": 79,
+        "ceiling": 79,
+        "result": "Dandelions release seeds into the swirling wind."
+      },
+      {
+        "floor": 80,
+        "ceiling": 80,
+        "result": "A pack of wild dogs scavenges near the path."
+      },
+      {
+        "floor": 81,
+        "ceiling": 81,
+        "result": "Holly bushes bear bright red berries in winter."
+      },
+      {
+        "floor": 82,
+        "ceiling": 82,
+        "result": "A serene valley cradles a mirror-like lake."
+      },
+      {
+        "floor": 83,
+        "ceiling": 83,
+        "result": "Quail scurry through the dry grass underfoot."
+      },
+      {
+        "floor": 84,
+        "ceiling": 84,
+        "result": "Ancient petroglyphs adorn the cliff face nearby."
+      },
+      {
+        "floor": 85,
+        "ceiling": 85,
+        "result": "A flock of sheep grazes on hillside grasses."
+      },
+      {
+        "floor": 86,
+        "ceiling": 86,
+        "result": "Willow trees droop branches over the riverbank."
+      },
+      {
+        "floor": 87,
+        "ceiling": 87,
+        "result": "A narrow gorge channels a roaring torrent below."
+      },
+      {
+        "floor": 88,
+        "ceiling": 88,
+        "result": "Pigeons coo from roosts in rocky outcrops."
+      },
+      {
+        "floor": 89,
+        "ceiling": 89,
+        "result": "Wild roses climb over tumbled stone fences."
+      },
+      {
+        "floor": 90,
+        "ceiling": 90,
+        "result": "A vast forest opens to a sun-dappled glade."
+      },
+      {
+        "floor": 91,
+        "ceiling": 91,
+        "result": "Squirrels leap between branches of nut trees."
+      },
+      {
+        "floor": 92,
+        "ceiling": 92,
+        "result": "A calm estuary meets the sea with gentle waves."
+      },
+      {
+        "floor": 93,
+        "ceiling": 93,
+        "result": "Robins sing from perches on fence rails."
+      },
+      {
+        "floor": 94,
+        "ceiling": 94,
+        "result": "Thick brambles form natural barriers along the trail."
+      },
+      {
+        "floor": 95,
+        "ceiling": 95,
+        "result": "A lone pine towers over the barren heath."
+      },
+      {
+        "floor": 96,
+        "ceiling": 96,
+        "result": "Fish swarm in the shallow river pools."
+      },
+      {
+        "floor": 97,
+        "ceiling": 97,
+        "result": "Hedgehogs curl in nests of dry leaves."
+      },
+      {
+        "floor": 98,
+        "ceiling": 98,
+        "result": "A meadow bursts with poppies in full bloom."
+      },
+      {
+        "floor": 99,
+        "ceiling": 99,
+        "result": "Wolves' tracks lead toward a distant copse."
+      },
+      {
+        "floor": 100,
+        "ceiling": 100,
+        "result": "Wolves' tracks lead toward a distant copse."
+      }
+    ],
+    "maxRoll": 100,
+    "oracle_type": "Exploration Details",
+    "summary": "Exploration Details"
+  }
+]

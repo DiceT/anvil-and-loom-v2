@@ -53,6 +53,7 @@ export interface TablePackMetadata {
 
 export interface OracleTableMetadata {
   source: TableSource;
+  subCategory: 'core' | 'more';  // Distinguishes oracles/ vs oracles/more/
   table: RollTable;
 }
 

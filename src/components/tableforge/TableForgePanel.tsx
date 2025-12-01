@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ForgeTable } from '../../core/tables/tableForge';
-import { createEmptyAspectTables, createEmptyDomainTables, createEmptyOracleTable } from '../../core/tables/tableForge';
+import { createEmptyAspectTables, createEmptyDomainTables, createEmptyOracleTable, buildForgeFile } from '../../core/tables/tableForge';
 import { fillTablesWithAI, fillTableWithAI } from '../../core/tables/aiTableFiller';
 import { useAiStore } from '../../stores/useAiStore';
 
@@ -164,13 +164,14 @@ export function TableForgePanel() {
                   setStatus('Saving...');
                   setError(null);
 
-                  // Construct the full payload
-                  const payload = {
-                    category: type,
-                    name: name.trim(),
-                    description: description.trim(),
-                    tables: tables
-                  };
+                  // Use buildForgeFile to format data correctly based on category
+                  // (Oracle tables export as plain array, Aspect/Domain with wrapper)
+                  const payload = buildForgeFile(
+                    type as 'Aspect' | 'Domain' | 'Oracle',
+                    name.trim(),
+                    description.trim(),
+                    tables
+                  );
 
                   const result = await window.electron.tables.saveForgeFile(
                     type,
@@ -180,6 +181,8 @@ export function TableForgePanel() {
 
                   if (result.success) {
                     setStatus(`Saved to ${result.path}`);
+                  } else if (result.error === 'Save cancelled') {
+                    setStatus(null); // User cancelled, don't show error
                   } else {
                     setError(result.error || 'Failed to save');
                     setStatus(null);
@@ -243,9 +246,8 @@ export function TableForgePanel() {
                       if (!tables || !currentTable) return;
 
                       setIsFilling(true);
-                      setStatus('Filling table with AI…');
-
                       const persona = getEffectivePersona(activePersonaId);
+                      setStatus(`${persona.name} is filling the table…`);
 
                       const tag = (currentTable.oracle_type || currentTable.name || '').toLowerCase();
                       const kind = tag.includes('objective')
@@ -304,9 +306,8 @@ export function TableForgePanel() {
                       if (!tables) return;
 
                       setIsFilling(true);
-                      setStatus('Filling tables with AI…');
-
                       const persona = getEffectivePersona(activePersonaId);
+                      setStatus(`${persona.name} is filling the tables…`);
 
                       const filled = await fillTablesWithAI(tables, {
                         name: name.trim(),

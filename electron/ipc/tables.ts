@@ -61,15 +61,25 @@ async function loadJsonFilesFromDirectory(
  * Load all tables from core and user directories
  */
 async function loadAllTables() {
-  const [coreAspects, coreDomains, coreOracles, userAspects, userDomains, userOracles] =
-    await Promise.all([
-      loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'aspects')),
-      loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'domains')),
-      loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'oracles')),
-      loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'aspects')),
-      loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'domains')),
-      loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'oracles')),
-    ]);
+  const [
+    coreAspects,
+    coreDomains,
+    coreOracles,
+    coreOraclesMore,
+    userAspects,
+    userDomains,
+    userOracles,
+    userOraclesMore
+  ] = await Promise.all([
+    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'aspects')),
+    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'domains')),
+    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'oracles')),
+    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, 'oracles', 'more')),
+    loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'aspects')),
+    loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'domains')),
+    loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'oracles')),
+    loadJsonFilesFromDirectory(path.join(getUserDataDir(), 'oracles', 'more')),
+  ]);
 
   return {
     aspects: {
@@ -82,7 +92,9 @@ async function loadAllTables() {
     },
     oracles: {
       core: coreOracles,
+      coreMore: coreOraclesMore,
       user: userOracles,
+      userMore: userOraclesMore,
     },
   };
 }
@@ -119,20 +131,33 @@ export function setupTableHandlers() {
   });
 
   /**
-   * Save a Forge file (Aspect or Domain) to the user directory
+   * Save a Forge file (Aspect or Domain) to a user-chosen location
    */
-  ipcMain.handle('tables:saveForgeFile', async (_, { category, filename, data }) => {
+  ipcMain.handle('tables:saveForgeFile', async (event, { category, filename, data }) => {
     try {
-      const subDir = category.toLowerCase() + 's'; // aspects or domains
-      const targetDir = path.join(getUserDataDir(), subDir);
+      const { dialog, BrowserWindow } = await import('electron');
+      const win = BrowserWindow.fromWebContents(event.sender);
 
-      // Ensure directory exists
-      await fs.mkdir(targetDir, { recursive: true });
+      if (!win) {
+        return { success: false, error: 'Window not found' };
+      }
 
-      const filePath = path.join(targetDir, `${filename}.json`);
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+      const result = await dialog.showSaveDialog(win, {
+        title: 'Save Table Forge File',
+        defaultPath: `${filename}.json`,
+        filters: [
+          { name: 'JSON Files', extensions: ['json'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      });
 
-      return { success: true, path: filePath };
+      if (result.canceled || !result.filePath) {
+        return { success: false, error: 'Save cancelled' };
+      }
+
+      await fs.writeFile(result.filePath, JSON.stringify(data, null, 2), 'utf-8');
+
+      return { success: true, path: result.filePath };
     } catch (error) {
       console.error('Failed to save forge file:', error);
       return {

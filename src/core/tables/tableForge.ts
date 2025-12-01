@@ -104,6 +104,7 @@ export function createEmptyAspectTables(name: string, description: string, custo
   objectives.tableData = withActionAspectMacros(objectives.tableData);
 
   const atmosphere: ForgeTable = baseTable(category, "Atmosphere", tagsBase, undefined, "Atmosphere");
+  atmosphere.tableData = makeOracleRows(); // Atmosphere always has 100 individual entries
   atmosphere.tableData = withActionAspectMacros(atmosphere.tableData);
 
   const manifestations: ForgeTable = baseTable(category, "Manifestations", tagsBase, undefined, "Manifestations");
@@ -135,6 +136,7 @@ export function createEmptyDomainTables(name: string, description: string, custo
   objectives.tableData = withActionAspectMacros(objectives.tableData);
 
   const atmosphere: ForgeTable = baseTable(category, "Atmosphere", tagsBase, undefined, "Atmosphere");
+  atmosphere.tableData = makeOracleRows(); // Atmosphere always has 100 individual entries
   atmosphere.tableData = withActionAspectMacros(atmosphere.tableData);
 
   const locations: ForgeTable = baseTable(category, "Locations", tagsBase, undefined, "Locations");
@@ -159,7 +161,9 @@ export function createEmptyDomainTables(name: string, description: string, custo
 
 export function createEmptyOracleTable(name: string, description: string, customTags: string[] = []): ForgeTable[] {
   const category: ForgeCategory = "Oracle";
-  const tagsBase = ["oracle", ...customTags];
+  // Add name as lowercase tag (e.g., "action", "theme") for proper table loading
+  const nameTag = name.toLowerCase().replace(/\s+/g, '-');
+  const tagsBase = ["oracle", nameTag, ...customTags];
 
   const table: ForgeTable = {
     sourcePath: "forge",
@@ -167,14 +171,14 @@ export function createEmptyOracleTable(name: string, description: string, custom
     name,
     tags: tagsBase,
     description,
-    headers: ["Roll", "Result"],
-    tableData: makeOracleRows(), // Use Oracle-specific rows (100 entries with floor==ceiling)
+    headers: ["d100", "Result"],
+    tableData: makeOracleRows(), // Use Oracle-specific rows (50 entries with pairs: 1-2, 3-4, etc.)
     maxRoll: 100,
-    oracle_type: "Oracle",
+    oracle_type: name,
   };
   table.summary = name;
 
-  // Oracles have 100 individual rows (floor==ceiling), no macros by default
+  // Oracles use the same pair format as Aspect/Domain (50 pairs = 100 outcomes)
   // We return it as an array of 1 for consistency with the other types
   return [table];
 }
@@ -184,6 +188,11 @@ export function buildForgeFile(
   name: string,
   description: string,
   tables: ForgeTable[]
-): ForgeFilePayload {
+): ForgeFilePayload | ForgeTable[] {
+  // Oracle tables are exported as a plain array of table objects, not wrapped in ForgeFilePayload
+  if (category === "Oracle") {
+    return tables;
+  }
+  // Aspect and Domain tables use ForgeFilePayload wrapper
   return { category, name, description, tables };
 }

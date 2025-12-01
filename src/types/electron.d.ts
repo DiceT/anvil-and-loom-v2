@@ -49,7 +49,9 @@ export interface ElectronAPI {
         };
         oracles: {
           core: Array<{ filename: string; data: unknown }>;
+          coreMore: Array<{ filename: string; data: unknown }>;
           user: Array<{ filename: string; data: unknown }>;
+          userMore: Array<{ filename: string; data: unknown }>;
         };
       };
       error?: string;

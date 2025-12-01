@@ -108,6 +108,7 @@ const PERSONA_FILE_MAP: Record<GmPersonaId, string> = {
     archivist: '5-the-archivist.md',
     hearth_keeper: '6-the-hearth-keeper.md',
     minimalist: '7-the-minimalist.md',
+    muse: '8-the-muse.md',
 };
 
 /**
@@ -121,6 +122,7 @@ const PERSONA_NAMES: Record<GmPersonaId, string> = {
     archivist: 'The Archivist',
     hearth_keeper: 'The Hearth-Keeper',
     minimalist: 'The Minimalist',
+    muse: 'The Muse',
 };
 
 // Import all persona markdown files as raw strings
@@ -204,6 +206,11 @@ export const PERSONA_DEFAULTS: Record<GmPersonaId, GmPersonaConfig> = {
         id: 'dreadnought',
         defaultName: PERSONA_NAMES.dreadnought,
         defaultInstructions: loadPersonaFromFile(PERSONA_FILE_MAP.dreadnought),
+    },
+    muse: {
+        id: 'muse',
+        defaultName: PERSONA_NAMES.muse,
+        defaultInstructions: loadPersonaFromFile(PERSONA_FILE_MAP.muse),
     },
 };
 

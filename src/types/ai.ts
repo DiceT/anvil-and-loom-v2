@@ -10,7 +10,8 @@ export type GmPersonaId =
     | 'trickster'
     | 'minimalist'
     | 'hearth_keeper'
-    | 'dreadnought';
+    | 'dreadnought'
+    | 'muse';
 
 /**
  * Configuration for a GM Persona (defaults)
@@ -56,6 +57,7 @@ export const defaultAiSettings: AiSettings = {
         minimalist: {},
         hearth_keeper: {},
         dreadnought: {},
+        muse: {},
     },
 };
 

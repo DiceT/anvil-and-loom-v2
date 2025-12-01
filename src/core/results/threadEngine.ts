@@ -13,7 +13,7 @@ export interface LogThreadInput {
   header: string;
   result: string;
   content: string;
-  generateId(): string;
+  source?: ResultSource;
   meta?: Record<string, unknown>;
 }
 

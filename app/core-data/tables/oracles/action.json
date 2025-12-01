@@ -1,71 +1,521 @@
 [
   {
     "sourcePath": "core-data/tables/oracles/action.json",
+    "category": "Oracle",
     "name": "Action",
     "tags": [
       "oracle",
       "action"
     ],
+    "description": "This table generates single-word action prompts that describe what is being done or should be done. Each result must be exactly one word, written as a clear verb (for example: Strike, Conceal, Endure). These results are designed to pair with the Theme table to form Action + Theme combinations (for example: Endure + Isolation). Each word should stand alone as a versatile action while also working cleanly when read together with a Theme word.",
     "headers": [
       "d100",
       "Result"
     ],
     "tableData": [
-      { "floor": 1,  "ceiling": 2,  "result": "Advance" },
-      { "floor": 3,  "ceiling": 4,  "result": "Withdraw" },
-      { "floor": 5,  "ceiling": 6,  "result": "Secure" },
-      { "floor": 7,  "ceiling": 8,  "result": "Reveal" },
-      { "floor": 9,  "ceiling": 10, "result": "Hide" },
-      { "floor": 11, "ceiling": 12, "result": "Investigate" },
-      { "floor": 13, "ceiling": 14, "result": "Assault" },
-      { "floor": 15, "ceiling": 16, "result": "Defend" },
-      { "floor": 17, "ceiling": 18, "result": "Travel" },
-      { "floor": 19, "ceiling": 20, "result": "Escort" },
-      { "floor": 21, "ceiling": 22, "result": "Negotiate" },
-      { "floor": 23, "ceiling": 24, "result": "Deceive" },
-      { "floor": 25, "ceiling": 26, "result": "Sabotage" },
-      { "floor": 27, "ceiling": 28, "result": "Create" },
-      { "floor": 29, "ceiling": 30, "result": "Destroy" },
-      { "floor": 31, "ceiling": 32, "result": "Aid" },
-      { "floor": 33, "ceiling": 34, "result": "Endure" },
-      { "floor": 35, "ceiling": 36, "result": "Explore" },
-      { "floor": 37, "ceiling": 38, "result": "Guard" },
-      { "floor": 39, "ceiling": 40, "result": "Steal" },
-      { "floor": 41, "ceiling": 42, "result": "Learn" },
-      { "floor": 43, "ceiling": 44, "result": "Transform" },
-      { "floor": 45, "ceiling": 46, "result": "Escape" },
-      { "floor": 47, "ceiling": 48, "result": "Confront" },
-      { "floor": 49, "ceiling": 50, "result": "Delay" },
-      { "floor": 51, "ceiling": 52, "result": "Rescue" },
-      { "floor": 53, "ceiling": 54, "result": "Recruit" },
-      { "floor": 55, "ceiling": 56, "result": "Repair" },
-      { "floor": 57, "ceiling": 58, "result": "Observe" },
-      { "floor": 59, "ceiling": 60, "result": "Punish" },
-      { "floor": 61, "ceiling": 62, "result": "Reward" },
-      { "floor": 63, "ceiling": 64, "result": "Infiltrate" },
-      { "floor": 65, "ceiling": 66, "result": "Search" },
-      { "floor": 67, "ceiling": 68, "result": "Guide" },
-      { "floor": 69, "ceiling": 70, "result": "Trade" },
-      { "floor": 71, "ceiling": 72, "result": "Test" },
-      { "floor": 73, "ceiling": 74, "result": "Warn" },
-      { "floor": 75, "ceiling": 76, "result": "Bind" },
-      { "floor": 77, "ceiling": 78, "result": "Break" },
-      { "floor": 79, "ceiling": 80, "result": "Swear" },
-      { "floor": 81, "ceiling": 82, "result": "Forsake" },
-      { "floor": 83, "ceiling": 84, "result": "Protect" },
-      { "floor": 85, "ceiling": 86, "result": "Challenge" },
-      { "floor": 87, "ceiling": 88, "result": "Unleash" },
-      { "floor": 89, "ceiling": 90, "result": "Contain" },
-      { "floor": 91, "ceiling": 92, "result": "Communicate" },
-      { "floor": 93, "ceiling": 94, "result": "Commune" },
-      { "floor": 95, "ceiling": 96, "result": "Divert" },
-      { "floor": 97, "ceiling": 98, "result": "Sacrifice" },
-      { "floor": 99, "ceiling": 100, "result": "Dominate" }
+      {
+        "floor": 1,
+        "ceiling": 1,
+        "result": "Strike"
+      },
+      {
+        "floor": 2,
+        "ceiling": 2,
+        "result": "Conceal"
+      },
+      {
+        "floor": 3,
+        "ceiling": 3,
+        "result": "Endure"
+      },
+      {
+        "floor": 4,
+        "ceiling": 4,
+        "result": "Explore"
+      },
+      {
+        "floor": 5,
+        "ceiling": 5,
+        "result": "Defend"
+      },
+      {
+        "floor": 6,
+        "ceiling": 6,
+        "result": "Attack"
+      },
+      {
+        "floor": 7,
+        "ceiling": 7,
+        "result": "Heal"
+      },
+      {
+        "floor": 8,
+        "ceiling": 8,
+        "result": "Discover"
+      },
+      {
+        "floor": 9,
+        "ceiling": 9,
+        "result": "Betray"
+      },
+      {
+        "floor": 10,
+        "ceiling": 10,
+        "result": "Sacrifice"
+      },
+      {
+        "floor": 11,
+        "ceiling": 11,
+        "result": "Bind"
+      },
+      {
+        "floor": 12,
+        "ceiling": 12,
+        "result": "Unravel"
+      },
+      {
+        "floor": 13,
+        "ceiling": 13,
+        "result": "Whisper"
+      },
+      {
+        "floor": 14,
+        "ceiling": 14,
+        "result": "Slay"
+      },
+      {
+        "floor": 15,
+        "ceiling": 15,
+        "result": "Forge"
+      },
+      {
+        "floor": 16,
+        "ceiling": 16,
+        "result": "Resist"
+      },
+      {
+        "floor": 17,
+        "ceiling": 17,
+        "result": "Pursue"
+      },
+      {
+        "floor": 18,
+        "ceiling": 18,
+        "result": "Evade"
+      },
+      {
+        "floor": 19,
+        "ceiling": 19,
+        "result": "Reveal"
+      },
+      {
+        "floor": 20,
+        "ceiling": 20,
+        "result": "Summon"
+      },
+      {
+        "floor": 21,
+        "ceiling": 21,
+        "result": "Destroy"
+      },
+      {
+        "floor": 22,
+        "ceiling": 22,
+        "result": "Protect"
+      },
+      {
+        "floor": 23,
+        "ceiling": 23,
+        "result": "Infiltrate"
+      },
+      {
+        "floor": 24,
+        "ceiling": 24,
+        "result": "Negotiate"
+      },
+      {
+        "floor": 25,
+        "ceiling": 25,
+        "result": "Escape"
+      },
+      {
+        "floor": 26,
+        "ceiling": 26,
+        "result": "Command"
+      },
+      {
+        "floor": 27,
+        "ceiling": 27,
+        "result": "Deceive"
+      },
+      {
+        "floor": 28,
+        "ceiling": 28,
+        "result": "End"
+      },
+      {
+        "floor": 29,
+        "ceiling": 29,
+        "result": "Begin"
+      },
+      {
+        "floor": 30,
+        "ceiling": 30,
+        "result": "Transform"
+      },
+      {
+        "floor": 31,
+        "ceiling": 31,
+        "result": "Hunt"
+      },
+      {
+        "floor": 32,
+        "ceiling": 32,
+        "result": "Gather"
+      },
+      {
+        "floor": 33,
+        "ceiling": 33,
+        "result": "Build"
+      },
+      {
+        "floor": 34,
+        "ceiling": 34,
+        "result": "Ruin"
+      },
+      {
+        "floor": 35,
+        "ceiling": 35,
+        "result": "Ascend"
+      },
+      {
+        "floor": 36,
+        "ceiling": 36,
+        "result": "Descend"
+      },
+      {
+        "floor": 37,
+        "ceiling": 37,
+        "result": "Unite"
+      },
+      {
+        "floor": 38,
+        "ceiling": 38,
+        "result": "Divide"
+      },
+      {
+        "floor": 39,
+        "ceiling": 39,
+        "result": "Steal"
+      },
+      {
+        "floor": 40,
+        "ceiling": 40,
+        "result": "Give"
+      },
+      {
+        "floor": 41,
+        "ceiling": 41,
+        "result": "Question"
+      },
+      {
+        "floor": 42,
+        "ceiling": 42,
+        "result": "Answer"
+      },
+      {
+        "floor": 43,
+        "ceiling": 43,
+        "result": "Follow"
+      },
+      {
+        "floor": 44,
+        "ceiling": 44,
+        "result": "Lead"
+      },
+      {
+        "floor": 45,
+        "ceiling": 45,
+        "result": "Hide"
+      },
+      {
+        "floor": 46,
+        "ceiling": 46,
+        "result": "Seek"
+      },
+      {
+        "floor": 47,
+        "ceiling": 47,
+        "result": "Fight"
+      },
+      {
+        "floor": 48,
+        "ceiling": 48,
+        "result": "Flee"
+      },
+      {
+        "floor": 49,
+        "ceiling": 49,
+        "result": "Create"
+      },
+      {
+        "floor": 50,
+        "ceiling": 50,
+        "result": "Consume"
+      },
+      {
+        "floor": 51,
+        "ceiling": 51,
+        "result": "Adapt"
+      },
+      {
+        "floor": 52,
+        "ceiling": 52,
+        "result": "Challenge"
+      },
+      {
+        "floor": 53,
+        "ceiling": 53,
+        "result": "Support"
+      },
+      {
+        "floor": 54,
+        "ceiling": 54,
+        "result": "Undermine"
+      },
+      {
+        "floor": 55,
+        "ceiling": 55,
+        "result": "Observe"
+      },
+      {
+        "floor": 56,
+        "ceiling": 56,
+        "result": "Act"
+      },
+      {
+        "floor": 57,
+        "ceiling": 57,
+        "result": "Wait"
+      },
+      {
+        "floor": 58,
+        "ceiling": 58,
+        "result": "Rush"
+      },
+      {
+        "floor": 59,
+        "ceiling": 59,
+        "result": "Plan"
+      },
+      {
+        "floor": 60,
+        "ceiling": 60,
+        "result": "Improvise"
+      },
+      {
+        "floor": 61,
+        "ceiling": 61,
+        "result": "Learn"
+      },
+      {
+        "floor": 62,
+        "ceiling": 62,
+        "result": "Teach"
+      },
+      {
+        "floor": 63,
+        "ceiling": 63,
+        "result": "Survive"
+      },
+      {
+        "floor": 64,
+        "ceiling": 64,
+        "result": "Thrive"
+      },
+      {
+        "floor": 65,
+        "ceiling": 65,
+        "result": "Corrupt"
+      },
+      {
+        "floor": 66,
+        "ceiling": 66,
+        "result": "Purify"
+      },
+      {
+        "floor": 67,
+        "ceiling": 67,
+        "result": "Invoke"
+      },
+      {
+        "floor": 68,
+        "ceiling": 68,
+        "result": "Banish"
+      },
+      {
+        "floor": 69,
+        "ceiling": 69,
+        "result": "Trap"
+      },
+      {
+        "floor": 70,
+        "ceiling": 70,
+        "result": "Release"
+      },
+      {
+        "floor": 71,
+        "ceiling": 71,
+        "result": "Dominate"
+      },
+      {
+        "floor": 72,
+        "ceiling": 72,
+        "result": "Submit"
+      },
+      {
+        "floor": 73,
+        "ceiling": 73,
+        "result": "Trade"
+      },
+      {
+        "floor": 74,
+        "ceiling": 74,
+        "result": "Craft"
+      },
+      {
+        "floor": 75,
+        "ceiling": 75,
+        "result": "Harvest"
+      },
+      {
+        "floor": 76,
+        "ceiling": 76,
+        "result": "Plant"
+      },
+      {
+        "floor": 77,
+        "ceiling": 77,
+        "result": "Ignite"
+      },
+      {
+        "floor": 78,
+        "ceiling": 78,
+        "result": "Extinguish"
+      },
+      {
+        "floor": 79,
+        "ceiling": 79,
+        "result": "Travel"
+      },
+      {
+        "floor": 80,
+        "ceiling": 80,
+        "result": "Arrive"
+      },
+      {
+        "floor": 81,
+        "ceiling": 81,
+        "result": "Depart"
+      },
+      {
+        "floor": 82,
+        "ceiling": 82,
+        "result": "Remember"
+      },
+      {
+        "floor": 83,
+        "ceiling": 83,
+        "result": "Forget"
+      },
+      {
+        "floor": 84,
+        "ceiling": 84,
+        "result": "Dream"
+      },
+      {
+        "floor": 85,
+        "ceiling": 85,
+        "result": "Awaken"
+      },
+      {
+        "floor": 86,
+        "ceiling": 86,
+        "result": "Curse"
+      },
+      {
+        "floor": 87,
+        "ceiling": 87,
+        "result": "Bless"
+      },
+      {
+        "floor": 88,
+        "ceiling": 88,
+        "result": "Enchant"
+      },
+      {
+        "floor": 89,
+        "ceiling": 89,
+        "result": "Disenchant"
+      },
+      {
+        "floor": 90,
+        "ceiling": 90,
+        "result": "Spy"
+      },
+      {
+        "floor": 91,
+        "ceiling": 91,
+        "result": "Ally"
+      },
+      {
+        "floor": 92,
+        "ceiling": 92,
+        "result": "Betray"
+      },
+      {
+        "floor": 93,
+        "ceiling": 93,
+        "result": "Redeem"
+      },
+      {
+        "floor": 94,
+        "ceiling": 94,
+        "result": "Corrode"
+      },
+      {
+        "floor": 95,
+        "ceiling": 95,
+        "result": "Restore"
+      },
+      {
+        "floor": 96,
+        "ceiling": 96,
+        "result": "Innovate"
+      },
+      {
+        "floor": 97,
+        "ceiling": 97,
+        "result": "Tradition"
+      },
+      {
+        "floor": 98,
+        "ceiling": 98,
+        "result": "Rebel"
+      },
+      {
+        "floor": 99,
+        "ceiling": 99,
+        "result": "Conform"
+      },
+      {
+        "floor": 100,
+        "ceiling": 100,
+        "result": "Investigate"
+      }
     ],
     "maxRoll": 100,
-    "category": "Oracle",
     "oracle_type": "Action",
-    "description": "The Action oracle provides concise verbs that frame what is happening or what must be done.",
-    "summary": "Action oracle"
+    "summary": "Action"
   }
 ]

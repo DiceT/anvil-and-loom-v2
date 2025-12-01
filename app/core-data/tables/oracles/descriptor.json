@@ -1,71 +1,521 @@
 [
   {
-    "sourcePath": "core-data/tables/oracles/descriptor.json",
+    "sourcePath": "forge",
+    "category": "Oracle",
     "name": "Descriptor",
     "tags": [
       "oracle",
       "descriptor"
     ],
+    "description": "This table generates single-word descriptors that express qualities, moods, or textures. Each result must be exactly one word, written as an adjective (for example: Weathered, Restless, Guttering). These results are designed to pair with the Focus table to form Descriptor + Focus combinations (for example: Fragmented + Relic). Each word should be flexible enough to modify many possible Focus words while still conveying a distinct tone.",
     "headers": [
       "d100",
       "Result"
     ],
     "tableData": [
-      { "floor": 1,  "ceiling": 2,  "result": "Ancient" },
-      { "floor": 3,  "ceiling": 4,  "result": "Broken" },
-      { "floor": 5,  "ceiling": 6,  "result": "Cold" },
-      { "floor": 7,  "ceiling": 8,  "result": "Dark" },
-      { "floor": 9,  "ceiling": 10, "result": "Empty" },
-      { "floor": 11, "ceiling": 12, "result": "Forbidden" },
-      { "floor": 13, "ceiling": 14, "result": "Glowing" },
-      { "floor": 15, "ceiling": 16, "result": "Hidden" },
-      { "floor": 17, "ceiling": 18, "result": "Iron" },
-      { "floor": 19, "ceiling": 20, "result": "Jagged" },
-      { "floor": 21, "ceiling": 22, "result": "Knotted" },
-      { "floor": 23, "ceiling": 24, "result": "Lost" },
-      { "floor": 25, "ceiling": 26, "result": "Mossy" },
-      { "floor": 27, "ceiling": 28, "result": "Narrow" },
-      { "floor": 29, "ceiling": 30, "result": "Overgrown" },
-      { "floor": 31, "ceiling": 32, "result": "Pale" },
-      { "floor": 33, "ceiling": 34, "result": "Quiet" },
-      { "floor": 35, "ceiling": 36, "result": "Rusted" },
-      { "floor": 37, "ceiling": 38, "result": "Shadowed" },
-      { "floor": 39, "ceiling": 40, "result": "Twisted" },
-      { "floor": 41, "ceiling": 42, "result": "Unnatural" },
-      { "floor": 43, "ceiling": 44, "result": "Vast" },
-      { "floor": 45, "ceiling": 46, "result": "Weathered" },
-      { "floor": 47, "ceiling": 48, "result": "Wet" },
-      { "floor": 49, "ceiling": 50, "result": "Withered" },
-      { "floor": 51, "ceiling": 52, "result": "Bloody" },
-      { "floor": 53, "ceiling": 54, "result": "Cracked" },
-      { "floor": 55, "ceiling": 56, "result": "Damp" },
-      { "floor": 57, "ceiling": 58, "result": "Eerie" },
-      { "floor": 59, "ceiling": 60, "result": "Foul" },
-      { "floor": 61, "ceiling": 62, "result": "Grim" },
-      { "floor": 63, "ceiling": 64, "result": "Haunted" },
-      { "floor": 65, "ceiling": 66, "result": "Icy" },
-      { "floor": 67, "ceiling": 68, "result": "Jaundiced" },
-      { "floor": 69, "ceiling": 70, "result": "Keen" },
-      { "floor": 71, "ceiling": 72, "result": "Luminous" },
-      { "floor": 73, "ceiling": 74, "result": "Murky" },
-      { "floor": 75, "ceiling": 76, "result": "Noble" },
-      { "floor": 77, "ceiling": 78, "result": "Ominous" },
-      { "floor": 79, "ceiling": 80, "result": "Pristine" },
-      { "floor": 81, "ceiling": 82, "result": "Quivering" },
-      { "floor": 83, "ceiling": 84, "result": "Rotten" },
-      { "floor": 85, "ceiling": 86, "result": "Silent" },
-      { "floor": 87, "ceiling": 88, "result": "Thorned" },
-      { "floor": 89, "ceiling": 90, "result": "Unsettling" },
-      { "floor": 91, "ceiling": 92, "result": "Vivid" },
-      { "floor": 93, "ceiling": 94, "result": "Weeping" },
-      { "floor": 95, "ceiling": 96, "result": "Skeletal" },
-      { "floor": 97, "ceiling": 98, "result": "Pulsing" },
-      { "floor": 99, "ceiling": 100, "result": "Forgotten" }
+      {
+        "floor": 1,
+        "ceiling": 1,
+        "result": "Weathered"
+      },
+      {
+        "floor": 2,
+        "ceiling": 2,
+        "result": "Restless"
+      },
+      {
+        "floor": 3,
+        "ceiling": 3,
+        "result": "Guttering"
+      },
+      {
+        "floor": 4,
+        "ceiling": 4,
+        "result": "Fragmented"
+      },
+      {
+        "floor": 5,
+        "ceiling": 5,
+        "result": "Shadowed"
+      },
+      {
+        "floor": 6,
+        "ceiling": 6,
+        "result": "Cursed"
+      },
+      {
+        "floor": 7,
+        "ceiling": 7,
+        "result": "Ethereal"
+      },
+      {
+        "floor": 8,
+        "ceiling": 8,
+        "result": "Decayed"
+      },
+      {
+        "floor": 9,
+        "ceiling": 9,
+        "result": "Sinister"
+      },
+      {
+        "floor": 10,
+        "ceiling": 10,
+        "result": "Ancient"
+      },
+      {
+        "floor": 11,
+        "ceiling": 11,
+        "result": "Forsaken"
+      },
+      {
+        "floor": 12,
+        "ceiling": 12,
+        "result": "Whispering"
+      },
+      {
+        "floor": 13,
+        "ceiling": 13,
+        "result": "Bloodied"
+      },
+      {
+        "floor": 14,
+        "ceiling": 14,
+        "result": "Haunted"
+      },
+      {
+        "floor": 15,
+        "ceiling": 15,
+        "result": "Gloomy"
+      },
+      {
+        "floor": 16,
+        "ceiling": 16,
+        "result": "Twisted"
+      },
+      {
+        "floor": 17,
+        "ceiling": 17,
+        "result": "Faded"
+      },
+      {
+        "floor": 18,
+        "ceiling": 18,
+        "result": "Rusted"
+      },
+      {
+        "floor": 19,
+        "ceiling": 19,
+        "result": "Spectral"
+      },
+      {
+        "floor": 20,
+        "ceiling": 20,
+        "result": "Malevolent"
+      },
+      {
+        "floor": 21,
+        "ceiling": 21,
+        "result": "Ominous"
+      },
+      {
+        "floor": 22,
+        "ceiling": 22,
+        "result": "Withered"
+      },
+      {
+        "floor": 23,
+        "ceiling": 23,
+        "result": "Enigmatic"
+      },
+      {
+        "floor": 24,
+        "ceiling": 24,
+        "result": "Corroded"
+      },
+      {
+        "floor": 25,
+        "ceiling": 25,
+        "result": "Lurking"
+      },
+      {
+        "floor": 26,
+        "ceiling": 26,
+        "result": "Dismal"
+      },
+      {
+        "floor": 27,
+        "ceiling": 27,
+        "result": "Tarnished"
+      },
+      {
+        "floor": 28,
+        "ceiling": 28,
+        "result": "Eerie"
+      },
+      {
+        "floor": 29,
+        "ceiling": 29,
+        "result": "Bleak"
+      },
+      {
+        "floor": 30,
+        "ceiling": 30,
+        "result": "Ragged"
+      },
+      {
+        "floor": 31,
+        "ceiling": 31,
+        "result": "Mysterious"
+      },
+      {
+        "floor": 32,
+        "ceiling": 32,
+        "result": "Flickering"
+      },
+      {
+        "floor": 33,
+        "ceiling": 33,
+        "result": "Corrupted"
+      },
+      {
+        "floor": 34,
+        "ceiling": 34,
+        "result": "Forlorn"
+      },
+      {
+        "floor": 35,
+        "ceiling": 35,
+        "result": "Grim"
+      },
+      {
+        "floor": 36,
+        "ceiling": 36,
+        "result": "Veiled"
+      },
+      {
+        "floor": 37,
+        "ceiling": 37,
+        "result": "Shattered"
+      },
+      {
+        "floor": 38,
+        "ceiling": 38,
+        "result": "Pale"
+      },
+      {
+        "floor": 39,
+        "ceiling": 39,
+        "result": "Wretched"
+      },
+      {
+        "floor": 40,
+        "ceiling": 40,
+        "result": "Obscure"
+      },
+      {
+        "floor": 41,
+        "ceiling": 41,
+        "result": "Dreary"
+      },
+      {
+        "floor": 42,
+        "ceiling": 42,
+        "result": "Jagged"
+      },
+      {
+        "floor": 43,
+        "ceiling": 43,
+        "result": "Sallow"
+      },
+      {
+        "floor": 44,
+        "ceiling": 44,
+        "result": "Hollow"
+      },
+      {
+        "floor": 45,
+        "ceiling": 45,
+        "result": "Livid"
+      },
+      {
+        "floor": 46,
+        "ceiling": 46,
+        "result": "Ghastly"
+      },
+      {
+        "floor": 47,
+        "ceiling": 47,
+        "result": "Murky"
+      },
+      {
+        "floor": 48,
+        "ceiling": 48,
+        "result": "Sullen"
+      },
+      {
+        "floor": 49,
+        "ceiling": 49,
+        "result": "Riven"
+      },
+      {
+        "floor": 50,
+        "ceiling": 50,
+        "result": "Tenebrous"
+      },
+      {
+        "floor": 51,
+        "ceiling": 51,
+        "result": "Baleful"
+      },
+      {
+        "floor": 52,
+        "ceiling": 52,
+        "result": "Fetid"
+      },
+      {
+        "floor": 53,
+        "ceiling": 53,
+        "result": "Wan"
+      },
+      {
+        "floor": 54,
+        "ceiling": 54,
+        "result": "Cadaverous"
+      },
+      {
+        "floor": 55,
+        "ceiling": 55,
+        "result": "Noxious"
+      },
+      {
+        "floor": 56,
+        "ceiling": 56,
+        "result": "Putrid"
+      },
+      {
+        "floor": 57,
+        "ceiling": 57,
+        "result": "Sepulchral"
+      },
+      {
+        "floor": 58,
+        "ceiling": 58,
+        "result": "Desolate"
+      },
+      {
+        "floor": 59,
+        "ceiling": 59,
+        "result": "Languid"
+      },
+      {
+        "floor": 60,
+        "ceiling": 60,
+        "result": "Morbid"
+      },
+      {
+        "floor": 61,
+        "ceiling": 61,
+        "result": "Nebulous"
+      },
+      {
+        "floor": 62,
+        "ceiling": 62,
+        "result": "Pernicious"
+      },
+      {
+        "floor": 63,
+        "ceiling": 63,
+        "result": "Quivering"
+      },
+      {
+        "floor": 64,
+        "ceiling": 64,
+        "result": "Rancid"
+      },
+      {
+        "floor": 65,
+        "ceiling": 65,
+        "result": "Stygian"
+      },
+      {
+        "floor": 66,
+        "ceiling": 66,
+        "result": "Torpid"
+      },
+      {
+        "floor": 67,
+        "ceiling": 67,
+        "result": "Unholy"
+      },
+      {
+        "floor": 68,
+        "ceiling": 68,
+        "result": "Vermilion"
+      },
+      {
+        "floor": 69,
+        "ceiling": 69,
+        "result": "Waxen"
+      },
+      {
+        "floor": 70,
+        "ceiling": 70,
+        "result": "Yawning"
+      },
+      {
+        "floor": 71,
+        "ceiling": 71,
+        "result": "Zephyrous"
+      },
+      {
+        "floor": 72,
+        "ceiling": 72,
+        "result": "Abyssal"
+      },
+      {
+        "floor": 73,
+        "ceiling": 73,
+        "result": "Blighted"
+      },
+      {
+        "floor": 74,
+        "ceiling": 74,
+        "result": "Chthonic"
+      },
+      {
+        "floor": 75,
+        "ceiling": 75,
+        "result": "Dolorous"
+      },
+      {
+        "floor": 76,
+        "ceiling": 76,
+        "result": "Evanescent"
+      },
+      {
+        "floor": 77,
+        "ceiling": 77,
+        "result": "Fecund"
+      },
+      {
+        "floor": 78,
+        "ceiling": 78,
+        "result": "Gossamer"
+      },
+      {
+        "floor": 79,
+        "ceiling": 79,
+        "result": "Hoary"
+      },
+      {
+        "floor": 80,
+        "ceiling": 80,
+        "result": "Iridescent"
+      },
+      {
+        "floor": 81,
+        "ceiling": 81,
+        "result": "Jaundiced"
+      },
+      {
+        "floor": 82,
+        "ceiling": 82,
+        "result": "Knavish"
+      },
+      {
+        "floor": 83,
+        "ceiling": 83,
+        "result": "Lugubrious"
+      },
+      {
+        "floor": 84,
+        "ceiling": 84,
+        "result": "Miasmic"
+      },
+      {
+        "floor": 85,
+        "ceiling": 85,
+        "result": "Nocturnal"
+      },
+      {
+        "floor": 86,
+        "ceiling": 86,
+        "result": "Opalescent"
+      },
+      {
+        "floor": 87,
+        "ceiling": 87,
+        "result": "Pallid"
+      },
+      {
+        "floor": 88,
+        "ceiling": 88,
+        "result": "Querulous"
+      },
+      {
+        "floor": 89,
+        "ceiling": 89,
+        "result": "Rutilant"
+      },
+      {
+        "floor": 90,
+        "ceiling": 90,
+        "result": "Sibilant"
+      },
+      {
+        "floor": 91,
+        "ceiling": 91,
+        "result": "Tumultuous"
+      },
+      {
+        "floor": 92,
+        "ceiling": 92,
+        "result": "Umbral"
+      },
+      {
+        "floor": 93,
+        "ceiling": 93,
+        "result": "Vexed"
+      },
+      {
+        "floor": 94,
+        "ceiling": 94,
+        "result": "Wistful"
+      },
+      {
+        "floor": 95,
+        "ceiling": 95,
+        "result": "Xenolithic"
+      },
+      {
+        "floor": 96,
+        "ceiling": 96,
+        "result": "Yclept"
+      },
+      {
+        "floor": 97,
+        "ceiling": 97,
+        "result": "Zymotic"
+      },
+      {
+        "floor": 98,
+        "ceiling": 98,
+        "result": "Arcane"
+      },
+      {
+        "floor": 99,
+        "ceiling": 99,
+        "result": "Beguiling"
+      },
+      {
+        "floor": 100,
+        "ceiling": 100,
+        "result": "Cryptic"
+      }
     ],
     "maxRoll": 100,
-    "category": "Oracle",
     "oracle_type": "Descriptor",
-    "description": "The Descriptor oracle provides evocative adjectives that characterize people, places, or things.",
-    "summary": "Descriptor oracle"
+    "summary": "Descriptor"
   }
 ]

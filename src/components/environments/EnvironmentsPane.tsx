@@ -18,6 +18,19 @@ export function EnvironmentsPane() {
   const { registry, loadTables } = useTableStore();
   const { requestExpandPack, setRequestExpandPack } = useToolStore();
   const [expandedPacks, setExpandedPacks] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['aspects', 'domains']));
+
+  const toggleSection = (section: string) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!registry) {
@@ -188,34 +201,60 @@ export function EnvironmentsPane() {
     );
   };
 
+
+
   return (
     <div className="px-2 pt-2 pb-2 h-full overflow-y-auto app-scroll">
       {/* Aspects Section */}
       <div className="mb-4">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2 px-3">
-          Aspects
-        </h3>
-        <div className="bg-slate-800 rounded-lg overflow-hidden">
-          {aspects.length === 0 ? (
-            <div className="p-4 text-sm text-slate-500 text-center">No aspects found</div>
+        <button
+          onClick={() => toggleSection('aspects')}
+          className="flex items-center gap-2 w-full text-left px-3 py-2 hover:bg-slate-800 transition-colors"
+        >
+          {expandedSections.has('aspects') ? (
+            <ChevronDown className="w-4 h-4 text-slate-400" />
           ) : (
-            aspects.map(renderPack)
+            <ChevronRight className="w-4 h-4 text-slate-400" />
           )}
-        </div>
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+            Aspects
+          </h3>
+        </button>
+        {expandedSections.has('aspects') && (
+          <div className="bg-slate-800 rounded-lg overflow-hidden mt-2">
+            {aspects.length === 0 ? (
+              <div className="p-4 text-sm text-slate-500 text-center">No aspects found</div>
+            ) : (
+              aspects.map(renderPack)
+            )}
+          </div>
+        )}
       </div>
 
       {/* Domains Section */}
       <div className="mb-4">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2 px-3">
-          Domains
-        </h3>
-        <div className="bg-slate-800 rounded-lg overflow-hidden">
-          {domains.length === 0 ? (
-            <div className="p-4 text-sm text-slate-500 text-center">No domains found</div>
+        <button
+          onClick={() => toggleSection('domains')}
+          className="flex items-center gap-2 w-full text-left px-3 py-2 hover:bg-slate-800 transition-colors"
+        >
+          {expandedSections.has('domains') ? (
+            <ChevronDown className="w-4 h-4 text-slate-400" />
           ) : (
-            domains.map(renderPack)
+            <ChevronRight className="w-4 h-4 text-slate-400" />
           )}
-        </div>
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+            Domains
+          </h3>
+        </button>
+        {expandedSections.has('domains') && (
+          <div className="bg-slate-800 rounded-lg overflow-hidden mt-2">
+            {domains.length === 0 ? (
+              <div className="p-4 text-sm text-slate-500 text-center">No domains found</div>
+            ) : (
+              domains.map(renderPack)
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

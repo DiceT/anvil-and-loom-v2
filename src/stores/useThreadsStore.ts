@@ -17,33 +17,36 @@ interface ThreadsStore {
 
 export const useThreadsStore = create<ThreadsStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       threads: [],
 
       addThread: (thread) =>
         set((state) => ({
           threads: [...state.threads, thread],
+          cards: [...state.threads, thread],
         })),
 
       clearThreads: () =>
-        set({ threads: [] }),
+        set({ threads: [], cards: [] }),
 
       loadThreads: (threads) =>
-        set({ threads }),
+        set({ threads, cards: threads }),
 
       // Legacy card-based API, backed by threads
-      get cards() {
-        return get().threads;
-      },
+      cards: [],
 
-      addCard: (card) => get().addThread(card),
+      addCard: (card) => set((state) => ({
+        threads: [...state.threads, card],
+        cards: [...state.threads, card],
+      })),
 
-      clearCards: () => get().clearThreads(),
+      clearCards: () => set({ threads: [], cards: [] }),
 
-      loadCards: (cards) => get().loadThreads(cards),
+      loadCards: (cards) => set({ threads: cards, cards }),
     }),
     {
       name: 'anvil-loom-thread-history',
+      version: 1,
     }
   )
 );

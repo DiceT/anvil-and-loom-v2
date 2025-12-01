@@ -1,0 +1,1866 @@
+{
+  "category": "Domain",
+  "name": "Mire",
+  "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+  "tables": [
+    {
+      "sourcePath": "forge",
+      "category": "Domain",
+      "name": "Objectives",
+      "tags": [
+        "domain",
+        "objective"
+      ],
+      "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "Escape the encroaching fog that blinds all paths forward."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Retrieve a submerged relic from a peat-choked pool."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "Track a elusive beast through shifting reed beds."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Rescue a traveler sunk in quickmud up to their waist."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "Map deceptive landmarks to create a reliable guide."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Harvest rare herbs that thrive in acidic bog waters."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Uncover a long-lost village swallowed by the fen."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Evade patrols of mire-dwellers guarding hidden trails."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Drain a flooded hollow to reveal buried secrets."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Survive a night amid whispering winds and hidden cries."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Collect samples of glowing moss for an alchemist's brew."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Negotiate passage with reclusive fen folk."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Destroy a corrupted willow that ensnares wanderers."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Find a safe ford across a deceptive stream."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Recover bones of an ancient hero from the depths."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Quell unnatural lights luring travelers to doom."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Build a raft from sodden timber to cross open water."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Investigate rumors of a hidden cache in the reeds."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Endure the mire's chill to reach a distant hummock."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Capture a specimen of the elusive bog serpent."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "Decipher carvings on a half-sunken menhir."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Avoid sinking pits while pursuing a fleeing informant."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Gather peat for fuel in a desperate camp."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Unmask illusions cloaking a treacherous causeway."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Aid a spirit bound to a drowned tree."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Forge a path through dense, sucking mud."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Salvage tools from an abandoned expedition's wreck."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Withstand hallucinatory mists testing resolve."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Hunt for edible roots in nutrient-poor soil."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Reveal a concealed entrance to underground tunnels."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Repel swarms of biting insects clouding the air."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Trace echoes of distant calls to their source."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Extract a trapped mount from viscous slime."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Seek counsel from a hermit dwelling on a bog island."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Bury a cursed artifact deep in the mire's embrace."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Navigate by distorted stars reflected in still pools."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "Harvest venom from mire spiders for antidotes."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Unravel the mystery of vanishing wayfarers."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Construct bridges over deceptive sinkholes."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "End a feud between rival bog clans."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Recover a map etched on preserved hide."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Endure silence broken only by bubbling gases."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Capture fireflies that glow with unnatural hues."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Explore a fen riddled with ancient barrows."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Evade grasping vines animated by mire spirits."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Gather fog-condensed dew for purification rites."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Track down a deserter hiding in the wetlands."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "Drain acidic waters to expose a fossilized horror."
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "ACTION + THEME"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Objectives",
+      "summary": "Mire — Objectives"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Domain",
+      "name": "Atmosphere",
+      "tags": [
+        "domain"
+      ],
+      "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 1,
+          "result": "Thick fog muffles distant calls, turning them into eerie whispers."
+        },
+        {
+          "floor": 2,
+          "ceiling": 2,
+          "result": "Stagnant water releases a sour, earthy stench that clings to clothing."
+        },
+        {
+          "floor": 3,
+          "ceiling": 3,
+          "result": "Sunlight filters weakly through reeds, casting long, wavering shadows."
+        },
+        {
+          "floor": 4,
+          "ceiling": 4,
+          "result": "The air hangs heavy with humidity, making every breath labored."
+        },
+        {
+          "floor": 5,
+          "ceiling": 5,
+          "result": "A low hum of insects buzzes incessantly, never quite localizable."
+        },
+        {
+          "floor": 6,
+          "ceiling": 6,
+          "result": "Mud squelches underfoot, pulling at boots with reluctant suction."
+        },
+        {
+          "floor": 7,
+          "ceiling": 7,
+          "result": "Mist rises from pools, obscuring the horizon in a pale veil."
+        },
+        {
+          "floor": 8,
+          "ceiling": 8,
+          "result": "Faint echoes of splashing water suggest unseen movement nearby."
+        },
+        {
+          "floor": 9,
+          "ceiling": 9,
+          "result": "The chill of damp earth seeps through layers, numbing exposed skin."
+        },
+        {
+          "floor": 10,
+          "ceiling": 10,
+          "result": "Reeds rustle softly in a breeze that carries hints of decay."
+        },
+        {
+          "floor": 11,
+          "ceiling": 11,
+          "result": "Twilight lingers unnaturally, blending day and night into gloom."
+        },
+        {
+          "floor": 12,
+          "ceiling": 12,
+          "result": "Bubbles surface slowly from dark water, popping with a fetid gasp."
+        },
+        {
+          "floor": 13,
+          "ceiling": 13,
+          "result": "A pervasive silence broken only by occasional, distant croaks."
+        },
+        {
+          "floor": 14,
+          "ceiling": 14,
+          "result": "Warm pockets of air contrast with sudden, icy drafts from below."
+        },
+        {
+          "floor": 15,
+          "ceiling": 15,
+          "result": "Light refracts oddly on oily surfaces, creating illusory depths."
+        },
+        {
+          "floor": 16,
+          "ceiling": 16,
+          "result": "The ground trembles faintly, as if breathing beneath the surface."
+        },
+        {
+          "floor": 17,
+          "ceiling": 17,
+          "result": "Sour tang of rotting vegetation permeates the still air."
+        },
+        {
+          "floor": 18,
+          "ceiling": 18,
+          "result": "Distant thunder rumbles, muffled by layers of fog and mire."
+        },
+        {
+          "floor": 19,
+          "ceiling": 19,
+          "result": "Textures of slime and moss coat every reachable surface."
+        },
+        {
+          "floor": 20,
+          "ceiling": 20,
+          "result": "An oppressive weight of isolation presses down amid the vastness."
+        },
+        {
+          "floor": 21,
+          "ceiling": 21,
+          "result": "Flickering lights dance over water, like will-o'-the-wisps."
+        },
+        {
+          "floor": 22,
+          "ceiling": 22,
+          "result": "The scent of wet peat smoke drifts from hidden sources."
+        },
+        {
+          "floor": 23,
+          "ceiling": 23,
+          "result": "Cool mist condenses on skin, forming beads of moisture."
+        },
+        {
+          "floor": 24,
+          "ceiling": 24,
+          "result": "Sounds distort across the bog, arriving from wrong directions."
+        },
+        {
+          "floor": 25,
+          "ceiling": 25,
+          "result": "A haze of pollen or spores floats lazily in the humid air."
+        },
+        {
+          "floor": 26,
+          "ceiling": 26,
+          "result": "Uneven footing shifts with each step, heightening unease."
+        },
+        {
+          "floor": 27,
+          "ceiling": 27,
+          "result": "Pale moonlight scatters through clouds, illuminating little."
+        },
+        {
+          "floor": 28,
+          "ceiling": 28,
+          "result": "The air tastes metallic, laced with minerals from the soil."
+        },
+        {
+          "floor": 29,
+          "ceiling": 29,
+          "result": "Gentle lapping of water against roots creates rhythmic susurrus."
+        },
+        {
+          "floor": 30,
+          "ceiling": 30,
+          "result": "Fog thickens at dusk, swallowing landmarks in white oblivion."
+        },
+        {
+          "floor": 31,
+          "ceiling": 31,
+          "result": "A faint vibration hums through the ground, origin unknown."
+        },
+        {
+          "floor": 32,
+          "ceiling": 32,
+          "result": "Acrid fumes from bubbling mud pits sting the eyes."
+        },
+        {
+          "floor": 33,
+          "ceiling": 33,
+          "result": "Warmth from decomposing matter rises in unexpected waves."
+        },
+        {
+          "floor": 34,
+          "ceiling": 34,
+          "result": "Reflections in still pools mirror twisted, unrecognizable shapes."
+        },
+        {
+          "floor": 35,
+          "ceiling": 35,
+          "result": "The hush of the mire amplifies every personal heartbeat."
+        },
+        {
+          "floor": 36,
+          "ceiling": 36,
+          "result": "Slick surfaces glisten under intermittent rain showers."
+        },
+        {
+          "floor": 37,
+          "ceiling": 37,
+          "result": "An undercurrent of dread lingers in the unchanging landscape."
+        },
+        {
+          "floor": 38,
+          "ceiling": 38,
+          "result": "Insects' wings beat in unison, creating a droning symphony."
+        },
+        {
+          "floor": 39,
+          "ceiling": 39,
+          "result": "Damp chill penetrates bones, fostering a sense of vulnerability."
+        },
+        {
+          "floor": 40,
+          "ceiling": 40,
+          "result": "Mirages shimmer on the horizon, promising solid ground."
+        },
+        {
+          "floor": 41,
+          "ceiling": 41,
+          "result": "The odor of brackish water mingles with floral sweetness."
+        },
+        {
+          "floor": 42,
+          "ceiling": 42,
+          "result": "Wind whispers through tall grasses, mimicking distant voices."
+        },
+        {
+          "floor": 43,
+          "ceiling": 43,
+          "result": "Twilight hues paint the sky in bruised purples and grays."
+        },
+        {
+          "floor": 44,
+          "ceiling": 44,
+          "result": "Suction sounds echo as unseen creatures stir below."
+        },
+        {
+          "floor": 45,
+          "ceiling": 45,
+          "result": "A blanket of quietude envelops, broken by sudden splashes."
+        },
+        {
+          "floor": 46,
+          "ceiling": 46,
+          "result": "Humidity saturates the air, weighing on spirits and bodies."
+        },
+        {
+          "floor": 47,
+          "ceiling": 47,
+          "result": "Golden rays pierce mist briefly, highlighting hidden perils."
+        },
+        {
+          "floor": 48,
+          "ceiling": 48,
+          "result": "The tang of salt from ancient seas lingers in the breeze."
+        },
+        {
+          "floor": 49,
+          "ceiling": 49,
+          "result": "Creaking of submerged wood hints at buried structures."
+        },
+        {
+          "floor": 50,
+          "ceiling": 50,
+          "result": "Fog rolls in waves, alternately revealing and concealing."
+        },
+        {
+          "floor": 51,
+          "ceiling": 51,
+          "result": "A low fog clings to ankles, cooling the lower extremities."
+        },
+        {
+          "floor": 52,
+          "ceiling": 52,
+          "result": "Echoes of bird calls warp into haunting, elongated cries."
+        },
+        {
+          "floor": 53,
+          "ceiling": 53,
+          "result": "Peat smoke's acrid bite irritates throats and lungs."
+        },
+        {
+          "floor": 54,
+          "ceiling": 54,
+          "result": "Sun-warmed pools release vapors that distort vision."
+        },
+        {
+          "floor": 55,
+          "ceiling": 55,
+          "result": "The mire's embrace feels alive, reluctant to release."
+        },
+        {
+          "floor": 56,
+          "ceiling": 56,
+          "result": "Distant howls carry across water, directionless and wild."
+        },
+        {
+          "floor": 57,
+          "ceiling": 57,
+          "result": "Mossy scents blend with the sharpness of exposed roots."
+        },
+        {
+          "floor": 58,
+          "ceiling": 58,
+          "result": "Overcast skies press low, enhancing the claustrophobic feel."
+        },
+        {
+          "floor": 59,
+          "ceiling": 59,
+          "result": "Bubbling gases erupt sporadically, releasing sulfurous bursts."
+        },
+        {
+          "floor": 60,
+          "ceiling": 60,
+          "result": "The air shimmers with heat haze over steaming vents."
+        },
+        {
+          "floor": 61,
+          "ceiling": 61,
+          "result": "Whispers of wind through hollow reeds sound like sighs."
+        },
+        {
+          "floor": 62,
+          "ceiling": 62,
+          "result": "A pervasive dampness soaks through fabrics, unrelenting."
+        },
+        {
+          "floor": 63,
+          "ceiling": 63,
+          "result": "Illusory lights flicker at the periphery, teasing the eye."
+        },
+        {
+          "floor": 64,
+          "ceiling": 64,
+          "result": "The flavor of iron-rich water taints every swallow."
+        },
+        {
+          "floor": 65,
+          "ceiling": 65,
+          "result": "Gentle rain patters on leaves, a constant soft percussion."
+        },
+        {
+          "floor": 66,
+          "ceiling": 66,
+          "result": "Mist swirls in eddies, stirred by invisible currents."
+        },
+        {
+          "floor": 67,
+          "ceiling": 67,
+          "result": "A sense of timelessness pervades the unchanging bog."
+        },
+        {
+          "floor": 68,
+          "ceiling": 68,
+          "result": "Faint tremors ripple through the mud, unsettling balance."
+        },
+        {
+          "floor": 69,
+          "ceiling": 69,
+          "result": "Rot's sweet-sickly aroma wafts from concealed decay."
+        },
+        {
+          "floor": 70,
+          "ceiling": 70,
+          "result": "Twilight deepens shadows, merging land and water."
+        },
+        {
+          "floor": 71,
+          "ceiling": 71,
+          "result": "Insect choruses swell and fade in rhythmic pulses."
+        },
+        {
+          "floor": 72,
+          "ceiling": 72,
+          "result": "Cool drafts rise from fissures, carrying subterranean chill."
+        },
+        {
+          "floor": 73,
+          "ceiling": 73,
+          "result": "Refractions in water create kaleidoscopic patterns."
+        },
+        {
+          "floor": 74,
+          "ceiling": 74,
+          "result": "The weight of humidity burdens movement and thought."
+        },
+        {
+          "floor": 75,
+          "ceiling": 75,
+          "result": "Distant splashes punctuate the otherwise still quiet."
+        },
+        {
+          "floor": 76,
+          "ceiling": 76,
+          "result": "Peaty earth clings to skin, leaving dark stains."
+        },
+        {
+          "floor": 77,
+          "ceiling": 77,
+          "result": "Fog horns of wind through trees moan lowly."
+        },
+        {
+          "floor": 78,
+          "ceiling": 78,
+          "result": "A metallic aftertaste lingers from mineral-laden mist."
+        },
+        {
+          "floor": 79,
+          "ceiling": 79,
+          "result": "Sunsets bleed red across the watery expanse."
+        },
+        {
+          "floor": 80,
+          "ceiling": 80,
+          "result": "Squelching mud records every passage with audible protest."
+        },
+        {
+          "floor": 81,
+          "ceiling": 81,
+          "result": "An aura of abandonment hangs heavy in the air."
+        },
+        {
+          "floor": 82,
+          "ceiling": 82,
+          "result": "Bubbles of marsh gas pop with faint, explosive reports."
+        },
+        {
+          "floor": 83,
+          "ceiling": 83,
+          "result": "Warm updrafts carry scents of blooming water plants."
+        },
+        {
+          "floor": 84,
+          "ceiling": 84,
+          "result": "Echoes bounce unpredictably off dense reed walls."
+        },
+        {
+          "floor": 85,
+          "ceiling": 85,
+          "result": "The chill of evening descends swiftly, sharpening senses."
+        },
+        {
+          "floor": 86,
+          "ceiling": 86,
+          "result": "Oily sheens on water reflect distorted starlight."
+        },
+        {
+          "floor": 87,
+          "ceiling": 87,
+          "result": "A hush falls at night, amplifying nocturnal rustles."
+        },
+        {
+          "floor": 88,
+          "ceiling": 88,
+          "result": "Humidity curls hair and warps wood alike."
+        },
+        {
+          "floor": 89,
+          "ceiling": 89,
+          "result": "Phantom lights bob over distant pools, mesmerizing."
+        },
+        {
+          "floor": 90,
+          "ceiling": 90,
+          "result": "The scent of fresh rain mixes with underlying rot."
+        },
+        {
+          "floor": 91,
+          "ceiling": 91,
+          "result": "Wind carves paths through mist, fleeting and ephemeral."
+        },
+        {
+          "floor": 92,
+          "ceiling": 92,
+          "result": "Twilight's glow suffuses the air with melancholy."
+        },
+        {
+          "floor": 93,
+          "ceiling": 93,
+          "result": "Suction grips ankles, a reminder of the mire's hold."
+        },
+        {
+          "floor": 94,
+          "ceiling": 94,
+          "result": "A low buzz of life thrums beneath the surface calm."
+        },
+        {
+          "floor": 95,
+          "ceiling": 95,
+          "result": "Cool mist veils the sun, diffusing light into haze."
+        },
+        {
+          "floor": 96,
+          "ceiling": 96,
+          "result": "Distant cries warp into laughter-like echoes."
+        },
+        {
+          "floor": 97,
+          "ceiling": 97,
+          "result": "ACTION + THEME"
+        },
+        {
+          "floor": 98,
+          "ceiling": 98,
+          "result": "Peat's earthy richness fills nostrils with each breath."
+        },
+        {
+          "floor": 99,
+          "ceiling": 99,
+          "result": "ROLL TWICE"
+        },
+        {
+          "floor": 100,
+          "ceiling": 100,
+          "result": "Overhead clouds mirror the bog's mottled surface."
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Atmosphere",
+      "summary": "Mire — Atmosphere"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Domain",
+      "name": "Locations",
+      "tags": [
+        "domain"
+      ],
+      "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "A cluster of gnarled willows arching over a stagnant pool."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "A sunken path lined with half-buried flagstones."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "A reed-choked inlet where water laps against crumbling banks."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "A foggy hollow filled with buzzing insects."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "A peat bog dotted with exposed roots and sucking mud."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "A drowned meadow where wildflowers cling to hummocks."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "A narrow causeway of packed earth snaking through the mire."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "A bubbling spring surrounded by sulfurous vapors."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "A hidden grotto beneath overhanging sedges."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "A vast fen where mist rises in eerie columns."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "A collapsed peat cutter's hut sinking into the bog."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "A shallow ford crossed by twisted vines."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "A glade of carnivorous plants with glistening leaves."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "A forgotten shrine half-submerged in brackish water."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "A network of animal trails weaving through tall grasses."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "A deep sinkhole filled with dark, still water."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "A ridge of firm ground overlooking endless marsh."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "A cluster of ancient standing stones tilted in the mud."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "A foggy expanse where distant shapes loom indistinctly."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "A narrow channel navigated by flat-bottomed boats."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "A boggy woodland with trees draped in moss."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "A hidden cache of rusted tools buried in peat."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "A misty vale echoing with unseen bird calls."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "A drowned forest where trunks rise like skeletal fingers."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "A peat fire smoldering in an open pit."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "A secluded pond ringed by thorny brambles."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "A winding brook that disappears into underground caverns."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "A hummocky plain scarred by old drainage ditches."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "A fog-bound islet accessible only at low tide."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "A cluster of bubbling mud pots emitting warm steam."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "A reed bed hiding nests of waterfowl."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "A sunken village with rooftops barely visible above the water."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "A narrow defile flanked by steep, slippery banks."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "A glade where fireflies dance in unnatural patterns."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "A forgotten mill wheel half-buried in silt."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "A vast swamp where echoes distort across the water."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "A hidden spring feeding a crystal-clear pool."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "A bog iron deposit exposed in a shallow excavation."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "A misty copse of alder trees with twisted branches."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "A drowned road marked by weathered signposts."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "A secluded bayou overgrown with hanging vines."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "A peat stack slowly dissolving in the damp."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "A foggy knoll crowned by a lone, dead tree."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "A network of beaver dams creating shallow lakes."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "A deep quagmire concealed by floating vegetation."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "A ridge of ancient barrows eroding into the mire."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "A bubbling tar pit surrounded by blackened earth."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "CONNECTION WEB"
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "ACTION + THEME"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Locations",
+      "summary": "Mire — Locations"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Domain",
+      "name": "Discoveries",
+      "tags": [
+        "domain"
+      ],
+      "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "A rusted dagger protruding from a peat mound."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Skeletal remains of an ancient beast half-submerged in muck."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "A cluster of bioluminescent fungi glowing faintly in the mist."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Footprints of an unknown creature vanishing into a sinkhole."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "A weathered journal bound in oiled leather, pages stuck together."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "An old stone idol partially buried in the bog, eyes seeming to watch."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Bubbles rising from a pool, releasing a stench of decay."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "A hidden cache of tarnished silver coins in a rotted satchel."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Carnivorous plants with snapping jaws amid the reeds."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "A faint trail of blood leading to a quagmire."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Echoes of distant, mournful cries carried on the wind."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "A forgotten campsite with abandoned gear sinking into the mud."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Strange runes carved into a gnarled tree trunk."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "A pool of still water reflecting an impossible sky."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Remains of a wooden bridge collapsed into the fen."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "A small, ornate key encrusted with dried mud."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Whispers seeming to emanate from a cluster of cattails."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "A preserved corpse in the peat, clothing from a bygone era."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Glowing insects swarming over a patch of vibrant moss."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "A map fragment depicting hidden paths through the mire."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "An abandoned rowboat filled with stagnant water."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Traces of a recent struggle in the churned mud."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "A crystal vial containing a murky liquid, stoppered tightly."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Birds circling above a concealed burrow."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "A stone tablet inscribed with warnings in an ancient tongue."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Faint lights dancing across the bog at dusk."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "A collection of animal bones arranged in a deliberate pattern."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "An old lantern still flickering weakly in the fog."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Tracks of webbed feet imprinting the soft earth."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "A sealed chest partially sunk, lock rusted shut."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Murmurs of voices from beneath a layer of scum-covered water."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "A rare flower blooming atop a hummock of grass."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Remnants of a ritual circle formed by standing reeds."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "A lone figure's silhouette in the distant haze, unmoving."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "An arrowhead embedded in a decaying log."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Pockets of quicksand marked by subtle vibrations."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "A forgotten shrine adorned with wilted offerings."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Insects preserved in amber-like resin from the bog."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "A tattered flag fluttering from a submerged pole."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "Whirlpools forming in a shallow stream, pulling debris under."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "A leather pouch containing dried herbs and bones."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Shadows that linger longer than the light suggests."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "A carved wooden totem depicting serpentine forms."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Bubbles of marsh gas igniting into brief flames."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "A hidden grotto entrance concealed by overhanging vines."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Echoes of laughter distorted by the reeds."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "A brass astrolabe corroded by moisture, dials frozen."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "CONNECTION WEB"
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "DESCRIPTOR + FOCUS"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Discoveries",
+      "summary": "Mire — Discoveries"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Domain",
+      "name": "Banes",
+      "tags": [
+        "domain"
+      ],
+      "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "Quicksand pits that swallow the unwary without warning."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Poisonous gases seeping from decaying peat layers."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "Swarms of bloodthirsty insects clouding the air."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Hidden sinkholes disguised by mossy coverings."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "Thick mud that clings and slows every step."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Deceptive mists leading travelers in endless circles."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Submerged roots tangling legs and pulling under."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Rotting vegetation releasing noxious spores."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Predatory crocodiles lurking in shallow pools."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Treacherous fog banks that muffle cries for help."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Unstable ground crumbling into watery voids."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Venomous snakes coiled among the reeds."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Diseased waters breeding feverish infections."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Phantom lights luring wanderers to doom."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Sucking bogs that trap and preserve victims."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Corrosive acids bubbling from underground springs."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Hordes of leeches infesting stagnant ponds."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Illusory paths vanishing into deep mire."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Fetid odors causing nausea and disorientation."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Ambush predators camouflaged in mud."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "Collapsing peat banks burying paths."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Hallucinogenic fungi spores drifting on winds."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Thorny vines ensnaring limbs in thorny grips."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Flash floods drowning low-lying areas."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Echoing sounds distorting directions and distances."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Buried relics cursed with malevolent energies."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Swirling eddies pulling swimmers beneath."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Toxic blooms poisoning water sources."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Hidden pitfalls filled with sharpened stakes."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Whispering winds carrying misleading voices."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Overgrown trails hiding venomous creatures."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Sodden earth eroding underfoot suddenly."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Packs of wild dogs scavenging in packs."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Corrupted pools radiating unnatural chill."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Deceptive islands sinking when stepped upon."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Fungal infections spreading from damp wounds."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "Sudden quagmires forming after rains."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Camouflaged traps set by reclusive hermits."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Eerie silences broken by distant howls."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "Acidic rains scarring skin and gear."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Subterranean gases igniting into flames."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Entangling weeds growing rapidly overnight."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Lost souls haunting misty expanses."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Corrosive slime coating submerged objects."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Vicious birds diving from foggy skies."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Unmarked graves releasing restless spirits."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Drowning weeds that grasp and pull down."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "Pestilent flies carrying debilitating plagues."
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "DESCRIPTOR + FOCUS"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Banes",
+      "summary": "Mire — Banes"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Domain",
+      "name": "Boons",
+      "tags": [
+        "domain"
+      ],
+      "description": "The Mire Domain covers bogs, fens, peatlands, and drowned lowlands where the ground cannot be trusted. Every step may sink, suck, or slide, and water hides both hazards and long-rotting secrets. Light behaves badly here—muted, reflected, or swallowed by mist—and sound carries in strange ways across reeds and pools. In a Mire, movement is slow, landmarks are deceptive, and anything abandoned tends to stay that way until someone is unlucky enough to find it again.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "A hidden spring of clear, drinkable water bubbles up through the muck."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Rare medicinal herbs thrive in the nutrient-rich peat."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "A sturdy raft abandoned by previous travelers floats nearby."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Friendly fireflies guide wanderers through the fog at night."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "A concealed path of solid ground snakes through the bog."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Preserved ancient relics surface from the drowning mud."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Nutritious berries cluster on resilient mire bushes."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "A hermit offers shelter and local knowledge in exchange for aid."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Camouflaging mud provides natural cover from pursuers."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Echoing calls reveal the locations of hidden game trails."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "A forgotten cache of tools and supplies lies half-buried."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Healing mud packs soothe wounds and ailments."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Stable hummocks form a chain of safe stepping stones."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Rare fungi with potent alchemical properties grow abundantly."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "A sympathetic spirit whispers warnings of nearby dangers."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Overgrown vines serve as ropes for crossing deep pools."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Sunken logs provide makeshift bridges over treacherous waters."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "A flock of birds signals the presence of edible insects."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Isolated dry knolls offer vantage points for scouting."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Preserved leather goods from long-lost expeditions remain intact."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "A natural fog bank conceals movements from enemies."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Edible roots swell in the waterlogged soil."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "A reclusive fisherman shares bountiful fishing spots."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Mire gases can be harnessed for simple flares."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Hidden grottos shelter valuable mineral deposits."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "A loyal swamp creature befriends those who show kindness."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Firm clay beds yield material for crafting pottery."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Distant drumming leads to a safe haven amid the reeds."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Peat blocks cut easily for building temporary shelters."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "A map etched on bark reveals shortcuts through the fen."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Glow worms illuminate dark pools, revealing submerged finds."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Resilient reeds weave into strong baskets and mats."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "A wandering trader barters rare mire-sourced goods."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Natural sinkholes trap and preserve fresh rainwater."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Echoes amplify calls for help, drawing potential rescuers."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Buried amber chunks hold ancient insects for study."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "A tameable mire pony grazes on tough grasses."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Mist-shrouded islets hide caches of forgotten wealth."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Edible moss covers rocks in nutritious layers."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "A knowledgeable bog witch offers potions for favors."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Stable ridges provide elevated paths above flood levels."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Rare orchids bloom with petals of medicinal value."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Sympathetic reeds sway to reveal wind patterns for navigation."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Sunken boats yield salvageable timber and rope."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "A chorus of frogs indicates nearby clean water sources."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Isolated peat mounds burn slowly for long-lasting fires."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Preserved scrolls in wax-sealed containers hold lost lore."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "A friendly otter leads to hidden fish traps."
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "DESCRIPTOR + FOCUS"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Boons",
+      "summary": "Mire — Boons"
+    }
+  ]
+}

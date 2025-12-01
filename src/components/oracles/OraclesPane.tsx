@@ -8,7 +8,7 @@ import { formatComboOracleThread, formatTableRollThread } from '../../core/table
 
 export function OraclesPane() {
   const { registry, loadTables } = useTableStore();
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['core', 'more']));
 
   useEffect(() => {
     if (!registry) {
@@ -55,13 +55,13 @@ export function OraclesPane() {
     });
   };
 
-  // Separate core and user oracles
+  // Separate core and more oracles (both core and user sources)
   const coreOracles = Array.from(registry.oracles.values())
-    .filter((o) => o.source === 'core')
+    .filter((o) => o.subCategory === 'core')
     .sort((a, b) => a.table.name.localeCompare(b.table.name));
 
-  const userOracles = Array.from(registry.oracles.values())
-    .filter((o) => o.source === 'user')
+  const moreOracles = Array.from(registry.oracles.values())
+    .filter((o) => o.subCategory === 'more')
     .sort((a, b) => a.table.name.localeCompare(b.table.name));
 
   const renderOracleList = (oracles: OracleTableMetadata[]) => {
@@ -141,25 +141,25 @@ export function OraclesPane() {
         )}
       </div>
 
-      {/* User Oracles */}
-      {userOracles.length > 0 && (
+      {/* More Oracles */}
+      {moreOracles.length > 0 && (
         <div className="mb-4">
           <button
-            onClick={() => toggleSection('user')}
+            onClick={() => toggleSection('more')}
             className="flex items-center gap-2 w-full text-left px-3 py-2 hover:bg-slate-800 transition-colors"
           >
-            {expandedSections.has('user') ? (
+            {expandedSections.has('more') ? (
               <ChevronDown className="w-4 h-4 text-slate-400" />
             ) : (
               <ChevronRight className="w-4 h-4 text-slate-400" />
             )}
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              User Oracles
+              More Oracles
             </h3>
           </button>
-          {expandedSections.has('user') && (
+          {expandedSections.has('more') && (
             <div className="bg-slate-800 rounded-lg overflow-hidden mt-2">
-              {renderOracleList(userOracles)}
+              {renderOracleList(moreOracles)}
             </div>
           )}
         </div>

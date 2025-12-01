@@ -26,7 +26,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
   },
   tables: {
     loadAll: () => electron.ipcRenderer.invoke("tables:loadAll"),
-    getUserDir: () => electron.ipcRenderer.invoke("tables:getUserDir")
+    getUserDir: () => electron.ipcRenderer.invoke("tables:getUserDir"),
+    saveForgeFile: (category, filename, data) => electron.ipcRenderer.invoke("tables:saveForgeFile", { category, filename, data })
   },
   weaves: {
     loadAll: () => electron.ipcRenderer.invoke("weaves:loadAll"),

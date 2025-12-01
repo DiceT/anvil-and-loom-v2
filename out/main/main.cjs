@@ -1,4 +1,26 @@
 "use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 const electron = require("electron");
 const path = require("path");
 const url = require("url");
@@ -120,13 +142,24 @@ async function loadJsonFilesFromDirectory(dirPath) {
   }
 }
 async function loadAllTables() {
-  const [coreAspects, coreDomains, coreOracles, userAspects, userDomains, userOracles] = await Promise.all([
+  const [
+    coreAspects,
+    coreDomains,
+    coreOracles,
+    coreOraclesMore,
+    userAspects,
+    userDomains,
+    userOracles,
+    userOraclesMore
+  ] = await Promise.all([
     loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "aspects")),
     loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "domains")),
     loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "oracles")),
+    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "oracles", "more")),
     loadJsonFilesFromDirectory(path.join(getUserDataDir(), "aspects")),
     loadJsonFilesFromDirectory(path.join(getUserDataDir(), "domains")),
-    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "oracles"))
+    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "oracles")),
+    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "oracles", "more"))
   ]);
   return {
     aspects: {
@@ -139,7 +172,9 @@ async function loadAllTables() {
     },
     oracles: {
       core: coreOracles,
-      user: userOracles
+      coreMore: coreOraclesMore,
+      user: userOracles,
+      userMore: userOraclesMore
     }
   };
 }
@@ -161,6 +196,34 @@ function setupTableHandlers() {
   });
   electron.ipcMain.handle("tables:getUserDir", async () => {
     return getUserDataDir();
+  });
+  electron.ipcMain.handle("tables:saveForgeFile", async (event, { category, filename, data }) => {
+    try {
+      const { dialog, BrowserWindow } = await import("electron");
+      const win = BrowserWindow.fromWebContents(event.sender);
+      if (!win) {
+        return { success: false, error: "Window not found" };
+      }
+      const result = await dialog.showSaveDialog(win, {
+        title: "Save Table Forge File",
+        defaultPath: `${filename}.json`,
+        filters: [
+          { name: "JSON Files", extensions: ["json"] },
+          { name: "All Files", extensions: ["*"] }
+        ]
+      });
+      if (result.canceled || !result.filePath) {
+        return { success: false, error: "Save cancelled" };
+      }
+      await fs.writeFile(result.filePath, JSON.stringify(data, null, 2), "utf-8");
+      return { success: true, path: result.filePath };
+    } catch (error) {
+      console.error("Failed to save forge file:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error"
+      };
+    }
   });
 }
 const CORE_WEAVES_DIR = path.join(process.cwd(), "app", "core-data", "weaves");
