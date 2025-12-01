@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
-import { Dices, Type, Settings, X } from 'lucide-react';
+import { Dices, Type, Settings, X, Sparkles } from 'lucide-react';
 
 interface SettingsLayoutProps {
-    activeCategory: 'dice' | 'editor';
-    onCategoryChange: (category: 'dice' | 'editor') => void;
+    activeCategory: 'dice' | 'editor' | 'ai';
+    onCategoryChange: (category: 'dice' | 'editor' | 'ai') => void;
     onClose: () => void;
     children: ReactNode;
 }
@@ -32,8 +32,8 @@ export function SettingsLayout({ activeCategory, onCategoryChange, onClose, chil
                         <button
                             onClick={() => onCategoryChange('dice')}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeCategory === 'dice'
-                                    ? 'bg-purple-600/20 text-purple-300'
-                                    : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                                ? 'bg-purple-600/20 text-purple-300'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
                                 }`}
                         >
                             <Dices className="w-4 h-4" />
@@ -42,12 +42,22 @@ export function SettingsLayout({ activeCategory, onCategoryChange, onClose, chil
                         <button
                             onClick={() => onCategoryChange('editor')}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeCategory === 'editor'
-                                    ? 'bg-purple-600/20 text-purple-300'
-                                    : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                                ? 'bg-purple-600/20 text-purple-300'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
                                 }`}
                         >
                             <Type className="w-4 h-4" />
                             Editor
+                        </button>
+                        <button
+                            onClick={() => onCategoryChange('ai')}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeCategory === 'ai'
+                                ? 'bg-purple-600/20 text-purple-300'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+                                }`}
+                        >
+                            <Sparkles className="w-4 h-4" />
+                            AI
                         </button>
                     </div>
 

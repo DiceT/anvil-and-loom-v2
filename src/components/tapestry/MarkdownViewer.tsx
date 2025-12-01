@@ -7,9 +7,10 @@ import { WikiLink } from './WikiLink';
 
 interface MarkdownViewerProps {
     markdown: string;
+    onInterpretThread?: (thread: ThreadModel) => Promise<void>;
 }
 
-export function MarkdownViewer({ markdown }: MarkdownViewerProps) {
+export function MarkdownViewer({ markdown, onInterpretThread }: MarkdownViewerProps) {
     return (
         <div className="p-8 bg-slate-900">
             <div className="prose prose-slate prose-invert max-w-none" style={{ color: '#eeeeff' }}>
@@ -59,7 +60,16 @@ export function MarkdownViewer({ markdown }: MarkdownViewerProps) {
                                     try {
                                         const jsonString = String(codeProps.children).replace(/\n$/, '');
                                         const card = JSON.parse(jsonString) as ThreadModel;
-                                        return <PanelThreadCard card={card} />;
+                                        return (
+                                            <PanelThreadCard
+                                                card={card}
+                                                onInterpretWithAi={
+                                                    onInterpretThread
+                                                        ? () => onInterpretThread(card)
+                                                        : undefined
+                                                }
+                                            />
+                                        );
                                     } catch (e) {
                                         return (
                                             <div className="p-4 text-red-500 bg-red-900/20 rounded border border-red-900/50">

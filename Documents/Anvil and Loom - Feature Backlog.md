@@ -90,6 +90,7 @@ _Source tags used below:_
 | Priority | Feature                                   | Source(s)                     | Tags                                   | Notes |
 |---------:|-------------------------------------------|-------------------------------|----------------------------------------|-------|
 | P0       | Typed Panels (character, place, item…)   | Kanka, WA, LK                | #kanka #worldanvil #legendkeeper       | Each type can have its own template. |
+| P0       | **Place Panels (First Look)**   | Anvil & Loom  | #kanka #worldanvil #legendkeeper       | Each type can have its own template. |
 | P0       | Custom fields per type                    | Kanka, WA                    | #kanka #worldanvil                     | E.g. “CR”, “alignment”, “population”. |
 | P1       | Entity relationships / links graph        | Kanka, WA                    | #kanka #worldanvil                     | Families, factions, “reports to”, “lives in”. |
 | P1       | Inline statblocks / system-agnostic sheets| WA                           | #worldanvil                            | System-neutral first; later system presets. |
@@ -172,7 +173,7 @@ A running list of things we want to argue about later:
 |---------:|----------------------------------------------------|------------------------------------|----------------------------|-------|
 | P0       | **Local oracle & table roller**                      | Anvil & Loom                       | #original                  | Core engine for d100 tables, Aspects/Domains, etc. |
 | P0       | **Weave table support**             | Anvil & Loom   | #original | Core support for The Weave: build and resolve combined Aspect/Domain tables (Atmosphere, Locations, Accoutrements, Banes, Boons) using macros like ACTION+ASPECT, DESCRIPTOR+FOCUS, CONNECTION WEB, and ROLL TWICE. The Weave must run locally alongside standard tables. |
-| P0       | AI-assisted oracle interpretation (optional API)   | Anvil & Loom + LLM integration     | #ai #original              | Take raw rolls and suggest narrative meaning in context. |
+| P0       | **AI-assisted oracle interpretation (optional API)**   | Anvil & Loom + LLM integration     | #ai #original              | Take raw rolls and suggest narrative meaning in context. |
 | P1       | AI-powered tagging & link suggestions              | Obsidian-style + AI                | #ai #obsidian #original    | Suggest tags, backlinks, and related entries while writing. |
 | P1       | AI prompts from table results (“expand this”)      | Oracles + AI                       | #ai #original              | Click a result to generate 2–3 variations or elaborations. |
 | P1       | AI-assisted session summaries & recap generation   | Journals + AI                      | #ai #original              | Turn raw session logs into summaries, NPC lists, loose threads. |

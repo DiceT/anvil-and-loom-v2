@@ -55,6 +55,7 @@ export interface ElectronAPI {
       error?: string;
     }>;
     getUserDir: () => Promise<string>;
+    saveForgeFile: (category: string, filename: string, data: any) => Promise<{ success: boolean; path?: string; error?: string }>;
   };
   weaves: {
     loadAll: () => Promise<{ success: boolean; data?: Weave[]; error?: string }>;

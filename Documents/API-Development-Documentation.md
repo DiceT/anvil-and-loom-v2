@@ -1,8 +1,8 @@
 # Anvil and Loom - API & Development Documentation
 
-**Version:** 0.2.0
+**Version:** 0.3.0
 **Description:** A story-first TTRPG engine for journaling, dice, and oracles
-**Generated:** 2025-11-28
+**Generated:** 2025-11-30
 
 ---
 
@@ -18,17 +18,21 @@
 8. [Editor Stack](#editor-stack)
 9. [Result Logging](#result-logging)
 10. [Core Engines & Tools](#core-engines--tools)
-11. [Settings](#settings)
-12. [Dependencies](#dependencies)
-13. [Known Limitations & Next Steps](#known-limitations--next-steps)
+11. [AI Integration System](#ai-integration-system)
+12. [Table Forge](#table-forge)
+13. [Settings](#settings)
+14. [Dependencies](#dependencies)
+15. [Known Limitations & Next Steps](#known-limitations--next-steps)
 
 ---
 
 ## Project Overview
 
-- Electron + React 19 + TypeScript desktop app with rc-dock layout and Tailwind styling.
+- Electron + React 19 + TypeScript desktop app with Obsidian-style pane layout and Tailwind styling.
 - Tapestry system stores campaigns on disk with registry, per-world config, entry tree, and Milkdown-based editor.
 - Dice, Oracles, Environments, and Weave tools generate Result Cards; logging can also append cards directly into the active entry.
+- AI integration system with persona-based content generation and contextual interpretation.
+- Table Forge tool for AI-powered oracle/table creation with sophisticated prompt engineering.
 - 3D dice implementation and assets were intentionally removed (per Loomwright notes). Only the 2D dice roller is active; keep Electron/build config untouched.
 
 ## Architecture & Layout
@@ -97,6 +101,7 @@ Exposes `window.electron`:
 
 - `tables.loadAll(): Promise<{ success, data?, error? }>` loads core/user tables from `app/core-data/tables` and `%userData%/AnvilAndLoom/assets/tables`.
 - `tables.getUserDir(): Promise<string>`
+- `tables.saveForgeFile(category, filename, data): Promise<{ success, path?, error? }>` saves generated Table Forge files to user directory.
 - `weaves.loadAll(): Promise<{ success, data?: Weave[] }>` merges core/user weaves.
 - `weaves.save(weave): Promise<{ success }>`
 - `weaves.delete(id): Promise<{ success }>`
@@ -117,18 +122,22 @@ Exposes `window.electron`:
 
 ## Renderer Systems & State
 
-- **Docking (`rc-dock`)**: `DockContainer` uses `panelRegistry` + `defaultLayout` for left (Tapestry), center (Editor), right (Tools). `useDockingStore` tracks layout/open panels, saves to `localStorage` (`anvil_dock_layout`); IPC settings handlers exist but are not yet wired.
-- **TopBar/Right pane**: `TopBar` switches `useToolStore.rightPaneMode` between dice/environments/oracles/weave/results; Settings button opens SettingsModal. `GlobalLastResult` stays pinned at the bottom of the right panel.
+- **Layout**: Obsidian-style three-pane system with collapsible left/right panes and resizable drag handles. Replaced rc-dock with custom pane system.
+- **TopBar/Toolbars**: Top toolbar contains collapse buttons and mode switchers for left pane (Tapestry/Tags/Bookmarks) and right pane (Dice/Environments/Oracles/Stitchboard/Weave/Results). Table Forge button (Wand icon) opens generator in center lane. `GlobalLastResult` stays pinned at the bottom of the right panel.
 - **State stores (Zustand)**:
   - `useTapestryStore`: registry, `activeTapestryId`, `tree`, loading/error, CRUD + tree loaders.
   - `useEditorStore`: global `mode`, `openEntries`, `activeEntryId`, dirty tracking, `openEntry/closeEntry/saveEntry/saveAllEntries`.
-  - `useTabStore`: tab list for editor/weave tabs with `openTab/closeTab/setActiveTab/updateTabTitle`.
+  - `useTabStore`: tab list for entry/weave/tableforge tabs with `openTab/closeTab/setActiveTab/updateTabTitle`.
   - `useResultsStore`: in-memory result cards (`addCard/clearCards/loadCards`).
   - `useToolStore`: `activeTool`, `rightPaneMode`, and `requestExpandPack` for environment deep-links.
   - `useWeaveStore`: load/save/delete weaves via IPC; local creation/update with range recalculation.
   - `useTableStore`: load tables into `TableRegistry`.
+  - `useAiStore`: AI settings (model, URI, API key), persona state (7 personas with name/instruction overrides), active persona selection.
   - `useSettingsStore`: persisted `GlobalSettings` (localStorage key `anvil-loom-settings`).
-  - `useDockingStore`: layout persistence (localStorage).
+  - `usePaneStore`: pane widths and collapse states.
+  - `useLeftPaneStore`: left pane mode and collapse state.
+  - `useTagStore`: tag indexing and filtering for panels.
+  - `useDialogStore`: global dialog management for confirmations.
   - `useDiceStore`: legacy 3D dice settings, currently unused in UI.
 
 ## Tapestry Workflow
@@ -190,7 +199,75 @@ Exposes `window.electron`:
   - `logWeaveResult` logs a card with target metadata (aspect/domain/oracle/combo).
   - IPC merges core (`app/core-data/weaves`) and user (`%userData%/AnvilAndLoom/assets/weaves`) definitions; save/delete operate in user dir.
   - UI: `WeaveTool` lists weaves, roll, open, delete, create placeholder weave; opens `WeaveEditor` tab for editing rows, die size, targets; saves via IPC.
-- **Right pane tools**: modes `dice`, `environments`, `oracles`, `weave`, `results` driven by `useToolStore`. Environment deep-links use `requestExpandPack` to open packs from Result Cards. `GlobalLastResult` is fixed at bottom of the right lane.
+- **Right pane tools**: modes `dice`, `environments`, `oracles`, `weave`, `results`, `stitchboard` driven by `useToolStore`. Environment deep-links use `requestExpandPack` to open packs from Result Cards. `GlobalLastResult` is fixed at bottom of the right lane.
+
+## AI Integration System
+
+- **AI Client** (`core/ai/aiClient.ts`):
+  - `callAi(uri, apiKey, model, messages) => Promise<AiResponse>` - Centralized OpenAI-compatible API client with error handling.
+  - Supports any OpenAI-compatible endpoint (OpenAI, Anthropic with adapter, local LLMs).
+  - Parses JSON responses and handles network/API errors gracefully.
+
+- **Persona System** (`core/ai/personaDefaults.ts`):
+  - 7 default GM personas: Weaver of Fates, Keeper of Shadows, Voice of the Wilds, Herald of the Void, Oracle of Stars, Chronicler of Ruins, Wandering Sage.
+  - Each persona has default name and instructions loaded from markdown files.
+  - Users can override persona names and instructions per-persona.
+  - Active persona selection affects all AI-generated content.
+
+- **Prompt Engineering** (`core/ai/promptBuilder.ts`):
+  - `buildFirstLookPrompt()` - Generates contextual prompts for place introductions.
+  - Universal GM instructions template for consistent AI behavior.
+  - Persona instructions appended to system prompts.
+
+- **Response Parsing** (`core/ai/responseParser.ts`):
+  - Parses AI responses into structured formats (Content/Result sections).
+  - Handles various response formats and fallbacks.
+
+- **Thread Integration**:
+  - "Interpret with AI" button on thread cards triggers contextual interpretation.
+  - AI interpretations displayed as separate purple-themed thread cards.
+  - Interpretations include persona name, content analysis, and actionable results.
+
+- **First Look Feature** (`core/tapestry/firstLook.ts`):
+  - Generates AI-powered place introductions using Atmosphere and Discovery oracles.
+  - Leverages active aspects, domains, and weave context.
+  - Creates formatted thread cards with structured output.
+
+## Table Forge
+
+- **Table Generation** (`core/tables/tableForge.ts`):
+  - `createEmptyAspectTables(name, description, customTags)` - Creates 6 tables: Objectives, Atmosphere, Manifestations, Discoveries, Banes, Boons.
+  - `createEmptyDown Tables(name, description, customTags)` - Creates 6 tables: Objectives, Atmosphere, Locations, Discoveries, Banes, Bo ons.
+  - `createEmptyOracleTable(name, description, customTags)` - Creates single 100-entry oracle table.
+  - Automatic macro insertion at high roll ranges (ACTION+THEME, DESCRIPTOR+FOCUS, CONNECTION WEB, ROLL TWICE).
+  - Custom tags merged with default category tags.
+
+- **AI Content Generation** (`core/tables/aiTableFiller.ts`):
+  - `fillTableWithAI(table, kind, context)` - Fills empty rows in a single table.
+  - `fillTablesWithAI(tables, context)` - Batch fills all tables in a set.
+  - Sophisticated prompt engineering with:
+    - Weirdness level detection (Mundane/Mixed/Bizarre)
+    - Oracle shape & structure guidance (Action/Theme/Descriptor/Focus)
+    - Quality filtering and diversity requirements
+    - Persona integration for tone consistency
+  - Separate prompt systems for Aspects/Domains vs Oracles.
+  - JSON-only output contract with robust parsing.
+
+- **UI** (`components/tableforge/TableForgePanel.tsx`):
+  - Type selector (Aspect/Domain/Oracle toggle buttons).
+  - Name input (required), Description textarea (optional).
+  - Tags input (comma-separated custom tags).
+  - Generate Empty Tables button.
+  - Table preview dropdown for switching between subtables.
+  - JSON preview display.
+  - Individual table AI filling ("Fill this table with AI").
+  - Batch filling ("Fill all tables with AI").
+  - Save to File (exports to user tables directory).
+  - View Table modal (displays Floor/Ceiling/Result in formatted table).
+
+- **Persistence**:
+  - Tables saved as JSON files to `%userData%/AnvilAndLoom/assets/tables/{aspects|domains|oracles}/`.
+  - Files automatically loadable by table system on next startup.
 
 ## Settings
 

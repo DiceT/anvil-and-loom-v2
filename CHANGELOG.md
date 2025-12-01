@@ -2,22 +2,33 @@
 
 ## Unreleased
 
-### Changed
-- **Layout Refactoring:** Transitioned from docking system (rc-dock) to Obsidian-style pane system
-  - Left and right panes now collapsible with collapse buttons in top toolbar
-  - Resizable panes with drag handles for customizable layout
-  - Vertical sidebars on left and right with focused toolbar sections
-- **Toolbar Reorganization:**
-  - Left pane mode switchers (Tapestry/Tags/Bookmarks) now in top horizontal toolbar
-  - Right pane mode switchers (Dice/Environments/Oracles/Stitchboard/Weave/Results) in top toolbar
-  - Collapse buttons positioned in top-left and top-right of toolbar
-- **Tapestry Tree Toolbar:**
-  - New Folder button (FolderTree icon) now creates folders when clicked
-  - New Panel button (Plus icon) creates panels when clicked
-  - Both icons positioned together in tree header toolbar
-- **Dice Tray Access:** Fixed Dice icon in top toolbar to properly open dice tray in right pane
+## 0.3.0 - 2025-11-30
 
 ### Added
+- **AI Integration System:** Full AI-powered interpretation and content generation
+  - AI Settings panel with OpenAI-compatible API configuration
+  - GM Persona system with 7 default personas (customizable names and instructions)
+  - Active persona selection with per-persona instruction overrides
+  - AI client service with centralized error handling and response parsing
+  - "Interpret with AI" button on thread cards for contextual interpretations
+  - AI interpretations displayed as separate purple-themed thread cards
+- **Table Forge:** AI-powered oracle/table generator for solo RPG play
+  - Support for Aspect, Domain, and Oracle table types
+  - Empty table template generation (6 tables for Aspects/Domains, 1 for Oracles)
+  - Sophisticated AI content generation with persona integration
+  - Custom tags input (merged with default category tags)
+  - Individual table filling or batch generation
+  - Save to JSON file (exports to user tables directory)
+  - Table viewer modal with Floor/Ceiling/Result columns
+  - Macro preservation (ACTION+THEME, DESCRIPTOR+FOCUS, ROLL TWICE, CONNECTION WEB)
+  - Comprehensive prompt engineering for quality oracle outputs:
+    - Weirdness level detection (Mundane/Mixed/Bizarre)
+    - Oracle shape & structure guidance (Action/Theme/Descriptor/Focus)
+    - Context-aware content with diversity and quality filtering
+- **First Look Feature:** AI-powered place introduction system
+  - Generates Atmosphere and Discovery results for new places
+  - Leverages active aspects, domains, and weave context
+  - Creates formatted thread cards with structured output
 - Themed confirmation dialogs using global `useDialogStore` (replaced native browser confirm dialogs)
 - "Change Badge" context menu option for panels (right-click to change category)  
 - "Rebuild Index" button in Stitchboard for manual index rebuilding
@@ -33,6 +44,25 @@
   - Real-time header title updates on panel rename
   - Removed redundant H1 title from new panel content
 
+### Changed
+- **Layout Refactoring:** Transitioned from docking system (rc-dock) to Obsidian-style pane system
+  - Left and right panes now collapsible with collapse buttons in top toolbar
+  - Resizable panes with drag handles for customizable layout
+  - Vertical sidebars on left and right with focused toolbar sections
+- **Toolbar Reorganization:**
+  - Left pane mode switchers (Tapestry/Tags/Bookmarks) now in top horizontal toolbar
+  - Right pane mode switchers (Dice/Environments/Oracles/Stitchboard/Weave/Results) in top toolbar
+  - Collapse buttons positioned in top-left and top-right of toolbar
+  - Table Forge button (Wand icon) added to top-right toolbar
+- **Tapestry Tree Toolbar:**
+  - New Folder button (FolderTree icon) now creates folders when clicked
+  - New Panel button (Plus icon) creates panels when clicked
+  - Both icons positioned together in tree header toolbar
+- **Dice Tray Access:** Fixed Dice icon in top toolbar to properly open dice tray in right pane
+- Thread card styling: AI interpretations use distinct purple theme to differentiate from oracle results
+- Renamed "Outgoing" to "Stitches" in Stitchboard
+- All confirmation dialogs now use consistent slate-800/900 theme
+
 ### Fixed
 - Panel tab switching now correctly syncs with editor and Stitchboard
 - Wiki link navigation now opens/activates corresponding tabs
@@ -41,13 +71,19 @@
 - Tab system and editor state now stay synchronized
 - Panel header titles now update immediately when renamed (no app restart needed)
 - New panels now automatically open and focus in the editor
+- Persona loading fixed for browser environment using `import.meta.glob`
+- First Look oracle combo resolution (Descriptor+Focus) now correctly parses macro results
+- Tag search bar position fixed in left pane
 
-### Changed
-- Renamed "Outgoing" to "Stitches" in Stitchboard
-- All confirmation dialogs now use consistent slate-800/900 theme
+### Technical Improvements
+- Centralized AI client with OpenAI-compatible API support
+- Prompt builder system with universal GM instructions
+- Response parser for structured AI outputs
+- Table Forge engine with empty table generation and AI filling
+- IPC handlers for saving forged tables to user directory
+- Comprehensive type definitions for AI settings and personas
 
 ## 0.2.0 - 2025-11-28
-
 
 ### Added
 - Tapestry system for managing worlds/campaigns as on-disk folders with a registry, metadata, and entry tree.

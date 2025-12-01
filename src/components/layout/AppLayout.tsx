@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, FolderTree, Tag, Bookmark, Dices, TentTree, Eclipse, List, Infinity, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FolderTree, Tag, Bookmark, Dices, TentTree, Eclipse, List, Infinity, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, Wand2 } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 import { TopBar } from './TopBar';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
@@ -12,6 +13,7 @@ import { useTapestryStore } from '../../stores/useTapestryStore';
 import { useLeftPaneStore, type LeftPaneMode } from '../../stores/useLeftPaneStore';
 import { usePaneStore } from '../../stores/usePaneStore';
 import { useToolStore, type RightPaneMode } from '../../stores/useToolStore';
+import { useTabStore } from '../../stores/useTabStore';
 import { GlobalDialogManager } from '../ui/GlobalDialogManager';
 
 export function AppLayout() {
@@ -133,6 +135,23 @@ export function AppLayout() {
                 tooltip={label}
               />
             ))}
+          </div>
+
+          {/* Table Forge Button */}
+          <div className="flex items-center px-2 flex-shrink-0">
+            <IconButton
+              icon={Wand2}
+              size="m"
+              tooltip="Table Forge"
+              onClick={() => {
+                const forgeTabId = `tableforge-${uuidv4()}`;
+                useTabStore.getState().openTab({
+                  id: forgeTabId,
+                  type: 'tableforge',
+                  title: 'Table Forge',
+                });
+              }}
+            />
           </div>
 
           {/* Right Collapse Button */}

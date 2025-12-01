@@ -934,4 +934,253 @@ onClick={() => {
 
 ---
 
-*Last Updated: 2025-11-29 19:00 by Weaver*
+### [2025-11-30 00:00] - Weaver - ✅
+**Topic:** Table Forge Integration Complete - AI-Powered Oracle Table Generator
+**Status:** ✅ Complete & Ready for Testing
+**Changes:**
+- **CREATED:** `src/components/tableforge/TableForgePanel.tsx` (main UI component)
+- **CREATED:** `src/core/tables/tableForge.ts` (table generation engine)
+- **CREATED:** `src/core/tables/aiTableFiller.ts` (AI-powered content generation)
+- **MODIFIED:** `src/stores/useTabStore.ts` (extended TabType to include 'tableforge')
+- **MODIFIED:** `src/components/layout/AppLayout.tsx` (added Table Forge button to top-right toolbar)
+- **MODIFIED:** `src/components/layout/CenterLane.tsx` (integrated TableForgePanel rendering)
+
+**Action Needed:** Test the Table Forge feature with AI generation
+
+**Notes:**
+Successfully integrated Table Forge feature into the main application. This is a comprehensive oracle table generator that leverages the active AI Persona system for sophisticated content generation.
+
+**Feature Overview:**
+
+**Table Forge** is a tool for creating oracle/random tables for solo RPG play. Users can:
+1. Create empty table templates (Aspect or Domain type)
+2. Configure table properties (name, description, weirdness level)
+3. Fill tables with AI-generated content using a sophisticated prompt system
+4. Use active AI Persona to influence generated content tone and style
+
+**What I Built:**
+
+**1. TableForgePanel.tsx (Main UI Component)**
+- Located in center lane (as requested, not right pane)
+- Table Type selector (Aspect/Domain toggle buttons)
+- Name input field (required)
+- Description textarea (optional, 2-3 sentence descriptor)
+- Generate Empty Tables button - creates 6 tables of specified type
+- Table preview selector - dropdown to choose which table to view
+- JSON preview display - shows current table structure
+- Two AI fill buttons:
+  - "Fill this table with AI" - fills selected table only
+  - "Fill all tables with AI" - fills all 6 tables at once
+- Status/error messages for user feedback
+- Loading state during AI generation
+
+**Integration Details:**
+```typescript
+const { settings, getEffectivePersona } = useAiStore();
+const persona = getEffectivePersona(activePersonaId);
+
+// Passes to AI:
+- model, uri, apiKey from settings
+- personaInstructions from active persona
+- Table name, type, description
+- Current genre (dark-fantasy)
+```
+
+**2. tableForge.ts (Table Generation Engine)**
+
+**Core Types:**
+```typescript
+export interface ForgeTable {
+  sourcePath: string;
+  category: ForgeCategory;  // "Aspect" | "Domain"
+  name: string;             // Table name (Objectives, Atmosphere, etc.)
+  tags: string[];
+  summary?: string;
+  description?: string;
+  headers: string[];        // ["Roll", "Result"]
+  tableData: ForgeTableRow[];
+  maxRoll: number;          // 100
+  oracle_type?: string;
+  icon?: string;
+  source?: { title: string; page?: number };
+}
+
+export interface ForgeTableRow {
+  floor: number;
+  ceiling: number;
+  result: string;
+}
+```
+
+**Functions:**
+- `createEmptyAspectTables()` - Creates 6 tables: Objectives, Atmosphere, Manifestations, Discoveries, Banes, Boons
+- `createEmptyDomainTables()` - Creates 6 tables: Objectives, Atmosphere, Locations, Discoveries, Banes, Boons
+- `withActionAspectMacros()` - Inserts macro rows: ACTION + THEME (97-98), ROLL TWICE (99-100), optionally CONNECTION WEB (95-96)
+- `withDescriptorFocusMacros()` - Inserts macro rows: DESCRIPTOR + FOCUS (97-98), ROLL TWICE (99-100), optionally CONNECTION WEB (95-96)
+
+**Macro System:**
+Tables automatically include placeholder rows at high roll ranges that instruct players to use alternative resolution methods. These are preserved during AI generation and not filled with content.
+
+**3. aiTableFiller.ts (AI-Powered Generation)**
+
+**Context Interface:**
+```typescript
+export interface TableContext {
+  name: string;
+  type: "aspect" | "domain";
+  description: string;
+  genre: "dark-fantasy" | "fantasy" | "sci-fi" | "starforged";
+  model: string;
+  uri: string;
+  apiKey: string;
+  personaInstructions?: string;
+}
+
+export type TableKind =
+  | "objectives" | "atmosphere" | "locations" | "manifestations"
+  | "discoveries" | "banes" | "boons";
+```
+
+**Key Functions:**
+- `fillTableWithAI()` - Fills empty rows in a single table
+- `fillTablesWithAI()` - Fills empty rows in all tables sequentially
+- `buildPrompt()` - Generates sophisticated system + user prompts
+
+**Prompt System (Comprehensive):**
+
+The AI prompt includes:
+1. **Mode Override:** Clearly signals "PROMPT GENERATOR MODE" while maintaining persona
+2. **Context:** Table name, type, description, and genre
+3. **Weirdness Level Detection:**
+   - MUNDANE-LEANING (everyday, grounded, social)
+   - MIXED (tension, decay, danger, hints of uncanny)
+   - BIZARRE-CORE (supernatural, warped, haunted, eldritch)
+4. **Balance Guidance:** How to mix grounded vs strange elements based on weirdness level
+5. **Table Type Specifics:** Detailed guidance for each of 7 table types:
+   - **ATMOSPHERE:** Sensory impressions, emotional tone, how place feels
+   - **LOCATIONS:** Distinct places/spaces that can be visited (rooms, halls, glades, etc.)
+   - **MANIFESTATIONS:** How aspect/domain expresses itself, symptoms, phenomena
+   - **OBJECTIVES:** Potential goals, pressures, tasks (situation hooks)
+   - **DISCOVERIES:** Secrets, clues, patterns, meaningful finds, knowledge
+   - **BANES:** Dangers, traps, curses, hostile forces, worsening situations
+   - **BOONS:** Opportunities, resources, knowledge, shelter, leverage, escape
+6. **Diversity Rules:** No duplicates, varied focus (sensory/spatial/history/change)
+7. **Forbidden Content:** No macros, roll ranges, game mechanics language, proper nouns
+8. **Quality Filtering:** AI internally evaluates and selects best results
+9. **Output Contract:** MUST output valid JSON array only, no text around it
+10. **Persona Integration:** Active persona instructions appended to system prompt
+
+**Result Format:**
+AI outputs a JSON array of strings (4-10 words each):
+```json
+[
+  "Howling wind carries smoke and ash",
+  "Strange symbols carved into stone walls",
+  "Temperature drops significantly",
+  "Scent of burning copper and earth"
+]
+```
+
+**AI Integration:**
+Uses centralized `callAi()` function:
+```typescript
+const response = await callAi(uri, apiKey, model, [
+  { role: 'system', content: systemPrompt },
+  { role: 'user', content: userPrompt }
+]);
+```
+
+**Robust Parsing:**
+Handles AI responses that may include text around JSON:
+```typescript
+try {
+  parsed = JSON.parse(text);
+} catch (e) {
+  const match = text.match(/\[[\\s\\S]*\\]/);
+  parsed = JSON.parse(match[0]);
+}
+```
+
+**Design Decisions:**
+
+1. **Persona Integration:** Appends persona instructions to system prompt (not replacing base instructions) so AI maintains both its generator mode training and persona characteristics
+
+2. **Weirdness Detection:** Built into prompt as guidance for AI to infer from name/description, not as explicit selection. Allows flexibility and nuance.
+
+3. **4-10 Word Constraint:** Forces concise, punchy results suitable for oracle tables. Not too minimal, not too flowery.
+
+4. **Macro Preservation:** Macro rows kept blank during generation so they're never filled with actual content—they remain reserved for alternative resolution mechanics
+
+5. **JSON-Only Output:** Eliminates parsing ambiguity by requiring strict JSON array format
+
+6. **No Game Mechanics Language:** Output describes fictional effects/situations, not mechanical bonuses/DCs/hit points
+
+7. **Single Responsibility:** Each table type has clear defined purpose (atmosphere focuses on sensory/mood, locations on places, objectives on goals, etc.)
+
+**Technical Architecture:**
+
+**File Organization:**
+```
+src/
+  components/
+    tableforge/
+      TableForgePanel.tsx          # Main UI
+  core/
+    tables/
+      tableForge.ts               # Table generation
+      aiTableFiller.ts            # AI integration
+  stores/
+    useTabStore.ts                # Extended with 'tableforge' tab type
+```
+
+**Data Flow:**
+1. User enters name/description, selects type
+2. `createEmptyAspectTables()` or `createEmptyDomainTables()` generates empty 6-table set
+3. User selects a table and clicks "Fill this table with AI"
+4. `buildPrompt()` generates system + user messages with persona instructions
+5. `fetchOpenAI()` calls centralized AI client
+6. Response parsed as JSON array
+7. Empty rows (non-macro) filled with AI results
+8. Filled table replaces original in state
+9. Preview updates immediately
+
+**Error Handling:**
+- Validates AI model and API key before generation
+- Catches JSON parse errors with fallback extraction
+- Validates array response format
+- Checks that generated count matches needed count
+- User-friendly error messages
+
+**Build Status:** ✅ Compiles successfully, no TypeScript errors
+
+**Testing Checklist:**
+
+- [ ] Table Forge button appears in top-right toolbar
+- [ ] Clicking button opens Table Forge in center lane
+- [ ] Can select Aspect or Domain type
+- [ ] Can enter name (required) and description (optional)
+- [ ] "Generate Empty Tables" creates 6 proper tables
+- [ ] JSON preview displays current table structure
+- [ ] Table dropdown switches between all 6 tables
+- [ ] "Fill this table with AI" generates content for selected table only
+- [ ] "Fill all tables with AI" generates content for all 6 tables
+- [ ] Generated content respects 4-10 word constraint
+- [ ] Macro rows (ACTION + THEME, DESCRIPTOR + FOCUS, CONNECTION WEB, ROLL TWICE) preserved
+- [ ] Active persona instructions influence generated content style/tone
+- [ ] Error messages display properly if AI fails
+- [ ] Loading states show during generation
+- [ ] Can switch tabs back to entries/weaves without losing table state
+
+**Notes for Future Enhancement:**
+
+- Could export tables to JSON file for import into RPG tools
+- Could add per-table AI generation settings
+- Could implement table preview/editing of individual rows
+- Could add template library of pre-built aspects/domains
+- Could integrate result cards with table rolls
+
+This integration brings powerful AI-assisted content generation directly into the application while respecting user preferences through the active Persona system. The sophisticated prompt engineering ensures output is gaming-focused, fiction-first, and highly contextual.
+
+---
+
+*Last Updated: 2025-11-30 00:00 by Weaver*

@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { Dice1, Scroll, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { ThreadModel } from '../../types/tapestry';
+import { useAiStore } from '../../stores/useAiStore';
 
 interface PanelThreadCardProps {
     card: ThreadModel;
     defaultExpanded?: boolean;
+    onInterpretWithAi?: () => Promise<void>;
 }
 
 const sourceColors: Record<string, string> = {
+    ai: '#4c1d95', // Purple
     dice: '#222244',
     aspect: '#224433',
     domain: '#224433',
@@ -16,41 +19,81 @@ const sourceColors: Record<string, string> = {
     table: '#224422',
 };
 
-export function PanelThreadCard({ card, defaultExpanded = false }: PanelThreadCardProps) {
+export function PanelThreadCard({ card, defaultExpanded = false, onInterpretWithAi }: PanelThreadCardProps) {
     const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+    const [isInterpreting, setIsInterpreting] = useState(false);
+    const { isConfigured } = useAiStore();
     const headerBgColor = sourceColors[card.type] || '#1e293b';
 
     // Generate timestamp from card timestamp
     const timestamp = new Date(card.timestamp).toLocaleTimeString();
 
+    // Check if this is a First Look thread
+    const isFirstLook = card.source.startsWith('First Look');
+
+    const handleInterpret = async () => {
+        if (!onInterpretWithAi) return;
+
+        setIsInterpreting(true);
+        try {
+            await onInterpretWithAi();
+        } catch (error) {
+            console.error('Interpretation failed:', error);
+        } finally {
+            setIsInterpreting(false);
+        }
+    };
+
     return (
         <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden flex flex-col my-2">
             {/* Header - Clickable Toggle */}
-            <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="px-3 py-1 border-b border-slate-700 text-left transition-opacity hover:opacity-90 focus:outline-none flex justify-between items-center"
-                style={{ backgroundColor: headerBgColor }}
-            >
-                <span className="text-sm font-bold" style={{ color: '#eeffff' }}>
-                    {card.source}
-                </span>
-                <span
-                    className="text-xs"
-                    style={{ color: '#eeffff', opacity: 0.7 }}
+            <div className="flex items-center">
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="flex-1 px-3 py-1 border-b border-slate-700 text-left transition-opacity hover:opacity-90 focus:outline-none flex justify-between items-center"
+                    style={{ backgroundColor: headerBgColor }}
                 >
-                    {timestamp}
-                </span>
-            </button>
+                    <span className="text-sm font-bold flex items-center gap-2" style={{ color: '#eeffff' }}>
+                        {card.type === 'ai' && <Sparkles className="w-3 h-3" />}
+                        {card.source}
+                    </span>
+                    <span
+                        className="text-xs"
+                        style={{ color: '#eeffff', opacity: 0.7 }}
+                    >
+                        {timestamp}
+                    </span>
+                </button>
+
+                {/* AI Interpret Button */}
+                {isFirstLook && onInterpretWithAi && (
+                    <button
+                        onClick={handleInterpret}
+                        disabled={!isConfigured() || isInterpreting}
+                        className="px-3 py-1 border-b border-l border-slate-700 hover:bg-slate-700/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                        style={{ backgroundColor: headerBgColor }}
+                        title={!isConfigured() ? 'Configure AI in Settings to use this feature' : 'Interpret with AI'}
+                    >
+                        <Sparkles className="w-4 h-4" style={{ color: '#eeffff' }} />
+                        {isInterpreting && <span className="text-xs" style={{ color: '#eeffff' }}>...</span>}
+                    </button>
+                )}
+            </div>
 
             {/* Content - Collapsible */}
             <div
                 className="overflow-hidden transition-all duration-300 ease-in-out"
                 style={{
-                    maxHeight: isExpanded ? '500px' : '0px',
+                    maxHeight: isExpanded ? '1000px' : '0px',
                     opacity: isExpanded ? 1 : 0,
                 }}
             >
                 <div className="px-2 py-2 text-sm text-slate-400 whitespace-pre-wrap">
+                    {/* AI Content Label */}
+                    {card.type === 'ai' && (
+                        <div className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">First Pass Content</div>
+                    )}
+
                     {/* Display content if available (for table rolls, oracles, etc) */}
                     {card.content && (
                         <div>{card.content}</div>

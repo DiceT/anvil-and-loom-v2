@@ -89,7 +89,9 @@ export interface EditorState {
  *
  * Embedded Threads stored inside Panels (historically called ResultCardModel).
  */
-export type ThreadType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table';
+export type ThreadType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table' | 'ai';
+
+import { ThreadAiInterpretation } from './ai';
 
 export interface PanelThreadModel {
     id: string;          // uuid
@@ -100,6 +102,7 @@ export interface PanelThreadModel {
     content?: string;    // detailed content (roll info, etc)
     payload: any;        // detailed data, JSON-serializable
     timestamp: string;   // ISO datetime for when the thread was created
+    aiInterpretations?: ThreadAiInterpretation[]; // AI-generated interpretations
 }
 
 /**

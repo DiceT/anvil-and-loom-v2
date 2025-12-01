@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { SettingsLayout } from './SettingsLayout';
 import { DiceSettingsPanel } from './DiceSettingsPanel';
 import { EditorSettingsPanel } from './EditorSettingsPanel';
+import { AiSettingsPanel } from './AiSettingsPanel';
 
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    initialCategory?: 'dice' | 'editor';
+    initialCategory?: 'dice' | 'editor' | 'ai';
 }
 
 export function SettingsModal({ isOpen, onClose, initialCategory = 'editor' }: SettingsModalProps) {
-    const [activeCategory, setActiveCategory] = useState<'dice' | 'editor'>(initialCategory);
+    const [activeCategory, setActiveCategory] = useState<'dice' | 'editor' | 'ai'>(initialCategory);
 
     if (!isOpen) return null;
 
@@ -22,6 +23,7 @@ export function SettingsModal({ isOpen, onClose, initialCategory = 'editor' }: S
         >
             {activeCategory === 'dice' && <DiceSettingsPanel />}
             {activeCategory === 'editor' && <EditorSettingsPanel />}
+            {activeCategory === 'ai' && <AiSettingsPanel />}
         </SettingsLayout>
     );
 }

@@ -1,32 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(tree:*)",
-      "Bash(git -C \"e:\\Anvil and Loom\\anvil-and-loom-v2\" log --oneline -10)",
-      "Bash(git -C \"e:\\Anvil and Loom\\anvil-and-loom-v2\" status)",
-      "Bash(pnpm init)",
-      "Bash(pnpm dev)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm rebuild:*)",
-      "Bash(npx tailwindcss:*)",
-      "Bash(pnpm add:*)",
-      "Bash(npx tsc:*)",
-      "Bash(pnpm remove:*)",
-      "Bash(pnpm approve-builds:*)",
-      "Bash(node install.js:*)",
-      "Bash(node:*)",
-      "Bash(cat:*)",
-      "Bash(taskkill:*)",
-      "Bash(nul)",
-      "Bash(exit 0)",
-      "Bash(dir:*)",
-      "Bash(timeout /t 5 /nobreak)",
-      "Bash(timeout /t 2 /nobreak)",
-      "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D4.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD6.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")",
-      "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D8.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD10.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")",
-      "Bash(copy \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\assets\\models\\dice\\D12.stl\" \"e:\\Anvil and Loom\\anvil-and-loom-v2\\public\\models\\dice\"\" && copy \"e:Anvil and Loomanvil-and-loom-v2srcassetsmodelsdiceD20.stl\" \"e:Anvil and Loomanvil-and-loom-v2publicmodelsdice\"\")",
-      "Bash(pnpm build)",
-      "Bash(ls \"e:\\Anvil and Loom\\anvil-and-loom-v2\\src\\components\\layout\"\" | findstr /i \"right \")"
+      "Bash(timeout 180 bash -c \"while pgrep -f ''pnpm build'' > /dev/null; do sleep 1; done; echo ''Build complete''\")",
+      "Bash(npx electron-vite:*)"
     ],
     "deny": [],
     "ask": []

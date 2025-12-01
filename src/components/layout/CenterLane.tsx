@@ -3,6 +3,7 @@ import { useTabStore } from '../../stores/useTabStore';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { WeaveEditor } from '../weave/WeaveEditor';
 import { TapestryEditor } from '../tapestry/TapestryEditor';
+import { TableForgePanel } from '../tableforge/TableForgePanel';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
@@ -24,6 +25,8 @@ export function CenterLane() {
         return <WeaveEditor weaveId={activeTab.id} />;
       case 'entry':
         return <TapestryEditor />;
+      case 'tableforge':
+        return <TableForgePanel />;
       default:
         return null;
     }

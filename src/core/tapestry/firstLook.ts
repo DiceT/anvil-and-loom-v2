@@ -194,10 +194,21 @@ function resolveWeaveRowDetailed(
 
 function formatMacroResult(macro: any): string {
     if (macro.type === 'combo') {
-        return `${macro.primary.result} + ${macro.secondary.result}`;
+        // Handle Action+Theme or Descriptor+Focus
+        if (macro.rolls && macro.rolls.length >= 2) {
+            return `${macro.rolls[0].result} + ${macro.rolls[1].result}`;
+        }
+        return 'Invalid Combo';
     }
     if (macro.type === 'repeat') {
         return `Roll Twice: ${macro.rolls.map((r: any) => r.result).join(', ')}`;
+    }
+    if (macro.type === 'reference') {
+        // Handle Objectives
+        return macro.rolls.map((r: any) => r.result).join(', ');
+    }
+    if (macro.type === 'placeholder') {
+        return macro.message || '...';
     }
     return macro.result || '...';
 }

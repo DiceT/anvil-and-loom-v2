@@ -37,6 +37,8 @@ contextBridge.exposeInMainWorld('electron', {
   tables: {
     loadAll: () => ipcRenderer.invoke('tables:loadAll'),
     getUserDir: () => ipcRenderer.invoke('tables:getUserDir'),
+    saveForgeFile: (category: string, filename: string, data: any) =>
+      ipcRenderer.invoke('tables:saveForgeFile', { category, filename, data }),
   },
   weaves: {
     loadAll: () => ipcRenderer.invoke('weaves:loadAll') as Promise<{ success: boolean; data?: Weave[]; error?: string }>,

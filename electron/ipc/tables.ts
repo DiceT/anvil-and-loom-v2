@@ -117,4 +117,28 @@ export function setupTableHandlers() {
   ipcMain.handle('tables:getUserDir', async () => {
     return getUserDataDir();
   });
+
+  /**
+   * Save a Forge file (Aspect or Domain) to the user directory
+   */
+  ipcMain.handle('tables:saveForgeFile', async (_, { category, filename, data }) => {
+    try {
+      const subDir = category.toLowerCase() + 's'; // aspects or domains
+      const targetDir = path.join(getUserDataDir(), subDir);
+
+      // Ensure directory exists
+      await fs.mkdir(targetDir, { recursive: true });
+
+      const filePath = path.join(targetDir, `${filename}.json`);
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+
+      return { success: true, path: filePath };
+    } catch (error) {
+      console.error('Failed to save forge file:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  });
 }
