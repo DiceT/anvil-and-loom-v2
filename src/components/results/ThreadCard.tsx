@@ -18,6 +18,7 @@ const sourceColors: Record<string, string> = {
   table: '#224422',   // General table (legacy)
   oracle: '#332244',  // Purple-ish for Oracles
   interpretation: '#442244',
+  ai: '#442244',      // Same as interpretation
   weave: '#685431',   // The Weave's gold/brown
   system: '#1e293b',
   other: '#1e293b',
@@ -88,7 +89,7 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
         : 'Roll Oracle';
 
       return (
-        <div className="font-bold text-slate-100 text-base flex items-center justify-between">
+        <div className="font-bold text-slate-100 text-sm flex items-center justify-between">
           <span>{card.result}</span>
           <button
             onClick={() => handleWeaveAction(weaveTargetType, weaveTargetId)}
@@ -104,7 +105,7 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
     // Aspect/Domain with Environment link
     if (isAspectOrDomain) {
       return (
-        <div className="font-bold text-slate-100 text-base flex items-center justify-between">
+        <div className="font-bold text-slate-100 text-sm flex items-center justify-between">
           <span>{card.result}</span>
           <button
             onClick={() => handleOpenEnvironment(packId)}
@@ -119,11 +120,11 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
 
     // Oracle combo - just show the result, no buttons needed (it's already a result)
     if (isOracleCombo) {
-      return <div className="font-bold text-slate-100 text-base">{card.result}</div>;
+      return <div className="font-bold text-slate-100 text-sm">{card.result}</div>;
     }
 
     // Default result without buttons
-    return <div className={`font-bold text-slate-100 whitespace-pre-line ${card.source === 'dice' ? 'text-2xl' : 'text-base'}`}>
+    return <div className={`font-bold text-slate-100 whitespace-pre-line ${card.source === 'dice' ? 'text-2xl' : 'text-sm'}`}>
       {card.result}
     </div>;
   };

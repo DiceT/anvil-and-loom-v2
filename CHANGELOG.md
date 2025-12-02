@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Added
+- **Raw Milkdown Editor Migration:** Replaced `@milkdown/crepe` with raw Milkdown for greater control over plugins and custom nodes.
+- **Source Mode:** Added "Source Mode" (Code icon) to the editor toolbar for viewing and editing raw Markdown/JSON.
+- **Inline Thread Cards:** Implemented custom ProseMirror node and React NodeView for rendering Thread Cards directly within the editor.
+- **Gap Cursor & Trailing Paragraph:** Improved editor usability by allowing cursor placement between cards and ensuring a trailing paragraph for typing after the last card.
+- **First Look Persistence Fix:** Fixed an issue where deleting a panel didn't clear it from editor memory, preventing "First Look" from running on a recreated panel.
+
+### Changed
+- **Editor Padding:** Standardized padding (`p-8`) across Edit, View, and Source modes for visual consistency.
+- **Thread Card Styling:** Updated Edit Mode cards to use `PanelThreadCard` component, ensuring pixel-perfect match with View Mode.
+- **Source Mode Logic:** Updated `TapestryEditor` to use `MilkdownEditor` for Source Mode, enabling raw code editing.
+
+### Fixed
+- **Duplicate Editors:** Fixed a race condition in `MilkdownEditor` that caused duplicate editor instances when switching modes or opening panels.
+- **Runtime Errors:** Fixed `prose is not a function` error by correctly registering `gapCursor` plugin.
+- **Missing Icons:** Fixed missing `ArrowDownToLine` import in `GlobalLastThread`.
+
+
 ## 0.3.0 - 2025-11-30
 
 ### Added

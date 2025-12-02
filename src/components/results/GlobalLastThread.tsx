@@ -1,6 +1,7 @@
-import { Eraser } from 'lucide-react';
+import { Eraser, ArrowDownToLine } from 'lucide-react';
 import { useThreadsStore } from '../../stores/useThreadsStore';
 import { useSettingsStore } from '../../stores/useSettingsStore';
+import { useEditorStore } from '../../stores/useEditorStore';
 import { ThreadCard } from './ThreadCard';
 import { IconButton } from '../ui/IconButton';
 
@@ -8,6 +9,7 @@ export function GlobalLastThread() {
   const threads = useThreadsStore((state) => state.threads);
   const clearCards = useThreadsStore((state) => state.clearCards);
   const { settings, updateDiceSettings } = useSettingsStore();
+  const { insertThreadAtCursor } = useEditorStore();
   const lastCard = threads[threads.length - 1];
 
   if (!lastCard) {
@@ -38,10 +40,16 @@ export function GlobalLastThread() {
               ? 'bg-purple-600 text-white'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
               }`}
-            title="Log threads to the active panel"
+            title="Auto-log threads to the active panel"
           >
-            LOG
+            AUTO
           </button>
+          <IconButton
+            icon={ArrowDownToLine}
+            size="s"
+            onClick={() => insertThreadAtCursor(lastCard)}
+            tooltip="Append to Entry"
+          />
           <IconButton
             icon={Eraser}
             size="s"

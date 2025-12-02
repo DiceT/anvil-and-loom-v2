@@ -1,5 +1,5 @@
-import { L as LRParser } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags, L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, j as foldInside } from "./index-CDeQsuKy.js";
+import { L as LRParser } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags, L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, j as foldInside } from "./index-BL0I7COa.js";
 const jsonHighlighting = styleTags({
   String: tags.string,
   Number: tags.number,

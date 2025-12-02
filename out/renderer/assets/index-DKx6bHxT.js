@@ -1,8 +1,8 @@
-import { L as LRLanguage, a as LanguageSupport, p as parseMixed, s as styleTags, t as tags } from "./index-CDeQsuKy.js";
-import { html } from "./index-C7k6qYie.js";
-import { javascriptLanguage } from "./index-C21PUzLi.js";
-import { L as LRParser, E as ExternalTokenizer } from "./index-CJ56FUQZ.js";
-import "./index-J_G6FbzK.js";
+import { L as LRLanguage, a as LanguageSupport, p as parseMixed, s as styleTags, t as tags } from "./index-BL0I7COa.js";
+import { html } from "./index-i9cNJf2W.js";
+import { javascriptLanguage } from "./index-DzKU7LLF.js";
+import { L as LRParser, E as ExternalTokenizer } from "./index-OFm3Tit9.js";
+import "./index-DF-PSKDK.js";
 const Text = 1, attributeContentSingle = 33, attributeContentDouble = 34, scriptAttributeContentSingle = 35, scriptAttributeContentDouble = 36;
 const text = /* @__PURE__ */ new ExternalTokenizer((input) => {
   let start = input.pos;

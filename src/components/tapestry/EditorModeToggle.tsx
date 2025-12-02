@@ -1,26 +1,27 @@
-import { Edit3, Eye, Save, Sparkles } from 'lucide-react';
+import { Edit3, Eye, Save, Sparkles, Code } from 'lucide-react';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { useAiStore } from '../../stores/useAiStore';
 import { useThreadInterpretation } from '../../hooks/useThreadInterpretation';
 import { useState } from 'react';
+import { EditorMode } from '../../types/tapestry';
 
 export function EditorModeToggle() {
     const { mode, setMode, saveAllEntries, openEntries, activeEntryId, saveEntry } = useEditorStore();
     const { isConfigured } = useAiStore();
     const { interpretFirstLook } = useThreadInterpretation();
-    const [isInterpreting, setIsInterpreting] = useState(false);
-
     const activeEntry = openEntries.find(e => e.id === activeEntryId);
     const isDirty = activeEntry?.isDirty || false;
     const isPlacePanel = activeEntry?.category === 'place';
     const showAiButton = isPlacePanel && isConfigured() && mode === 'view';
 
-    const handleModeToggle = async () => {
-        if (mode === 'edit') {
-            // Auto-save before switching to view
+    const [isInterpreting, setIsInterpreting] = useState(false);
+
+    const handleModeToggle = async (newMode: EditorMode) => {
+        if (mode === 'edit' || mode === 'source') {
+            // Auto-save before switching modes
             await saveAllEntries();
         }
-        setMode(mode === 'view' ? 'edit' : 'view');
+        setMode(newMode);
     };
 
     const handleSave = async () => {
@@ -67,17 +68,32 @@ export function EditorModeToggle() {
     return (
         <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800 bg-slate-900/50">
             {/* Mode Toggle */}
-            <button
-                onClick={handleModeToggle}
-                className="p-2 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors"
-                title={mode === 'view' ? 'Switch to Edit mode' : 'Switch to View mode'}
-            >
-                {mode === 'view' ? (
-                    <Edit3 className="w-5 h-5" />
-                ) : (
-                    <Eye className="w-5 h-5" />
-                )}
-            </button>
+            {/* Mode Toggle */}
+            <div className="flex bg-slate-800 rounded p-0.5">
+                <button
+                    onClick={() => handleModeToggle('view')}
+                    className={`p-1.5 rounded transition-colors ${mode === 'view' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    title="View Mode"
+                >
+                    <Eye className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => handleModeToggle('edit')}
+                    className={`p-1.5 rounded transition-colors ${mode === 'edit' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    title="Edit Mode"
+                >
+                    <Edit3 className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => handleModeToggle('source')}
+                    className={`p-1.5 rounded transition-colors ${mode === 'source' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    title="Source Mode (Raw JSON)"
+                >
+                    <Code className="w-4 h-4" />
+                </button>
+            </div>
+
+
 
             {/* Save Button (only in edit mode) */}
             {mode === 'edit' && (

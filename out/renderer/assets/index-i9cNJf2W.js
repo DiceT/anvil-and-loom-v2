@@ -1,7 +1,7 @@
-import { L as LRParser, E as ExternalTokenizer, C as ContextTracker } from "./index-CJ56FUQZ.js";
-import { p as parseMixed, s as styleTags, t as tags, E as EditorView, L as LRLanguage, e as syntaxTree, l as EditorSelection, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, G as bracketMatchingHandle } from "./index-CDeQsuKy.js";
-import { cssLanguage, css } from "./index-J_G6FbzK.js";
-import { typescriptLanguage, jsxLanguage, tsxLanguage, javascriptLanguage, javascript } from "./index-C21PUzLi.js";
+import { L as LRParser, E as ExternalTokenizer, C as ContextTracker } from "./index-OFm3Tit9.js";
+import { p as parseMixed, s as styleTags, t as tags, E as EditorView, L as LRLanguage, e as syntaxTree, l as EditorSelection, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, G as bracketMatchingHandle } from "./index-BL0I7COa.js";
+import { cssLanguage, css } from "./index-DF-PSKDK.js";
+import { typescriptLanguage, jsxLanguage, tsxLanguage, javascriptLanguage, javascript } from "./index-DzKU7LLF.js";
 const scriptText = 55, StartCloseScriptTag = 1, styleText = 56, StartCloseStyleTag = 2, textareaText = 57, StartCloseTextareaTag = 3, EndTag = 4, SelfClosingEndTag = 5, StartTag = 6, StartScriptTag = 7, StartStyleTag = 8, StartTextareaTag = 9, StartSelfClosingTag = 10, StartCloseTag = 11, NoMatchStartCloseTag = 12, MismatchedStartCloseTag = 13, missingCloseTag = 58, IncompleteTag = 14, IncompleteCloseTag = 15, commentContent$1 = 59, Element = 21, TagName = 23, Attribute = 24, AttributeName = 25, AttributeValue = 27, UnquotedAttributeValue = 28, ScriptText = 29, StyleText = 32, TextareaText = 35, OpenTag = 37, CloseTag = 38, Dialect_noMatch = 0, Dialect_selfClosing = 1;
 const selfClosers$1 = {
   area: true,

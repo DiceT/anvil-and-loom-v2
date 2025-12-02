@@ -1,5 +1,5 @@
-import { L as LRParser, E as ExternalTokenizer, C as ContextTracker } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags, E as EditorView, L as LRLanguage, e as syntaxTree, l as EditorSelection, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, G as bracketMatchingHandle } from "./index-CDeQsuKy.js";
+import { L as LRParser, E as ExternalTokenizer, C as ContextTracker } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags, E as EditorView, L as LRLanguage, e as syntaxTree, l as EditorSelection, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, G as bracketMatchingHandle } from "./index-BL0I7COa.js";
 const StartTag = 1, StartCloseTag = 2, MissingCloseTag = 3, mismatchedStartCloseTag = 4, incompleteStartCloseTag = 5, commentContent$1 = 36, piContent$1 = 37, cdataContent$1 = 38, Element$1 = 11, OpenTag = 13;
 function nameChar(ch) {
   return ch == 45 || ch == 46 || ch == 58 || ch >= 65 && ch <= 90 || ch == 95 || ch >= 97 && ch <= 122 || ch >= 161;

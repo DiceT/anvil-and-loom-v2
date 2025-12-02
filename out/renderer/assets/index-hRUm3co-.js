@@ -1,8 +1,8 @@
-import { L as LRParser, E as ExternalTokenizer } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags, L as LRLanguage, a as LanguageSupport, p as parseMixed, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, g as delimitedIndent, j as foldInside } from "./index-CDeQsuKy.js";
-import { html } from "./index-C7k6qYie.js";
-import "./index-J_G6FbzK.js";
-import "./index-C21PUzLi.js";
+import { L as LRParser, E as ExternalTokenizer } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags, L as LRLanguage, a as LanguageSupport, p as parseMixed, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, g as delimitedIndent, j as foldInside } from "./index-BL0I7COa.js";
+import { html } from "./index-i9cNJf2W.js";
+import "./index-DF-PSKDK.js";
+import "./index-DzKU7LLF.js";
 const castOpen = 1, HeredocString = 2, interpolatedStringContent = 275, EscapeSequence = 3, afterInterpolation = 276, automaticSemicolon = 277, eof = 278, abstract = 4, and = 5, array = 6, as = 7, Boolean = 8, _break = 9, _case = 10, _catch = 11, clone = 12, _const = 13, _continue = 14, _default = 15, declare = 16, _do = 17, echo = 18, _else = 19, elseif = 20, enddeclare = 21, endfor = 22, endforeach = 23, endif = 24, endswitch = 25, endwhile = 26, _enum = 27, _extends = 28, final = 29, _finally = 30, fn = 31, _for = 32, foreach = 33, from = 34, _function = 35, global = 36, goto = 37, _if = 38, _implements = 39, include = 40, include_once = 41, _instanceof = 42, insteadof = 43, _interface = 44, list = 45, match = 46, namespace = 47, _new = 48, _null = 49, or = 50, print = 51, readonly = 52, _require = 53, require_once = 54, _return = 55, _switch = 56, _throw = 57, trait = 58, _try = 59, unset = 60, use = 61, _var = 62, Visibility = 63, _while = 64, xor = 65, _yield = 66;
 const keywordMap = {
   abstract,

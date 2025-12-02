@@ -1,5 +1,5 @@
-import { L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, s as styleTags, g as delimitedIndent, j as foldInside, t as tags } from "./index-CDeQsuKy.js";
-import { L as LRParser } from "./index-CJ56FUQZ.js";
+import { L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, s as styleTags, g as delimitedIndent, j as foldInside, t as tags } from "./index-BL0I7COa.js";
+import { L as LRParser } from "./index-OFm3Tit9.js";
 const spec_Keyword = { __proto__: null, anyref: 34, dataref: 34, eqref: 34, externref: 34, i31ref: 34, funcref: 34, i8: 34, i16: 34, i32: 34, i64: 34, f32: 34, f64: 34 };
 const parser = /* @__PURE__ */ LRParser.deserialize({
   version: 14,

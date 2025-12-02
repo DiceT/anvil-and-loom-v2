@@ -55,6 +55,9 @@ export interface EditorSettings {
     syncOnChange: boolean;
     devModeOverrides: boolean;
 
+    // Experimental features
+
+
     // Future/Stub
     enableCollaboration: boolean;
 }
@@ -86,6 +89,8 @@ export const defaultEditorSettings: EditorSettings = {
     showInlineMarkdownHints: false,
     syncOnChange: true,
     devModeOverrides: false,
+
+
 };
 
 // Global Settings

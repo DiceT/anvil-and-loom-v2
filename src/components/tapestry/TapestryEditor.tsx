@@ -60,7 +60,7 @@ export function TapestryEditor() {
 
             {/* Editor Content - scroll container with explicit height */}
             <div className="flex-1 app-scroll" style={{ overflow: 'auto' }}>
-                {mode === 'edit' ? (
+                {mode === 'edit' || mode === 'source' ? (
                     <MilkdownEditor
                         key={activeEntry.id}
                         markdown={activeEntry.content}

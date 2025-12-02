@@ -1,5 +1,5 @@
-import { L as LRParser, E as ExternalTokenizer, a as LocalTokenGroup } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags$1, L as LRLanguage, a as LanguageSupport, e as syntaxTree, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, j as foldInside, N as NodeWeakMap, I as IterMode } from "./index-CDeQsuKy.js";
+import { L as LRParser, E as ExternalTokenizer, a as LocalTokenGroup } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags$1, L as LRLanguage, a as LanguageSupport, e as syntaxTree, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, j as foldInside, N as NodeWeakMap, I as IterMode } from "./index-BL0I7COa.js";
 const descendantOp = 122, Unit = 1, identifier$1 = 123, callee = 124, VariableName = 2, queryIdentifier = 125, queryVariableName = 3, QueryCallee = 4;
 const space = [
   9,

@@ -11,13 +11,19 @@ importers:
       '@milkdown/core':
         specifier: ^7.17.2
         version: 7.17.2
-      '@milkdown/crepe':
-        specifier: ^7.17.2
-        version: 7.17.2(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.3)(typescript@5.9.3)
       '@milkdown/ctx':
         specifier: ^7.17.2
         version: 7.17.2
+      '@milkdown/plugin-history':
+        specifier: ^7.17.2
+        version: 7.17.2
       '@milkdown/plugin-listener':
+        specifier: ^7.17.2
+        version: 7.17.2
+      '@milkdown/plugin-slash':
+        specifier: ^7.17.2
+        version: 7.17.2
+      '@milkdown/plugin-trailing':
         specifier: ^7.17.2
         version: 7.17.2
       '@milkdown/preset-commonmark':
@@ -35,6 +41,9 @@ importers:
       '@milkdown/utils':
         specifier: ^7.17.2
         version: 7.17.2
+      '@prosemirror-adapter/react':
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@react-three/cannon':
         specifier: ^6.6.0
         version: 6.6.0(@react-three/fiber@9.4.0(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.181.2))(react@19.2.0)(three@0.181.2)(typescript@5.9.3)
@@ -56,6 +65,9 @@ importers:
       lucide-react:
         specifier: ^0.554.0
         version: 0.554.0(react@19.2.0)
+      prosemirror-gapcursor:
+        specifier: ^1.4.0
+        version: 1.4.0
       rc-dock:
         specifier: 4.0.0-alpha.2
         version: 4.0.0-alpha.2(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -756,6 +768,20 @@ packages:
     resolution: {integrity: sha512-oJA1Bboc+WObksRaGDKJG0Wna9Q75xi1MdXVAZ9qXzBOyPsadmAnrmiKOEF0R8v/4zsuJElvscNZmyo3msbZjA==}
     peerDependencies:
       three: '>=0.139'
+
+  '@prosemirror-adapter/core@0.4.6':
+    resolution: {integrity: sha512-qbqd4u9IyDXXolFFmX1tzE000IpF9JbCiiwuSvqIh7lT9ZqjeMcyDVR/vxyM4oVY1sVyQQQj+WxHMAIhj7egVg==}
+
+  '@prosemirror-adapter/react@0.4.6':
+    resolution: {integrity: sha512-OvAjtFf+HCBFK5wMTY1eGYOLSZaGEoERK60bZxiYyS+yldQ9jEmQQ7xAKkzD0kQxIGrQHzzzYkmmC8P/E0yZfQ==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   '@rc-component/dropdown@1.0.0':
     resolution: {integrity: sha512-pIf/JyX46HWjScz6q9XlZwpdYBo4a30pPcuD0GbIaJgowJpxdR8Er0/Tt53x+p3JmAXnQvluV9YJ7Rns6ZibgQ==}
@@ -4512,6 +4538,23 @@ snapshots:
   '@pmndrs/cannon-worker-api@2.4.0(three@0.181.2)':
     dependencies:
       three: 0.181.2
+
+  '@prosemirror-adapter/core@0.4.6':
+    dependencies:
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-view: 1.41.3
+
+  '@prosemirror-adapter/react@0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      '@prosemirror-adapter/core': 0.4.6
+      nanoid: 5.1.6
+      prosemirror-model: 1.25.4
+      prosemirror-state: 1.4.4
+      prosemirror-view: 1.41.3
+    optionalDependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   '@rc-component/dropdown@1.0.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:

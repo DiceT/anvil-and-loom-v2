@@ -1,5 +1,5 @@
-import { L as LRParser, E as ExternalTokenizer, a as LocalTokenGroup, C as ContextTracker } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags, L as LRLanguage, k as snippetCompletion, a as LanguageSupport, b as ifNotIn, d as completeFromList, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, g as delimitedIndent, h as flatIndent, j as foldInside, e as syntaxTree, N as NodeWeakMap, I as IterMode } from "./index-CDeQsuKy.js";
+import { L as LRParser, E as ExternalTokenizer, a as LocalTokenGroup, C as ContextTracker } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags, L as LRLanguage, k as snippetCompletion, a as LanguageSupport, b as ifNotIn, d as completeFromList, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, g as delimitedIndent, h as flatIndent, j as foldInside, e as syntaxTree, N as NodeWeakMap, I as IterMode } from "./index-BL0I7COa.js";
 const insertedSemi = 177, space$1 = 179, identifier = 184, String = 12, closeParen$1 = 13, Number = 17, Rune = 20, closeBrace$1 = 25, closeBracket = 53, IncDecOp = 95, _return = 142, _break = 144, _continue = 145, fallthrough = 148;
 const newline = 10, carriageReturn = 13, space = 32, tab = 9, slash = 47, closeParen = 41, closeBrace = 125;
 const semicolon = new ExternalTokenizer((input, stack) => {

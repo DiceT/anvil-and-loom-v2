@@ -180,6 +180,12 @@ export function TapestryTree() {
 
     const confirmDelete = async () => {
         try {
+            // Check if the entry is open and close it
+            const entry = useEditorStore.getState().openEntries.find(e => e.path === currentPath);
+            if (entry) {
+                await useEditorStore.getState().closeEntry(entry.id);
+            }
+
             await window.electron.tapestry.deleteNode(currentPath);
             await loadTree();
             setShowDeleteDialog(false);

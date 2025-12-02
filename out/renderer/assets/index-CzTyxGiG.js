@@ -1,5 +1,5 @@
-import { L as LRParser, E as ExternalTokenizer, C as ContextTracker } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags, L as LRLanguage, a as LanguageSupport, p as parseMixed, i as indentNodeProp, f as foldNodeProp, g as delimitedIndent, j as foldInside } from "./index-CDeQsuKy.js";
+import { L as LRParser, E as ExternalTokenizer, C as ContextTracker } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags, L as LRLanguage, a as LanguageSupport, p as parseMixed, i as indentNodeProp, f as foldNodeProp, g as delimitedIndent, j as foldInside } from "./index-BL0I7COa.js";
 const blockEnd = 63, eof = 64, DirectiveEnd = 1, DocEnd = 2, sequenceStartMark = 3, sequenceContinueMark = 4, explicitMapStartMark = 5, explicitMapContinueMark = 6, flowMapMark = 7, mapStartMark = 65, mapContinueMark = 66, Literal = 8, QuotedLiteral = 9, Anchor = 10, Alias = 11, Tag = 12, BlockLiteralContent = 13, BracketL = 19, FlowSequence = 20, Colon = 29, BraceL = 33, FlowMapping = 34, BlockLiteralHeader = 47;
 const type_Top = 0, type_Seq = 1, type_Map = 2, type_Flow = 3, type_Lit = 4;
 class Context {

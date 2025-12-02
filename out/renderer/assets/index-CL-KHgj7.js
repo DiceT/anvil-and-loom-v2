@@ -1,6 +1,6 @@
-import { L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, j as foldInside, s as styleTags, t as tags } from "./index-CDeQsuKy.js";
-import { defineCSSCompletionSource } from "./index-J_G6FbzK.js";
-import { L as LRParser, E as ExternalTokenizer } from "./index-CJ56FUQZ.js";
+import { L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, j as foldInside, s as styleTags, t as tags } from "./index-BL0I7COa.js";
+import { defineCSSCompletionSource } from "./index-DF-PSKDK.js";
+import { L as LRParser, E as ExternalTokenizer } from "./index-OFm3Tit9.js";
 const descendantOp = 110, Unit = 1, openArgList = 2;
 const space = [
   9,

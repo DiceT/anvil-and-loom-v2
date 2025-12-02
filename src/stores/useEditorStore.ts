@@ -1,7 +1,7 @@
-
 import { create } from 'zustand';
 import type { EntryDoc, EditorMode } from '../types/tapestry';
 import { normalizeTag, deduplicateTags, extractInlineTags } from '../utils/tags';
+import { Thread } from '../core/results/types';
 
 interface EditorState {
     // State
@@ -34,6 +34,11 @@ interface EditorState {
     addDomain: (entryId: string, domainId: string) => void;
     removeDomain: (entryId: string, domainId: string) => void;
     setFirstLookDone: (entryId: string, done: boolean) => void;
+
+    // Editor Interaction
+    insertThreadCallback?: (thread: Thread) => void;
+    registerInsertThreadCallback: (callback: (thread: Thread) => void) => void;
+    insertThreadAtCursor: (thread: Thread) => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -372,5 +377,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         entry.frontmatter.firstLookDone = done;
         entry.isDirty = true;
         set({ openEntries: [...get().openEntries] });
+    },
+
+    // Editor Interaction
+    insertThreadCallback: undefined,
+    registerInsertThreadCallback: (callback) => set({ insertThreadCallback: callback }),
+    insertThreadAtCursor: (thread) => {
+        const callback = get().insertThreadCallback;
+        if (callback) {
+            callback(thread);
+        } else {
+            console.warn('No editor callback registered for insertThreadAtCursor');
+        }
     },
 }));

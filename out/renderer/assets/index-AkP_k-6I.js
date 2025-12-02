@@ -1,5 +1,5 @@
-import { L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, s as styleTags, c as continuedIndent, t as tags, b as ifNotIn, d as completeFromList, e as syntaxTree } from "./index-CDeQsuKy.js";
-import { L as LRParser, E as ExternalTokenizer } from "./index-CJ56FUQZ.js";
+import { L as LRLanguage, a as LanguageSupport, i as indentNodeProp, f as foldNodeProp, s as styleTags, c as continuedIndent, t as tags, b as ifNotIn, d as completeFromList, e as syntaxTree } from "./index-BL0I7COa.js";
+import { L as LRParser, E as ExternalTokenizer } from "./index-OFm3Tit9.js";
 const whitespace = 36, LineComment = 1, BlockComment = 2, String$1 = 3, Number = 4, Bool = 5, Null = 6, ParenL = 7, ParenR = 8, BraceL = 9, BraceR = 10, BracketL = 11, BracketR = 12, Semi = 13, Dot = 14, Operator = 15, Punctuation = 16, SpecialVar = 17, Identifier = 18, QuotedIdentifier = 19, Keyword = 20, Type = 21, Bits = 22, Bytes = 23, Builtin = 24;
 function isAlpha(ch) {
   return ch >= 65 && ch <= 90 || ch >= 97 && ch <= 122 || ch >= 48 && ch <= 57;

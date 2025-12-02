@@ -76,7 +76,7 @@ export interface FolderOrder {
 }
 
 // Editor state types
-export type EditorMode = 'edit' | 'view';
+export type EditorMode = 'edit' | 'view' | 'source';
 
 export interface EditorState {
     mode: EditorMode;

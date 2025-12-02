@@ -1,5 +1,5 @@
-import { L as LRParser, E as ExternalTokenizer, a as LocalTokenGroup, C as ContextTracker } from "./index-CJ56FUQZ.js";
-import { s as styleTags, t as tags, E as EditorView, L as LRLanguage, k as snippetCompletion, e as syntaxTree, l as EditorSelection, a as LanguageSupport, b as ifNotIn, d as completeFromList, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, g as delimitedIndent, h as flatIndent, j as foldInside, J as sublanguageProp, u as defineLanguageFacet, N as NodeWeakMap, I as IterMode } from "./index-CDeQsuKy.js";
+import { L as LRParser, E as ExternalTokenizer, a as LocalTokenGroup, C as ContextTracker } from "./index-OFm3Tit9.js";
+import { s as styleTags, t as tags, E as EditorView, L as LRLanguage, k as snippetCompletion, e as syntaxTree, l as EditorSelection, a as LanguageSupport, b as ifNotIn, d as completeFromList, i as indentNodeProp, f as foldNodeProp, c as continuedIndent, g as delimitedIndent, h as flatIndent, j as foldInside, J as sublanguageProp, u as defineLanguageFacet, N as NodeWeakMap, I as IterMode } from "./index-BL0I7COa.js";
 const noSemi = 316, noSemiType = 317, incdec = 1, incdecPrefix = 2, questionDot = 3, JSXStartTag = 4, insertSemi = 318, spaces = 320, newline = 321, LineComment = 5, BlockComment = 6, Dialect_jsx = 0;
 const space = [
   9,
