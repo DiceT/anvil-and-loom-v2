@@ -30,7 +30,11 @@ export interface MacroResolutionResult {
  * Resolve ACTION + THEME macro
  * Selects random action and theme oracle tables, rolls on each
  */
-export function resolveActionTheme(registry: TableRegistry): MacroResolutionResult | null {
+/**
+ * Resolve ACTION + THEME macro
+ * Selects random action and theme oracle tables, rolls on each
+ */
+export async function resolveActionTheme(registry: TableRegistry): Promise<MacroResolutionResult | null> {
   const actionTable = selectRandomOracleByTag(registry, 'action');
   const themeTable = selectRandomOracleByTag(registry, 'theme');
 
@@ -39,8 +43,8 @@ export function resolveActionTheme(registry: TableRegistry): MacroResolutionResu
     return null;
   }
 
-  const actionRoll = rollOnTable(actionTable);
-  const themeRoll = rollOnTable(themeTable);
+  const actionRoll = await rollOnTable(actionTable);
+  const themeRoll = await rollOnTable(themeTable);
 
   return {
     type: 'combo',
@@ -53,7 +57,11 @@ export function resolveActionTheme(registry: TableRegistry): MacroResolutionResu
  * Resolve DESCRIPTOR + FOCUS macro
  * Selects random descriptor and focus oracle tables, rolls on each
  */
-export function resolveDescriptorFocus(registry: TableRegistry): MacroResolutionResult | null {
+/**
+ * Resolve DESCRIPTOR + FOCUS macro
+ * Selects random descriptor and focus oracle tables, rolls on each
+ */
+export async function resolveDescriptorFocus(registry: TableRegistry): Promise<MacroResolutionResult | null> {
   const descriptorTable = selectRandomOracleByTag(registry, 'descriptor');
   const focusTable = selectRandomOracleByTag(registry, 'focus');
 
@@ -62,8 +70,8 @@ export function resolveDescriptorFocus(registry: TableRegistry): MacroResolution
     return null;
   }
 
-  const descriptorRoll = rollOnTable(descriptorTable);
-  const focusRoll = rollOnTable(focusTable);
+  const descriptorRoll = await rollOnTable(descriptorTable);
+  const focusRoll = await rollOnTable(focusTable);
 
   return {
     type: 'combo',
@@ -80,11 +88,11 @@ export function resolveDescriptorFocus(registry: TableRegistry): MacroResolution
  * @param sourceTableId - The table that produced the ROLL TWICE result
  * @param depth - Recursion depth to prevent infinite loops
  */
-export function resolveRollTwice(
+export async function resolveRollTwice(
   registry: TableRegistry,
   sourceTableId: string,
   depth = 0
-): MacroResolutionResult | null {
+): Promise<MacroResolutionResult | null> {
   if (depth > 5) {
     console.warn('ROLL TWICE recursion depth exceeded');
     return null;
@@ -96,14 +104,14 @@ export function resolveRollTwice(
     return null;
   }
 
-  const roll1 = rollOnTable(table);
-  const roll2 = rollOnTable(table);
+  const roll1 = await rollOnTable(table);
+  const roll2 = await rollOnTable(table);
 
   const rolls: TableRollResult[] = [];
 
   // Add first roll (recursive if it's also a macro)
   if (roll1.isMacro && roll1.macroType === 'ROLL_TWICE') {
-    const nested = resolveRollTwice(registry, sourceTableId, depth + 1);
+    const nested = await resolveRollTwice(registry, sourceTableId, depth + 1);
     if (nested) {
       rolls.push(...nested.rolls);
     }
@@ -113,7 +121,7 @@ export function resolveRollTwice(
 
   // Add second roll (recursive if it's also a macro)
   if (roll2.isMacro && roll2.macroType === 'ROLL_TWICE') {
-    const nested = resolveRollTwice(registry, sourceTableId, depth + 1);
+    const nested = await resolveRollTwice(registry, sourceTableId, depth + 1);
     if (nested) {
       rolls.push(...nested.rolls);
     }
@@ -135,10 +143,10 @@ export function resolveRollTwice(
  * @param registry - The table registry
  * @param sourceTableId - The table that produced the OBJECTIVES result
  */
-export function resolveObjectives(
+export async function resolveObjectives(
   registry: TableRegistry,
   sourceTableId: string
-): MacroResolutionResult | null {
+): Promise<MacroResolutionResult | null> {
   try {
     const parts = parseTableId(sourceTableId);
 
@@ -162,7 +170,7 @@ export function resolveObjectives(
       return null;
     }
 
-    const roll = rollOnTable(objectivesTable);
+    const roll = await rollOnTable(objectivesTable);
 
     return {
       type: 'reference',
@@ -194,11 +202,11 @@ export function resolveTheWeave(): MacroResolutionResult {
  * @param rollResult - The roll result that contains a macro
  * @param sourceTableId - The table the roll came from (for ROLL TWICE, OBJECTIVES)
  */
-export function resolveMacro(
+export async function resolveMacro(
   registry: TableRegistry,
   rollResult: TableRollResult,
   sourceTableId?: string
-): MacroResolutionResult | null {
+): Promise<MacroResolutionResult | null> {
   if (!rollResult.isMacro || !rollResult.macroType) {
     return null;
   }

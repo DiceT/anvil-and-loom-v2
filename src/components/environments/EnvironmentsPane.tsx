@@ -114,14 +114,14 @@ export function EnvironmentsPane() {
     });
   };
 
-  const handleRollSubtable = (pack: TablePackMetadata, subtableIndex: number) => {
+  const handleRollSubtable = async (pack: TablePackMetadata, subtableIndex: number) => {
     const table = pack.tables[subtableIndex];
-    const result = rollOnTable(table);
+    const result = await rollOnTable(table);
     const category = pack.category === 'aspect' ? 'ASPECT' : 'DOMAIN';
 
     // Check if it's a macro
     if (result.isMacro) {
-      const macroResult = resolveMacro(registry, result, table.id);
+      const macroResult = await resolveMacro(registry, result, table.id);
 
       if (macroResult) {
         switch (macroResult.type) {

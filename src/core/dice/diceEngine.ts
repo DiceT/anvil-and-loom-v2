@@ -1,8 +1,16 @@
 import { DiceRollResult, DiceOptions, RollResult } from './types';
 import { parseDiceExpression } from './diceParser';
 
-export function rollDie(sides: number): number {
-  return Math.floor(Math.random() * sides) + 1;
+import { diceEngine } from '../../integrations/anvil-dice-app';
+
+export async function rollDie(sides: number): Promise<number> {
+  try {
+    const notation = sides === 100 ? 'd%' : `d${sides}`;
+    const result = await diceEngine.roll(notation);
+    return result.total;
+  } catch (e) {
+    return Math.floor(Math.random() * sides) + 1;
+  }
 }
 
 export async function rollDiceExpression(
@@ -12,6 +20,28 @@ export async function rollDiceExpression(
   // Validate expression is not empty
   if (!expression || !expression.trim()) {
     throw new Error('Dice expression cannot be empty');
+  }
+
+  // Check if we can use the 3D engine first
+  try {
+    if (diceEngine.getEngineCore()) {
+      // Create a compatible expression for the 3D engine (e.g. d100 -> d%)
+      const engineExpression = expression.replace(/d100/g, 'd%');
+      const result = await diceEngine.roll(engineExpression);
+      return {
+        expression,
+        total: result.total,
+        rolls: result.breakdown?.map(r => ({
+          value: r.value,
+          sides: parseInt(r.type.replace('d', '')) || 0,
+          kept: !r.dropped
+        })) || [],
+        modifier: result.modifier,
+        meta: options?.meta
+      };
+    }
+  } catch (e) {
+    console.warn("3D Engine failed, using internal logic", e);
   }
 
   const parsed = parseDiceExpression(expression);
@@ -40,8 +70,10 @@ export async function rollDiceExpression(
     const groupRolls: RollResult[] = [];
 
     for (let i = 0; i < diceGroup.count; i++) {
+      // Fallback to naive random if we are here (engine didn't work)
+      // or if we need to loop manually (which we shouldn't if we use engine)
       groupRolls.push({
-        value: rollDie(diceGroup.sides),
+        value: Math.floor(Math.random() * diceGroup.sides) + 1,
         sides: diceGroup.sides,
         kept: false,
       });

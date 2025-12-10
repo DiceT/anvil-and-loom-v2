@@ -94,9 +94,9 @@ export function WeaveEditor({ weaveId }: WeaveEditorProps) {
     setLocalWeave({ ...localWeave, rows: updatedRows });
   };
 
-  const handleRoll = () => {
+  const handleRoll = async () => {
     try {
-      const { roll, row } = rollWeave(localWeave);
+      const { roll, row } = await rollWeave(localWeave);
       logWeaveResult(localWeave, roll, row);
     } catch (error) {
       console.error('Failed to roll weave:', error);
@@ -146,7 +146,7 @@ export function WeaveEditor({ weaveId }: WeaveEditorProps) {
       case 'oracle':
         return ['Action', 'Theme', 'Descriptor', 'Focus'];
       case 'oracleCombo':
-        return ['Action+Theme', 'Descriptor+Focus'];
+        return ['Action + Theme', 'Descriptor + Focus'];
       default:
         return [];
     }

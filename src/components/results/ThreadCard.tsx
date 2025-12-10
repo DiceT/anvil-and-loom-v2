@@ -31,17 +31,17 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
   const headerBgColor = sourceColors[card.source || 'other'];
   const timestamp = new Date(card.timestamp).toLocaleTimeString();
 
-  const handleRollOracle = (type: 'action' | 'theme' | 'descriptor' | 'focus') => {
+  const handleRollOracle = async (type: 'action' | 'theme' | 'descriptor' | 'focus') => {
     if (!registry) return;
 
     // Determine which combo this belongs to and roll it
     if (type === 'action' || type === 'theme') {
-      const result = resolveActionTheme(registry);
+      const result = await resolveActionTheme(registry);
       if (result) {
         formatComboOracleThread(result, 'Action + Theme', registry);
       }
     } else {
-      const result = resolveDescriptorFocus(registry);
+      const result = await resolveDescriptorFocus(registry);
       if (result) {
         formatComboOracleThread(result, 'Descriptor + Focus', registry);
       }
@@ -58,9 +58,9 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
       handleOpenEnvironment(targetId);
     } else if (targetType === 'oracleCombo') {
       // Roll the oracle combo (Action+Theme or Descriptor+Focus)
-      if (targetId === 'Action+Theme') {
+      if (targetId === 'Action+Theme' || targetId === 'Action + Theme') {
         handleRollOracle('action');
-      } else if (targetId === 'Descriptor+Focus') {
+      } else if (targetId === 'Descriptor+Focus' || targetId === 'Descriptor + Focus') {
         handleRollOracle('descriptor');
       }
     }

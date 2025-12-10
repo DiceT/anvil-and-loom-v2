@@ -57,8 +57,32 @@ export function getMacroType(result: string): MacroType | null {
  * @param explicitRoll - Optional explicit roll value (for testing/debugging)
  * @returns TableRollResult with roll value and result text
  */
-export function rollOnTable(table: RollTable, explicitRoll?: number): TableRollResult {
-  const roll = explicitRoll !== undefined ? explicitRoll : rollD100();
+import { diceEngine } from '../../integrations/anvil-dice-app';
+
+/**
+ * Roll on a table and return the result
+ *
+ * @param table - The table to roll on
+ * @param explicitRoll - Optional explicit roll value (for testing/debugging)
+ * @returns TableRollResult with roll value and result text
+ */
+export async function rollOnTable(table: RollTable, explicitRoll?: number): Promise<TableRollResult> {
+  let roll = explicitRoll;
+
+  if (roll === undefined) {
+    try {
+      // Try 3D dice first
+      // If table has maxRoll, use it. Otherwise d100.
+      const sides = table.maxRoll || 100;
+      const notation = sides === 100 ? 'd%' : `d${sides}`;
+      const result = await diceEngine.roll(notation, { meta: { suppressLog: true } });
+      roll = result.total;
+    } catch (error) {
+      // Fallback to internal RNG if engine not ready or fails
+      // console.warn('Dice engine unavailable, using fallback', error);
+      roll = rollD100();
+    }
+  }
 
   const row = resolveRoll(table, roll);
 
@@ -88,6 +112,6 @@ export function rollOnTable(table: RollTable, explicitRoll?: number): TableRollR
  * @param tables - Array of tables to roll on
  * @returns Array of TableRollResult
  */
-export function rollOnTables(tables: RollTable[]): TableRollResult[] {
-  return tables.map((table) => rollOnTable(table));
+export async function rollOnTables(tables: RollTable[]): Promise<TableRollResult[]> {
+  return Promise.all(tables.map((table) => rollOnTable(table)));
 }

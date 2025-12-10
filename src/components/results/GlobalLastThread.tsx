@@ -1,9 +1,12 @@
+import { useEffect } from 'react';
 import { Eraser, ArrowDownToLine } from 'lucide-react';
 import { useThreadsStore } from '../../stores/useThreadsStore';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { ThreadCard } from './ThreadCard';
 import { IconButton } from '../ui/IconButton';
+import { diceEngine } from '../../integrations/anvil-dice-app';
+import { logThread } from '../../core/results/threadEngine';
 
 export function GlobalLastThread() {
   const threads = useThreadsStore((state) => state.threads);
@@ -11,6 +14,34 @@ export function GlobalLastThread() {
   const { settings, updateDiceSettings } = useSettingsStore();
   const { insertThreadAtCursor } = useEditorStore();
   const lastCard = threads[threads.length - 1];
+
+  useEffect(() => {
+    const handleRollComplete = (result: any) => {
+      // Format the rolls for display
+      const breakdown = result.breakdown || [];
+      const rollsText = breakdown
+        .map((r: any) => (r.kept ? `**${r.value}**` : `${r.value}`))
+        .join(' + ');
+
+      if (result.meta?.suppressLog) {
+        return;
+      }
+
+      logThread({
+        header: `DICE: ${result.expression || 'Roll'}`,
+        result: `${result.total}`,
+        content: `Expression: ${result.expression || ''}\nRolls: ${rollsText}`,
+        source: 'dice',
+        meta: result
+      });
+    };
+
+    diceEngine.on('rollComplete', handleRollComplete);
+
+    return () => {
+      diceEngine.off('rollComplete', handleRollComplete);
+    };
+  }, []);
 
   if (!lastCard) {
     return (
@@ -40,15 +71,15 @@ export function GlobalLastThread() {
               ? 'bg-purple-600 text-white'
               : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
               }`}
-            title="Auto-log threads to the active panel"
+            title="Toggle auto-logging threads to the active panel"
           >
-            AUTO
+            Auto-Add
           </button>
           <IconButton
             icon={ArrowDownToLine}
             size="s"
             onClick={() => insertThreadAtCursor(lastCard)}
-            tooltip="Append to Entry"
+            tooltip="Insert Thread (Manual)"
           />
           <IconButton
             icon={Eraser}

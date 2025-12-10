@@ -20,14 +20,14 @@ interface AtmosphereDiscoveryRoll {
     result: string;
 }
 
-export function runFirstLook(
+export async function runFirstLook(
     weaveId: string,
     aspectIds: string[],
     domainIds: string[],
     placeName: string,
     tableRegistry: TableRegistry,
     weaveRegistry: WeaveRegistry
-): FirstLookResult {
+): Promise<FirstLookResult> {
     const weave = weaveRegistry.weaves.get(weaveId);
     if (!weave) throw new Error('Weave not found');
 
@@ -43,39 +43,39 @@ export function runFirstLook(
 
     // 2. Roll Location (Domain index 2)
     const locationTable = domainPack.tables[2];
-    const locationRoll = rollOnTable(locationTable);
+    const locationRoll = await rollOnTable(locationTable);
     let locationResult = locationRoll.result;
 
     if (locationRoll.isMacro) {
-        const macro = resolveMacro(tableRegistry, locationRoll, locationTable.id);
+        const macro = await resolveMacro(tableRegistry, locationRoll, locationTable.id);
         if (macro) locationResult = formatMacroResult(macro);
     }
 
     // 3. Roll Manifestation (Aspect index 2)
     const manifestationTable = aspectPack.tables[2];
-    const manifestationRoll = rollOnTable(manifestationTable);
+    const manifestationRoll = await rollOnTable(manifestationTable);
     let manifestationResult = manifestationRoll.result;
 
     if (manifestationRoll.isMacro) {
-        const macro = resolveMacro(tableRegistry, manifestationRoll, manifestationTable.id);
+        const macro = await resolveMacro(tableRegistry, manifestationRoll, manifestationTable.id);
         if (macro) manifestationResult = formatMacroResult(macro);
     }
 
     // 4. Roll Atmosphere (75% chance of 1, 25% chance of 2)
-    const atmosphereCount = rollDie(4) <= 3 ? 1 : 2;
+    const atmosphereCount = (await rollDie(4)) <= 3 ? 1 : 2;
     const atmosphereRolls: AtmosphereDiscoveryRoll[] = [];
     for (let i = 0; i < atmosphereCount; i++) {
-        const { roll: weaveRoll, row } = rollWeave(weave);
-        const atmRoll = resolveWeaveRowDetailed(row, tableRegistry, 'atmosphere', weaveRoll);
+        const { roll: weaveRoll, row } = await rollWeave(weave);
+        const atmRoll = await resolveWeaveRowDetailed(row, tableRegistry, 'atmosphere', weaveRoll);
         atmosphereRolls.push(atmRoll);
     }
 
     // 5. Roll Discovery (75% chance of 1, 25% chance of 2)
-    const discoveryCount = rollDie(4) <= 3 ? 1 : 2;
+    const discoveryCount = (await rollDie(4)) <= 3 ? 1 : 2;
     const discoveryRolls: AtmosphereDiscoveryRoll[] = [];
     for (let i = 0; i < discoveryCount; i++) {
-        const { roll: weaveRoll, row } = rollWeave(weave);
-        const discRoll = resolveWeaveRowDetailed(row, tableRegistry, 'discovery', weaveRoll);
+        const { roll: weaveRoll, row } = await rollWeave(weave);
+        const discRoll = await resolveWeaveRowDetailed(row, tableRegistry, 'discovery', weaveRoll);
         discoveryRolls.push(discRoll);
     }
 
@@ -140,12 +140,12 @@ export function runFirstLook(
     };
 }
 
-function resolveWeaveRowDetailed(
+async function resolveWeaveRowDetailed(
     row: any,
     registry: TableRegistry,
     intent: 'atmosphere' | 'discovery',
     weaveRoll: number
-): AtmosphereDiscoveryRoll {
+): Promise<AtmosphereDiscoveryRoll> {
     const packId = row.targetId;
     const type = row.targetType; // 'aspect' | 'domain'
 
@@ -176,11 +176,11 @@ function resolveWeaveRowDetailed(
         };
     }
 
-    const roll = rollOnTable(table);
+    const roll = await rollOnTable(table);
     let result = roll.result;
 
     if (roll.isMacro) {
-        const macro = resolveMacro(registry, roll, table.id);
+        const macro = await resolveMacro(registry, roll, table.id);
         if (macro) result = formatMacroResult(macro);
     }
 

@@ -21,9 +21,9 @@ export function WeaveTool() {
     a.name.localeCompare(b.name)
   );
 
-  const handleRollWeave = (weave: Weave) => {
+  const handleRollWeave = async (weave: Weave) => {
     try {
-      const { roll, row } = rollWeave(weave);
+      const { roll, row } = await rollWeave(weave);
       logWeaveResult(weave, roll, row);
     } catch (error) {
       console.error('Failed to roll weave:', error);

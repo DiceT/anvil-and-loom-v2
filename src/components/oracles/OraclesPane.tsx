@@ -24,22 +24,22 @@ export function OraclesPane() {
     );
   }
 
-  const handleComboOracle = (type: 'action-theme' | 'descriptor-focus') => {
+  const handleComboOracle = async (type: 'action-theme' | 'descriptor-focus') => {
     if (type === 'action-theme') {
-      const result = resolveActionTheme(registry);
+      const result = await resolveActionTheme(registry);
       if (result) {
         formatComboOracleThread(result, 'Action + Theme', registry);
       }
     } else {
-      const result = resolveDescriptorFocus(registry);
+      const result = await resolveDescriptorFocus(registry);
       if (result) {
         formatComboOracleThread(result, 'Descriptor + Focus', registry);
       }
     }
   };
 
-  const handleRollOracle = (oracle: OracleTableMetadata) => {
-    const result = rollOnTable(oracle.table);
+  const handleRollOracle = async (oracle: OracleTableMetadata) => {
+    const result = await rollOnTable(oracle.table);
     formatTableRollThread(result, 'ORACLE');
   };
 
