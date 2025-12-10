@@ -21,11 +21,21 @@ export const threadCardNode = $node('threadCard', () => ({
         'data-thread-data': JSON.stringify(node.attrs.threadData),
     }],
     parseMarkdown: {
-        match: (node) => node.type === 'code' && node.lang === 'result-card',
+        match: (node) => node.type === 'code' && (node.lang === 'thread-card' || node.lang === 'result-card'),
         runner: (state, node, type) => {
-            const threadData = JSON.parse(node.value as string);
+            let threadData;
+            try {
+                threadData = JSON.parse(node.value as string);
+                if (!threadData || typeof threadData !== 'object') {
+                    console.warn('Invalid thread data format:', threadData);
+                    threadData = null;
+                }
+            } catch (e) {
+                console.error('Failed to parse thread card JSON:', e, node.value);
+                threadData = null;
+            }
             state.addNode(type, {
-                threadId: threadData.id,
+                threadId: threadData?.id || '',
                 threadData,
             });
         },
@@ -35,7 +45,7 @@ export const threadCardNode = $node('threadCard', () => ({
         runner: (state, node) => {
             const thread = node.attrs.threadData;
             const json = JSON.stringify(thread, null, 2);
-            state.addNode('code', undefined, json, { lang: 'result-card' });
+            state.addNode('code', undefined, json, { lang: 'thread-card' });
         },
     },
 }));

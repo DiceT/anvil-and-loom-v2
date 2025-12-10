@@ -49,14 +49,14 @@ export function MarkdownViewer({ markdown, onInterpretThread }: MarkdownViewerPr
                         pre(props) {
                             const { children } = props;
 
-                            // Check if this pre contains a code element with result-card language
+                            // Check if this pre contains a code element with thread-card or result-card language
                             if (children && typeof children === 'object' && 'props' in children) {
                                 const codeProps = (children as any).props;
                                 const className = codeProps?.className || '';
                                 const match = /language-([\w-]+)/.exec(className);
                                 const lang = match ? match[1] : '';
 
-                                if (lang === 'result-card') {
+                                if (lang === 'result-card' || lang === 'thread-card') {
                                     try {
                                         const jsonString = String(codeProps.children).replace(/\n$/, '');
                                         const card = JSON.parse(jsonString) as ThreadModel;

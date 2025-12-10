@@ -32,15 +32,15 @@ export interface WeaveRegistry {
 
 export type StoryBlock =
   | {
-      id: string;
-      kind: 'text';
-      markdown: string;  // markdown content for narrative text
-    }
+    id: string;
+    kind: 'text';
+    markdown: string;  // markdown content for narrative text
+  }
   | {
-      id: string;
-      kind: 'thread';
-      threadId: string;  // reference to a Thread by ID
-    };
+    id: string;
+    kind: 'thread';
+    threadId: string;  // reference to a Thread by ID
+  };
 
 export interface StoryPage {
   id: string;                 // must match weave.id for persistence

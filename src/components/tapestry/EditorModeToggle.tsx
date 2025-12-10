@@ -37,7 +37,7 @@ export function EditorModeToggle() {
         try {
             // Find all First Look threads in the content
             const content = activeEntry.content || '';
-            const regex = /```result-card\n([\s\S]*?)\n```/g;
+            const regex = /```(result-card|thread-card)\n([\s\S]*?)\n```/g;
             let match;
             let interpretCount = 0;
 

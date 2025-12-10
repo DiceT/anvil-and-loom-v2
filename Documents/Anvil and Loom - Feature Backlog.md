@@ -111,7 +111,7 @@ _Source tags used below:_
 | P0       | Auto-logging Dice & Table results to Session   | Anvil & Loom                   | #original                              | Rolls from Dice/Oracles append structured cards into the active Session Panel. |
 | P0       | Basic progress / track support                 | Anvil & Loom, RPG systems      | #original                              | Generic clocks/vows/fronts that can be ticked in Play Mode and logged. |
 | P0       | Quick-create Panels from play                | Anvil & Loom                   | #original                              | Highlight text in a Session Panel to create a new linked Panel (NPC, place, etc.). |
-| P1       | 3D dice roller               | Anvil & Loom     | #original                  |  |
+| P1       | **3D dice roller**               | Anvil & Loom     | #original                  |  |
 | P1       | GM/Play dashboard (solo-focused)               | WA campaign manager            | #worldanvil #original                  | Pin current location, key NPCs, active tracks, and upcoming Reverberations for quick reference during play. |
 | P1       | Session recap tools (manual; AI optional later)| Anvil & Loom                   | #original #ai                          | Summarize a session’s key events, rolls, and loose threads; AI can expand into prose. |
 | P1       | Connection Web view (named elements & threads) | Kanka, DnD Campaign Planner, Anvil & Loom | #kanka #dndplanner #original | Visual graph of named oracle results, locations, NPCs, and other nodes with labeled relationships; feeds Echo/Reverberation and Weave decisions. |

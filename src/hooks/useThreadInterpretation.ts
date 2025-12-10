@@ -63,7 +63,7 @@ export function useThreadInterpretation() {
 
             // Find the original thread block and insert the new one after it
             const content = panel.content || '';
-            const regex = /```result-card\n([\s\S]*?)\n```/g;
+            const regex = /```(result-card|thread-card)\n([\s\S]*?)\n```/g;
             let match;
             let insertIndex = -1;
             let matchLength = 0;
@@ -82,7 +82,7 @@ export function useThreadInterpretation() {
             }
 
             if (insertIndex !== -1) {
-                const aiThreadBlock = `\n\n\`\`\`result-card\n${JSON.stringify(aiThread, null, 2)}\n\`\`\``;
+                const aiThreadBlock = `\n\n\`\`\`thread-card\n${JSON.stringify(aiThread, null, 2)}\n\`\`\``;
                 const updatedContent =
                     content.slice(0, insertIndex + matchLength) +
                     aiThreadBlock +

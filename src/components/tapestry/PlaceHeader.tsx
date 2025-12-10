@@ -82,7 +82,7 @@ export function PlaceHeader({ panel }: PlaceHeaderProps) {
         setRequestExpandPack(packId);
     };
 
-    const handleFirstLook = () => {
+    const handleFirstLook = async () => {
         if (!panel.frontmatter.weaveRef || !panel.frontmatter.aspects?.length || !panel.frontmatter.domains?.length) {
             alert('Please select a Weave, at least one Aspect, and at least one Domain.');
             return;
@@ -91,7 +91,7 @@ export function PlaceHeader({ panel }: PlaceHeaderProps) {
         if (!weaveRegistry || !tableRegistry) return;
 
         try {
-            const result = runFirstLook(
+            const result = await runFirstLook(
                 panel.frontmatter.weaveRef,
                 panel.frontmatter.aspects,
                 panel.frontmatter.domains,
@@ -112,7 +112,7 @@ export function PlaceHeader({ panel }: PlaceHeaderProps) {
             };
 
             // Append to content
-            const newContent = (panel.content || '') + `\n\n\`\`\`result-card\n${JSON.stringify(thread, null, 2)}\n\`\`\`\n`;
+            const newContent = (panel.content || '') + `\n\n\`\`\`thread-card\n${JSON.stringify(thread, null, 2)}\n\`\`\`\n`;
 
             // Update content and set firstLookDone
             useEditorStore.getState().updateEntryContent(panel.id, newContent);
@@ -122,6 +122,27 @@ export function PlaceHeader({ panel }: PlaceHeaderProps) {
             console.error('First Look failed:', err);
             alert('Failed to generate First Look: ' + String(err));
         }
+    };
+
+    const handleCreateWeave = async () => {
+        const newWeave = useWeaveStore.getState().createWeave({
+            name: panel.title,
+            aspects: panel.frontmatter.aspects,
+            domains: panel.frontmatter.domains
+        });
+        await useWeaveStore.getState().saveWeave(newWeave.id);
+
+        // Link to Place
+        setWeaveRef(panel.id, newWeave.id);
+
+        // Auto-Open the new Weave
+        setRightPaneMode('weave');
+        useWeaveStore.getState().setActiveWeave(newWeave.id);
+        openTab({
+            id: newWeave.id,
+            type: 'weave',
+            title: newWeave.name
+        });
     };
 
     return (
@@ -154,6 +175,17 @@ export function PlaceHeader({ panel }: PlaceHeaderProps) {
                                     </button>
                                 </div>
                             )}
+                            {!selectedWeave && (
+                                <div className="flex border-l border-slate-700">
+                                    <button
+                                        onClick={handleCreateWeave}
+                                        className="p-1 hover:bg-slate-700 text-slate-400 hover:text-green-400 transition-colors"
+                                        title="Create Weave from Place"
+                                    >
+                                        <Plus className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {isWeaveOpen && (
@@ -166,6 +198,28 @@ export function PlaceHeader({ panel }: PlaceHeaderProps) {
                                             key={weave.id}
                                             onClick={() => {
                                                 setWeaveRef(panel.id, weave.id);
+
+                                                // Sync aspects/domains from Weave Rows
+                                                const weaveAspects = new Set<string>();
+                                                const weaveDomains = new Set<string>();
+
+                                                weave.rows.forEach(row => {
+                                                    if (row.targetType === 'aspect' && row.targetId) {
+                                                        weaveAspects.add(row.targetId);
+                                                    }
+                                                    if (row.targetType === 'domain' && row.targetId) {
+                                                        weaveDomains.add(row.targetId);
+                                                    }
+                                                });
+
+                                                if (weaveAspects.size > 0 || weaveDomains.size > 0) {
+                                                    useEditorStore.getState().updateEntryFrontmatter(panel.id, {
+                                                        ...panel.frontmatter,
+                                                        weaveRef: weave.id,
+                                                        aspects: Array.from(weaveAspects),
+                                                        domains: Array.from(weaveDomains)
+                                                    });
+                                                }
                                                 setIsWeaveOpen(false);
                                             }}
                                             className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"

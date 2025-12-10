@@ -25,7 +25,17 @@ export class DiceEngine {
      */
     public initialize(container: HTMLElement) {
         if (this.engineCore) {
-            console.warn('DiceEngine already initialized.');
+            // If already initialized, just update the container if it changed
+            if (this.container !== container) {
+                console.log('DiceEngine re-parenting to new container.');
+                this.container = container;
+                // Move the canvas to the new container
+                if (this.engineCore.getRenderer().domElement.parentElement !== container) {
+                    container.appendChild(this.engineCore.getRenderer().domElement);
+                }
+                // Trigger resize to fit new container
+                this.engineCore.handleResize(container);
+            }
             return;
         }
         this.container = container;

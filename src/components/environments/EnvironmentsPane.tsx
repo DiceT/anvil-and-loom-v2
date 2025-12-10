@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Infinity, Dices } from 'lucide-react';
 import { useTableStore } from '../../stores/useTableStore';
 import { useToolStore } from '../../stores/useToolStore';
+import { useWeaveStore } from '../../stores/useWeaveStore';
+import { useTabStore } from '../../stores/useTabStore';
 import { TablePackMetadata } from '../../core/tables/types';
 import { rollOnTable } from '../../core/tables/tableEngine';
 import { resolveMacro } from '../../core/tables/macroResolver';
@@ -12,8 +14,6 @@ import {
   formatObjectivesThread,
   formatTheWeaveThread,
 } from '../../core/tables/threadFormatter';
-import type { WeaveRow } from '../../core/weave/weaveTypes';
-
 export function EnvironmentsPane() {
   const { registry, loadTables } = useTableStore();
   const { requestExpandPack, setRequestExpandPack } = useToolStore();
@@ -79,38 +79,15 @@ export function EnvironmentsPane() {
   };
 
   const handleAddToWeave = (type: 'aspect' | 'domain', packId: string) => {
-    const { useWeaveStore } = require('../../stores/useWeaveStore');
-    const { useTabStore } = require('../../stores/useTabStore');
-    const { generateRowId, recalculateRanges } = require('../../core/weave/weaveUtils');
-
-    const { registry: weaveRegistry, activeWeaveId, createWeave, updateWeave, setActiveWeave } = useWeaveStore.getState();
+    const { addPackToWeave } = useWeaveStore.getState();
     const { openTab } = useTabStore.getState();
 
-    let weave = activeWeaveId ? weaveRegistry?.weaves.get(activeWeaveId) ?? null : null;
-
-    if (!weave) {
-      weave = createWeave({ name: `${packId} Weave`, author: 'T' });
-    }
-
-    const newRow: WeaveRow = {
-      id: generateRowId(),
-      from: 0,
-      to: 0,
-      targetType: type,
-      targetId: packId,
-    };
-
-    const updatedRows = recalculateRanges([...weave.rows, newRow], weave.maxRoll);
-    const updatedWeave = { ...weave, rows: updatedRows };
-
-    updateWeave(updatedWeave);
-    setActiveWeave(updatedWeave.id);
-
-    // Open the weave editor
-    openTab({
-      id: updatedWeave.id,
-      type: 'weave',
-      title: updatedWeave.name,
+    addPackToWeave(packId, type, (id, title) => {
+      openTab({
+        id,
+        title,
+        type: 'weave'
+      });
     });
   };
 

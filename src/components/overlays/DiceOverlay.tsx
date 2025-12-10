@@ -14,22 +14,46 @@ export function DiceOverlay() {
             };
             window.addEventListener('resize', handleResize);
 
+            // Handle Visibility
+            let hideTimeout: NodeJS.Timeout;
+
+            const onRollStart = () => {
+                if (hideTimeout) clearTimeout(hideTimeout);
+                if (containerRef.current) {
+                    containerRef.current.style.visibility = 'visible';
+                    containerRef.current.style.opacity = '1';
+                    // Force resize just in case
+                    diceEngine.resize();
+                }
+            };
+
+            const onRollComplete = () => {
+                // Delay hiding
+                hideTimeout = setTimeout(() => {
+                    if (containerRef.current) {
+                        containerRef.current.style.visibility = 'hidden';
+                    }
+                }, 2000);
+            };
+
+            diceEngine.on('rollStart', onRollStart);
+            diceEngine.on('rollComplete', onRollComplete);
+
             return () => {
                 window.removeEventListener('resize', handleResize);
-                // We probably don't want to destroy the engine on unmount if we want to keep state,
-                // but for now, let's keep it clean or rely on the singleton nature.
-                // If we destroy, we lose the physics world. 
-                // diceEngine.destroy(); 
+                diceEngine.off('rollStart', onRollStart);
+                diceEngine.off('rollComplete', onRollComplete);
             };
         }
     }, []);
 
+    // Default hidden but with dimensions
     return (
         <div
             id="dice-overlay"
             ref={containerRef}
             className="fixed inset-0 z-[9999] pointer-events-none"
-            style={{ background: 'transparent' }} // Ensure transparency
+            style={{ background: 'transparent', visibility: 'hidden', opacity: 0 }}
         />
     );
 }

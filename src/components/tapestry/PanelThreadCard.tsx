@@ -26,10 +26,10 @@ export function PanelThreadCard({ card, defaultExpanded = false, onInterpretWith
     const headerBgColor = sourceColors[card.type] || '#1e293b';
 
     // Generate timestamp from card timestamp
-    const timestamp = new Date(card.timestamp).toLocaleTimeString();
+    const timestamp = card.timestamp ? new Date(card.timestamp).toLocaleTimeString() : '';
 
     // Check if this is a First Look thread
-    const isFirstLook = card.source.startsWith('First Look');
+    const isFirstLook = card.source?.startsWith('First Look');
 
     const handleInterpret = async () => {
         if (!onInterpretWithAi) return;

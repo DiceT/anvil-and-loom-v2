@@ -32,7 +32,7 @@ export const createThread = (
 
 export const serializeThread = (card: PanelThreadModel): string => {
   const json = JSON.stringify(card, null, 2);
-  return `\n\`\`\`result-card\n${json}\n\`\`\`\n`;
+  return `\n\`\`\`thread-card\n${json}\n\`\`\`\n`;
 };
 
 export const appendThread = (currentMarkdown: string, card: PanelThreadModel): string => {

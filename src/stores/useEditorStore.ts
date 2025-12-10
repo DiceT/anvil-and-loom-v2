@@ -34,6 +34,7 @@ interface EditorState {
     addDomain: (entryId: string, domainId: string) => void;
     removeDomain: (entryId: string, domainId: string) => void;
     setFirstLookDone: (entryId: string, done: boolean) => void;
+    updateEntryFrontmatter: (entryId: string, updates: Partial<EntryDoc['frontmatter']>) => void;
 
     // Editor Interaction
     insertThreadCallback?: (thread: Thread) => void;
@@ -375,6 +376,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         if (!entry) return;
 
         entry.frontmatter.firstLookDone = done;
+        entry.isDirty = true;
+        set({ openEntries: [...get().openEntries] });
+    },
+
+    updateEntryFrontmatter: (entryId: string, updates: Partial<EntryDoc['frontmatter']>) => {
+        const entry = get().openEntries.find(e => e.id === entryId);
+        if (!entry) return;
+
+        entry.frontmatter = { ...entry.frontmatter, ...updates };
         entry.isDirty = true;
         set({ openEntries: [...get().openEntries] });
     },

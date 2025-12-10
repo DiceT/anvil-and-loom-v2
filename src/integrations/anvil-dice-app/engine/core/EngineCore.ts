@@ -23,7 +23,9 @@ export class EngineCore {
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         // Fix Color Space (r124 uses older naming)
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        // this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.setClearColor(0x000000, 0); // Force transparent background
+        this.renderer.domElement.style.pointerEvents = 'none'; // Ensure clicks pass through canvas
         container.appendChild(this.renderer.domElement);
 
         // Initialize Systems
@@ -108,7 +110,11 @@ export class EngineCore {
         this.animationId = requestAnimationFrame(this.loop);
     };
 
-    private handleResize(container: HTMLElement) {
+    public getRenderer(): THREE.WebGLRenderer {
+        return this.renderer;
+    }
+
+    public handleResize(container: HTMLElement) {
         const width = container.clientWidth;
         const height = container.clientHeight;
         this.renderer.setSize(width, height);
