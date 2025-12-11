@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { ThreadModel } from '../../types/tapestry';
 import { useAiStore } from '../../stores/useAiStore';
+import { resolveThreadColor } from '../../constants/theme';
 
 interface PanelThreadCardProps {
     card: ThreadModel;
@@ -9,21 +10,14 @@ interface PanelThreadCardProps {
     onInterpretWithAi?: () => Promise<void>;
 }
 
-const sourceColors: Record<string, string> = {
-    ai: '#4c1d95', // Purple
-    dice: '#222244',
-    aspect: '#224433',
-    domain: '#224433',
-    oracle: '#332244',
-    weave: '#685431',
-    table: '#224422',
-};
+
 
 export function PanelThreadCard({ card, defaultExpanded = false, onInterpretWithAi }: PanelThreadCardProps) {
     const [isExpanded, setIsExpanded] = useState(defaultExpanded);
     const [isInterpreting, setIsInterpreting] = useState(false);
     const { isConfigured } = useAiStore();
-    const headerBgColor = sourceColors[card.type] || '#1e293b';
+    // Use shared resolver for consistency
+    const headerBgColor = resolveThreadColor(card.source || undefined, card.type);
 
     // Generate timestamp from card timestamp
     const timestamp = card.timestamp ? new Date(card.timestamp).toLocaleTimeString() : '';

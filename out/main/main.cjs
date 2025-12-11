@@ -557,6 +557,10 @@ function registerTapestryHandlers() {
     const { loomDir, entriesDir } = getTapestryPaths(root);
     await ensureDir(loomDir);
     await ensureDir(entriesDir);
+    const defaultFolders = ["Sessions", "Places", "People", "Lore", "World", "Mechanics", "Maps"];
+    for (const folder of defaultFolders) {
+      await ensureDir(path__namespace.join(entriesDir, folder));
+    }
     const createdAt = (/* @__PURE__ */ new Date()).toISOString();
     const config = {
       id,

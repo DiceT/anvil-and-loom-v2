@@ -207,8 +207,8 @@ const MapPin = React.memo(({ token, isSelected, onSelect, onChange, onClick, onC
                 stroke={isSelected ? '#ffffff' : '#000000'}
                 strokeWidth={isSelected ? 2 : 1}
                 fillRule="evenodd" // Makes the inner circle a hole
-                scaleX={2}
-                scaleY={2}
+                scaleX={1.35}
+                scaleY={1.35}
                 offsetX={12}
                 offsetY={22}
                 shadowColor="black"
@@ -746,11 +746,9 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
 
         // Handle Node Drop (Pins)
         const nodeData = e.dataTransfer.getData('application/tapestry-node');
-        console.error('Dropping:', e.dataTransfer.types, nodeData); // DEBUG
         if (nodeData) {
             try {
                 const node = JSON.parse(nodeData);
-                console.error('Parsed Node:', node); // DEBUG
                 newTokens.push({
                     id: crypto.randomUUID(),
                     x,
@@ -758,8 +756,8 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
                     src: '',
                     type: 'pin',
                     zLevel: 60, // MapLayers.MARKERS.min
-                    width: 32,
-                    height: 32,
+                    width: 20,
+                    height: 20,
                     linkedEntryId: node.id,
                     label: node.title || 'Untitled Entry',
                     blurb: node.blurb // Assuming dropped node has blurb, if not, we might need to fetch it or leave empty

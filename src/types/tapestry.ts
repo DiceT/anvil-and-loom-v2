@@ -90,7 +90,7 @@ export interface EditorState {
  *
  * Embedded Threads stored inside Panels (historically called ResultCardModel).
  */
-export type ThreadType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table' | 'ai';
+export type ThreadType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table' | 'ai' | 'user';
 
 import { ThreadAiInterpretation } from './ai';
 

@@ -7,6 +7,7 @@ export type ResultSource =
   | 'interpretation'
   | 'system'
   | 'weave'
+  | 'user'
   | 'other';
 
 /**

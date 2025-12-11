@@ -2,6 +2,7 @@ import { Thread, ResultSource } from './types';
 import { useThreadsStore } from '../../stores/useThreadsStore';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { useEditorStore } from '../../stores/useEditorStore';
+import { useSessionStore } from '../../stores/useSessionStore';
 import { createThread, appendThread } from '../../lib/tapestry/threadEngine';
 import { ThreadType } from '../../types/tapestry';
 
@@ -33,40 +34,56 @@ export function logThread(input: LogThreadInput): void {
 
   const { settings } = useSettingsStore.getState();
 
-  if (settings.dice.logToEntry) {
-    const { activeEntryId, openEntries, updateEntryContent, saveEntry } = useEditorStore.getState();
+  // 2. Log to Active Session
+  const { activeSessionId } = useSessionStore.getState();
+  const { activeEntryId, openEntries, updateEntryContent, saveEntry } = useEditorStore.getState();
 
-    if (activeEntryId) {
+  // Helper to append thread to an entry
+  const appendThreadToEntry = (entry: typeof openEntries[0]) => {
+    // Convert Thread to embedded Panel Thread model
+    const typeMap: Record<ResultSource, ThreadType> = {
+      dice: 'dice',
+      aspect: 'aspect',
+      domain: 'domain',
+      oracle: 'oracle',
+      weave: 'weave',
+      table: 'table',
+      interpretation: 'oracle',
+      system: 'oracle',
+      user: 'user',
+      other: 'table',
+    };
+
+    const panelThread = createThread(
+      typeMap[input.source || 'other'],
+      input.header,
+      input.result,
+      input.meta || {},
+      (input.meta?.expression as string | undefined) || undefined,
+      input.content,
+      thread.timestamp,
+    );
+
+    const newContent = appendThread(entry.content, panelThread);
+    updateEntryContent(entry.id, newContent);
+    saveEntry(entry.id);
+  };
+
+  if (activeSessionId) {
+    const sessionEntry = openEntries.find((e) => e.id === activeSessionId);
+    if (sessionEntry) {
+      appendThreadToEntry(sessionEntry);
+    }
+  }
+
+  // 3. Log to Active Entry (if Auto-Log enabled AND it's not the same as the session)
+  // We log to both if they are different files.
+  if (settings.dice.logToEntry) {
+    if (activeEntryId && activeEntryId !== activeSessionId) {
       const activeEntry = openEntries.find((e) => e.id === activeEntryId);
 
       if (activeEntry) {
-        // Convert Thread to embedded Panel Thread model
-        const typeMap: Record<ResultSource, ThreadType> = {
-          dice: 'dice',
-          aspect: 'aspect',
-          domain: 'domain',
-          oracle: 'oracle',
-          weave: 'weave',
-          table: 'table',
-          interpretation: 'oracle',
-          system: 'oracle',
-          other: 'table',
-        };
-
-        const panelThread = createThread(
-          typeMap[input.source || 'other'],
-          input.header,
-          input.result,
-          input.meta || {},
-          (input.meta?.expression as string | undefined) || undefined,
-          input.content,
-          thread.timestamp,
-        );
-
-        const newContent = appendThread(activeEntry.content, panelThread);
-        updateEntryContent(activeEntryId, newContent);
-
-        saveEntry(activeEntryId);
+        appendThreadToEntry(activeEntry);
       }
     }
   }

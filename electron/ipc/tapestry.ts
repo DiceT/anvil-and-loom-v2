@@ -260,6 +260,12 @@ export function registerTapestryHandlers() {
         await ensureDir(loomDir);
         await ensureDir(entriesDir);
 
+        // Create Default Folders
+        const defaultFolders = ['Sessions', 'Places', 'People', 'Lore', 'World', 'Mechanics', 'Maps'];
+        for (const folder of defaultFolders) {
+            await ensureDir(path.join(entriesDir, folder));
+        }
+
         const createdAt = new Date().toISOString();
 
         const config: TapestryConfig = {

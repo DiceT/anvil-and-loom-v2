@@ -182,8 +182,11 @@ export function TapestryManager() {
                                 />
                                 {deleteConfirm === tapestry.id && (
                                     <div
-                                        className="absolute inset-0 bg-red-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center p-4 cursor-pointer"
-                                        onClick={() => handleDelete(tapestry.id)}
+                                        className="absolute inset-0 bg-red-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center p-4 cursor-pointer z-50"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete(tapestry.id);
+                                        }}
                                     >
                                         <div className="text-center">
                                             <p className="text-white font-semibold mb-2">Click again to confirm deletion</p>

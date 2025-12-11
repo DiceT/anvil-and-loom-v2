@@ -5,6 +5,7 @@ import { WeaveEditor } from '../weave/WeaveEditor';
 import { TapestryEditor } from '../tapestry/TapestryEditor';
 import { TableForgePanel } from '../tableforge/TableForgePanel';
 import { MapEditor } from '../map/MapEditor';
+import { SessionInput } from '../session/SessionInput';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
@@ -73,6 +74,9 @@ export function CenterLane() {
       <div className="flex-1 min-h-0">
         {renderTabContent()}
       </div>
+
+      {/* Session Input (Overlay or Bottom Bar) */}
+      <SessionInput />
     </div>
   );
 }

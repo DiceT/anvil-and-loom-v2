@@ -61,12 +61,12 @@ _Source tags used below:_
 
 | Priority | Feature                                   | Source(s)                                      | Tags                                               | Notes |
 |---------:|-------------------------------------------|------------------------------------------------|----------------------------------------------------|-------|
-| P0       | Interactive maps with pins & hotspots     | LegendKeeper, WA, Kanka, DnD Campaign Planner, Augur | #legendkeeper #worldanvil #kanka #dndplanner #augur | Clickable pins/hotspots that open entries; core pattern for region, city, and dungeon maps. |
-| P1       | Map-triggered oracle / Weave integration  | Augur, Anvil & Loom                             | #augur #original                                   | Clicking a pin can roll The Weave or a table and append Result Cards into the linked Entry/Session. |
-| P1       | Multiple maps per tapestry                | LegendKeeper, WA                                | #legendkeeper #worldanvil                          | Regions, cities, dungeons, etc. |
+| P0       | **Interactive maps with pins & hotspots**     | LegendKeeper, WA, Kanka, DnD Campaign Planner, Augur | #legendkeeper #worldanvil #kanka #dndplanner #augur | Clickable pins/hotspots that open entries; core pattern for region, city, and dungeon maps. |
+| P1       | **Map-triggered oracle / Weave integration**  | Augur, Anvil & Loom                             | #augur #original                                   | Clicking a pin can roll The Weave or a table and append Result Cards into the linked Entry/Session. |
+| P1       | **Multiple maps per tapestry**                | LegendKeeper, WA                                | #legendkeeper #worldanvil                          | Regions, cities, dungeons, etc. |
 | P1       | Layers & toggleable overlays              | LegendKeeper                                    | #legendkeeper                                      | E.g. political vs geographic vs travel routes. |
-| P1       | Fog-of-war / player reveal controls       | LegendKeeper, VTT patterns                      | #legendkeeper #vtt                                 | Separate GM vs player visibility. |
-| P2       | Simple distance measuring                 | Misc tools                                      | #original                                          | Rough travel estimations. |
+| P1       | **Fog-of-war / player reveal controls**       | LegendKeeper, VTT patterns                      | #legendkeeper #vtt                                 | Separate GM vs player visibility. |
+| P2       | **Simple distance measuring**                 | Misc tools                                      | #original                                          | Rough travel estimations. |
 | P3       | Animated map states / time-lapse          | Future                                          | #original                                          | Show how a region changes over time. |
 
 
@@ -108,7 +108,7 @@ _Source tags used below:_
 | P0       | Onboarding Story Seed oracle                   | Anvil & Loom                   | #original                              | Roll once on a small Story Seed table and insert the result as an Oracle Result Card in the Welcome Panel. |
 | P0       | Guided “your turn” prompt in Welcome Panel     | Anvil & Loom                   | #original                              | Short, actionable text under the seed card that invites the user to write or roll again. |
 | P0       | Play Mode / Current Session Panel              | WA, Obsidian, Anvil & Loom     | #worldanvil #obsidian #original        | Focused layout for real-time play; one active Session Panel per session. |
-| P0       | Auto-logging Dice & Table results to Session   | Anvil & Loom                   | #original                              | Rolls from Dice/Oracles append structured cards into the active Session Panel. |
+| P0       | **Auto-logging Dice & Table results to Session**   | Anvil & Loom                   | #original                              | Rolls from Dice/Oracles append structured cards into the active Session Panel. |
 | P0       | Basic progress / track support                 | Anvil & Loom, RPG systems      | #original                              | Generic clocks/vows/fronts that can be ticked in Play Mode and logged. |
 | P0       | Quick-create Panels from play                | Anvil & Loom                   | #original                              | Highlight text in a Session Panel to create a new linked Panel (NPC, place, etc.). |
 | P1       | **3D dice roller**               | Anvil & Loom     | #original                  |  |
@@ -181,6 +181,7 @@ A running list of things we want to argue about later:
 | P2       | AI persona presets (Sage, Trickster, Archivist)    | Anvil & Loom                       | #ai #original              | Curated prompt styles for different creative “voices”. |
 | P3       | AI-assisted map dressing (non-positional prompts)  | Foundry-inspired + AI              | #ai #foundry #original     | Suggest landmarks, hazards, and atmosphere for a selected region. |
 | P3       | AI-powered system-conversion helper                | General                            | #ai #original              | Translate NPCs/items between supported RPG systems. |
+| P2       | **Native / Offline Speech-to-Text**                | OpenAI Whisper / Vosk              | #ai #original              | Embed a local model for voice input without Google/Cloud dependencies. |
 
 ---
 

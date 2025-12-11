@@ -1,34 +1,25 @@
 import { useState } from 'react';
-import { TentTree, Sparkles } from 'lucide-react';
+import { TentTree, Sparkles, Copy, Check } from 'lucide-react';
 import { Thread } from '../../core/results/types';
 import { useTableStore } from '../../stores/useTableStore';
 import { useToolStore } from '../../stores/useToolStore';
 import { resolveActionTheme, resolveDescriptorFocus } from '../../core/tables/macroResolver';
 import { formatComboOracleThread } from '../../core/tables/threadFormatter';
+import { resolveThreadColor } from '../../constants/theme';
 
 interface ThreadCardProps {
   card: Thread;
   defaultExpanded?: boolean;
 }
 
-const sourceColors: Record<string, string> = {
-  dice: '#222244',
-  aspect: '#224433',  // Green-ish for Aspects
-  domain: '#224433',  // Green-ish for Domains
-  table: '#224422',   // General table (legacy)
-  oracle: '#332244',  // Purple-ish for Oracles
-  interpretation: '#442244',
-  ai: '#442244',      // Same as interpretation
-  weave: '#685431',   // The Weave's gold/brown
-  system: '#1e293b',
-  other: '#1e293b',
-};
+
 
 export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [copied, setCopied] = useState(false);
   const { registry } = useTableStore();
   const { setRightPaneMode, setRequestExpandPack } = useToolStore();
-  const headerBgColor = sourceColors[card.source || 'other'];
+  const headerBgColor = resolveThreadColor(card.source, card.meta?.type || 'other');
   const timestamp = new Date(card.timestamp).toLocaleTimeString();
 
   const handleRollOracle = async (type: 'action' | 'theme' | 'descriptor' | 'focus') => {
@@ -78,6 +69,14 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
   const isWeave = card.source === 'weave' && card.meta?.targetType;
   const weaveTargetType = card.meta?.targetType as string;
   const weaveTargetId = card.meta?.targetId as string;
+
+  const handleCopy = () => {
+    // Determine text to copy - prefer content, fallback to result
+    const textToCopy = `**${card.header}**\n${card.result}\n\n${card.content}`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const renderResultWithButtons = () => {
     // Weave result with action button
@@ -167,8 +166,15 @@ export function ThreadCard({ card, defaultExpanded = false }: ThreadCardProps) {
       </div>
 
       {/* Footer - Always Visible */}
-      <div className="px-3 py-3 border-t border-slate-700">
-        {renderResultWithButtons()}
+      <div className="px-3 py-3 border-t border-slate-700 flex justify-between items-center">
+        <div className="flex-1 mr-2">{renderResultWithButtons()}</div>
+        <button
+          onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+          className="p-1.5 text-slate-500 hover:text-slate-300 hover:bg-slate-700 rounded transition-colors"
+          title="Copy to Clipboard"
+        >
+          {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+        </button>
       </div>
     </div>
   );
