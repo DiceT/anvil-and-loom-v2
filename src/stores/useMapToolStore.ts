@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { DEFAULT_DRAWING_Z } from '../components/map/MapConstants';
 
-export type MapToolType = 'select' | 'pan' | 'brush' | 'erase' | 'fog';
+export type MapToolType = 'select' | 'pan' | 'measure' | 'brush' | 'erase' | 'fog';
 
 interface MapToolState {
     activeTool: MapToolType;
@@ -9,12 +9,14 @@ interface MapToolState {
     brushSize: number;
     opacity: number;
     zLevel: number;
+    isMapLocked: boolean;
 
     setTool: (tool: MapToolType) => void;
     setBrushColor: (color: string) => void;
     setBrushSize: (size: number) => void;
     setOpacity: (opacity: number) => void;
     setZLevel: (level: number) => void;
+    toggleMapLock: () => void;
 }
 
 export const useMapToolStore = create<MapToolState>((set) => ({
@@ -23,10 +25,12 @@ export const useMapToolStore = create<MapToolState>((set) => ({
     brushSize: 5,
     opacity: 1,
     zLevel: DEFAULT_DRAWING_Z,
+    isMapLocked: true,
 
     setTool: (tool) => set({ activeTool: tool }),
     setBrushColor: (color) => set({ brushColor: color }),
     setBrushSize: (size) => set({ brushSize: size }),
     setOpacity: (opacity) => set({ opacity }),
     setZLevel: (level) => set({ zLevel: level }),
+    toggleMapLock: () => set((state) => ({ isMapLocked: !state.isMapLocked })),
 }));

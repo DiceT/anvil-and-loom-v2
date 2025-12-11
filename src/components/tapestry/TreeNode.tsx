@@ -55,6 +55,16 @@ export function TreeNode({
     // For folders, new items go inside. For files, they go in the parent folder (siblings).
     const creationPath = isFolder ? node.path : parentPath;
 
+    const handleDragStart = (e: React.DragEvent) => {
+        e.dataTransfer.setData('application/tapestry-node', JSON.stringify({
+            id: node.id,
+            title: node.name, // using name as title
+            type: node.type,
+            category: node.category
+        }));
+        e.dataTransfer.effectAllowed = 'copy';
+    };
+
     return (
         <>
             <div
@@ -65,6 +75,8 @@ export function TreeNode({
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 onClick={handleClick}
                 onContextMenu={handleContextMenu}
+                draggable={!isFolder} // Only allow dragging files for now
+                onDragStart={!isFolder ? handleDragStart : undefined}
             >
                 {/* Icon */}
                 {isFolder ? (

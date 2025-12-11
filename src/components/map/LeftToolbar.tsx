@@ -1,5 +1,4 @@
-import React from 'react';
-import { MousePointer2, Hand, Pen, Eraser, CloudFog } from 'lucide-react';
+import { MousePointer2, Hand, Pen, Eraser, CloudFog, Ruler } from 'lucide-react';
 import { useMapToolStore, MapToolType } from '../../stores/useMapToolStore';
 
 export function LeftToolbar() {
@@ -8,6 +7,7 @@ export function LeftToolbar() {
     const tools: { id: MapToolType; icon: React.ElementType; label: string }[] = [
         { id: 'select', icon: MousePointer2, label: 'Select' },
         { id: 'pan', icon: Hand, label: 'Pan' },
+        { id: 'measure', icon: Ruler, label: 'Ruler' },
         { id: 'brush', icon: Pen, label: 'Draw' },
         { id: 'erase', icon: Eraser, label: 'Erase' },
         { id: 'fog', icon: CloudFog, label: 'Fog' },
@@ -23,7 +23,8 @@ export function LeftToolbar() {
                         p-2 rounded transition-colors relative group
                         ${activeTool === tool.id
                             ? 'bg-indigo-600 text-white shadow-sm'
-                            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}
+                            : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                        }
                     `}
                     title={tool.label}
                 >
@@ -50,7 +51,8 @@ export function LeftToolbar() {
                                         w-6 h-6 rounded-full border border-slate-600 shadow-sm
                                         ${brushColor === color
                                             ? 'ring-2 ring-indigo-500 scale-110'
-                                            : 'hover:scale-110'}
+                                            : 'hover:scale-110'
+                                        }
                                     `}
                                     style={{ backgroundColor: color }}
                                     title={color}
@@ -69,7 +71,8 @@ export function LeftToolbar() {
                                     w-6 h-6 rounded flex items-center justify-center
                                     ${brushSize === size
                                         ? 'bg-slate-700 text-white'
-                                        : 'text-slate-500 hover:text-slate-300'}
+                                        : 'text-slate-500 hover:text-slate-300'
+                                    }
                                 `}
                                 title={`Size: ${size}px`}
                             >
