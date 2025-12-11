@@ -8,6 +8,7 @@ import type {
     CreateTapestryData,
     UpdateTapestryData,
 } from '../types/tapestry';
+import { useStitchStore } from './useStitchStore';
 
 interface TapestryState {
     // State
@@ -215,6 +216,14 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
 
                 traverse(tree);
                 useTagStore.getState().buildIndex(panels);
+            }
+
+            // Build stitch index
+            if (activeTapestryId) {
+                // We don't await this to keep UI responsive? Or maybe we should?
+                // Depending on performance. For now, let's fire and forget or await if critical.
+                // Stitches are critical for navigation, but maybe we can load tree first.
+                useStitchStore.getState().buildIndex(activeTapestryId);
             }
         } catch (error) {
             set({

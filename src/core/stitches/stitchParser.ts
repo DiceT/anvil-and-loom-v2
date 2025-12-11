@@ -30,3 +30,40 @@ export function extractStitches(content: string): Stitch[] {
 
     return stitches;
 }
+
+export interface PinStitch {
+    targetId: string;
+    label: string;
+    blurb?: string;
+}
+
+/**
+ * Extracts map pins from the JSON map data block.
+ * Looks for ```json:map-data ... ``` and parses tokens.
+ */
+export function extractMapPins(content: string): PinStitch[] {
+    const regex = /```json:map-data\s*([\s\S]*?)\s*```/;
+    const match = content.match(regex);
+    const pins: PinStitch[] = [];
+
+    if (match && match[1]) {
+        try {
+            const data = JSON.parse(match[1]);
+            if (data.tokens && Array.isArray(data.tokens)) {
+                data.tokens.forEach((token: any) => {
+                    if (token.type === 'pin' && token.linkedEntryId) {
+                        pins.push({
+                            targetId: token.linkedEntryId,
+                            label: token.label || 'Map Pin',
+                            blurb: token.blurb
+                        });
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Failed to parse map data for stitches', e);
+        }
+    }
+
+    return pins;
+}

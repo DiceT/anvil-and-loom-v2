@@ -95,11 +95,8 @@ export function TapestryTree() {
                 data: { path },
             });
 
-            // If it's a map, we don't open the text editor
-            if (!isMap) {
-                // Open entry in useEditorStore
-                await openEntry(path);
-            }
+            // Open entry in useEditorStore for ALL types (so activeEntryId is set)
+            await openEntry(path);
         } catch (err) {
             console.error('Failed to open entry:', err);
         }

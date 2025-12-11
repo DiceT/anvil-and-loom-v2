@@ -3,8 +3,12 @@ import { MapCanvas, DrawingLine, MapToken } from './MapCanvas';
 import { MapDevOverlay } from './MapDevOverlay';
 import { LeftToolbar } from './LeftToolbar';
 import { MapSettingsModal } from './MapSettingsModal';
+import { MapContextMenu } from './MapContextMenu';
 import { Settings } from 'lucide-react';
 
+
+import { useEditorStore } from '../../stores/useEditorStore';
+import { useStitchStore } from '../../stores/useStitchStore';
 
 interface MapEditorProps {
     panelId: string;
@@ -30,6 +34,7 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
 
     const [lines, setLines] = useState<DrawingLine[]>([]);
     const [tokens, setTokens] = useState<MapToken[]>([]);
+    const [fogLines, setFogLines] = useState<DrawingLine[]>([]);
     const [gridSettings, setGridSettings] = useState<any>({ // TODO: Type this properly
         type: 'square',
         scale: 1,
@@ -53,6 +58,7 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
                 try {
                     const data = JSON.parse(match[1]);
                     if (data.lines) setLines(data.lines);
+                    if (data.fogLines) setFogLines(data.fogLines);
                     if (data.tokens) setTokens(data.tokens);
                     if (data.grid) setGridSettings({ ...gridSettings, ...data.grid }); // Merge with defaults
                 } catch (e) {
@@ -65,13 +71,13 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
     }, [filePath]);
 
     // Save Logic
-    const saveMap = useCallback(async (newLines: DrawingLine[], newTokens: MapToken[], newGrid: any) => {
+    const saveMap = useCallback(async (newLines: DrawingLine[], newFogLines: DrawingLine[], newTokens: MapToken[], newGrid: any) => {
         if (!filePath) return;
 
         const freshEntry = await window.electron.tapestry.loadEntry(filePath);
         if (!freshEntry) return;
 
-        const jsonBlock = `\`\`\`json:map-data\n${JSON.stringify({ lines: newLines, tokens: newTokens, grid: newGrid }, null, 2)}\n\`\`\``;
+        const jsonBlock = `\`\`\`json:map-data\n${JSON.stringify({ lines: newLines, fogLines: newFogLines, tokens: newTokens, grid: newGrid }, null, 2)}\n\`\`\``;
 
         let newContent = freshEntry.content;
         const regex = /```json:map-data[\s\S]*?```/;
@@ -86,27 +92,32 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
         await window.electron.tapestry.saveEntry(freshEntry);
     }, [filePath]);
 
-    const triggerSave = useCallback((currentLines: DrawingLine[], currentTokens: MapToken[], currentGrid: any) => {
+    const triggerSave = useCallback((currentLines: DrawingLine[], currentFogLines: DrawingLine[], currentTokens: MapToken[], currentGrid: any) => {
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = setTimeout(() => {
-            saveMap(currentLines, currentTokens, currentGrid);
+            saveMap(currentLines, currentFogLines, currentTokens, currentGrid);
         }, 1000);
     }, [saveMap]);
 
     const handleLinesChange = useCallback((newLines: DrawingLine[]) => {
         setLines(newLines);
-        triggerSave(newLines, tokens, gridSettings);
-    }, [tokens, gridSettings, triggerSave]);
+        triggerSave(newLines, fogLines, tokens, gridSettings);
+    }, [fogLines, tokens, gridSettings, triggerSave]);
+
+    const handleFogChange = useCallback((newFogLines: DrawingLine[]) => {
+        setFogLines(newFogLines);
+        triggerSave(lines, newFogLines, tokens, gridSettings);
+    }, [lines, tokens, gridSettings, triggerSave]);
 
     const handleTokensChange = useCallback((newTokens: MapToken[]) => {
         setTokens(newTokens);
-        triggerSave(lines, newTokens, gridSettings);
-    }, [lines, gridSettings, triggerSave]);
+        triggerSave(lines, fogLines, newTokens, gridSettings);
+    }, [lines, fogLines, gridSettings, triggerSave]);
 
     const handleGridChange = useCallback((newGrid: any) => {
         setGridSettings(newGrid);
-        triggerSave(lines, tokens, newGrid);
-    }, [lines, tokens, triggerSave]);
+        triggerSave(lines, fogLines, tokens, newGrid);
+    }, [lines, fogLines, tokens, triggerSave]);
 
     const handleDebugUpdate = useCallback((info: any) => {
         setDebugInfo(prev => ({
@@ -135,6 +146,32 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
     };
 
     const [isSettingsOpen, setSettingsOpen] = useState(false);
+    const [contextMenu, setContextMenu] = useState<{ x: number, y: number, tokenId: string, color?: string } | null>(null);
+
+    const handleTokenContextMenu = (e: any, token: MapToken) => {
+        // e is KonvaEventObject
+        e.evt.preventDefault();
+        setContextMenu({
+            x: e.evt.clientX,
+            y: e.evt.clientY,
+            tokenId: token.id,
+            color: token.color
+        });
+    };
+
+    const handleColorChange = (color: string) => {
+        if (!contextMenu) return;
+        const newTokens = tokens.map(t => t.id === contextMenu.tokenId ? { ...t, color } : t);
+        setTokens(newTokens);
+        triggerSave(lines, fogLines, newTokens, gridSettings);
+    };
+
+    const handleDeletePin = () => {
+        if (!contextMenu) return;
+        const newTokens = tokens.filter(t => t.id !== contextMenu.tokenId);
+        setTokens(newTokens);
+        triggerSave(lines, fogLines, newTokens, gridSettings);
+    };
 
     const handleImportMap = async () => {
         try {
@@ -175,12 +212,31 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
 
             const newTokens = [...tokens, newToken];
             setTokens(newTokens);
-            triggerSave(lines, newTokens, gridSettings);
+            triggerSave(lines, fogLines, newTokens, gridSettings);
 
         } catch (err) {
             // console.error('Failed to import map:', err);
         }
     };
+
+    const handleOpenEntry = useCallback((id: string, newTab?: boolean) => {
+        // Resolve ID to Path
+        const stitchStore = useStitchStore.getState();
+        const title = stitchStore.idToTitle[id];
+
+        if (!title) {
+            console.error('Failed to find title for entry ID:', id);
+            return;
+        }
+
+        const panel = stitchStore.panelMap[title.toLowerCase()];
+        if (!panel) {
+            console.error('Failed to find panel for title:', title);
+            return;
+        }
+
+        useEditorStore.getState().openEntry(panel.path);
+    }, []);
 
     return (
         <div
@@ -208,11 +264,15 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
                 <LeftToolbar />
                 <MapCanvas
                     lines={lines}
+                    fogLines={fogLines}
                     tokens={tokens}
                     gridSettings={gridSettings}
                     onLinesChange={handleLinesChange}
+                    onFogChange={handleFogChange}
                     onTokensChange={handleTokensChange}
                     onDebugUpdate={handleDebugUpdate}
+                    onOpenEntry={handleOpenEntry}
+                    onTokenContextMenu={handleTokenContextMenu}
                 />
 
                 {/* Overlays */}
@@ -232,6 +292,17 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
                     gridSettings={gridSettings}
                     onGridChange={handleGridChange}
                 />
+
+                {contextMenu && (
+                    <MapContextMenu
+                        x={contextMenu.x}
+                        y={contextMenu.y}
+                        color={contextMenu.color}
+                        onColorChange={handleColorChange}
+                        onDelete={handleDeletePin}
+                        onClose={() => setContextMenu(null)}
+                    />
+                )}
             </div>
         </div>
     );

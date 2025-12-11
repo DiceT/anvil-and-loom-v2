@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { EntryDoc, EditorMode } from '../types/tapestry';
 import { normalizeTag, deduplicateTags, extractInlineTags } from '../utils/tags';
 import { Thread } from '../core/results/types';
+import { useTabStore } from './useTabStore';
 
 interface EditorState {
     // State
@@ -68,8 +69,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             const existing = get().openEntries.find(e => e.path === path);
             if (existing) {
                 set({ activeEntryId: existing.id, isLoading: false });
+
                 // Also activate the tab
-                const { useTabStore } = await import('./useTabStore');
                 const tabStore = useTabStore.getState();
                 const existingTab = tabStore.tabs.find(t => t.id === existing.id);
                 if (existingTab) {
@@ -98,7 +99,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
             }));
 
             // Create and activate tab
-            const { useTabStore } = await import('./useTabStore');
             useTabStore.getState().openTab({
                 id: entry.id,
                 type: 'entry',

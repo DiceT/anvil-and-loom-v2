@@ -1,11 +1,12 @@
 
 import { create } from 'zustand';
 import { StitchIndex, StitchReference } from '../types/stitch';
-import { extractStitches } from '../core/stitches/stitchParser';
+import { extractStitches, extractMapPins } from '../core/stitches/stitchParser';
 
 interface StitchStore {
     index: StitchIndex;
     panelMap: Record<string, { id: string; path: string }>; // Title (normalized) -> { id, path }
+    idToTitle: Record<string, string>; // ID -> Title (Original Case)
     isIndexing: boolean;
 
     // Actions
@@ -25,6 +26,7 @@ export const useStitchStore = create<StitchStore>((set, get) => ({
         incoming: {},
     },
     panelMap: {},
+    idToTitle: {},
     isIndexing: false,
 
     buildIndex: async (tapestryId: string) => {
@@ -37,26 +39,52 @@ export const useStitchStore = create<StitchStore>((set, get) => ({
             const outgoing: Record<string, string[]> = {};
             const incoming: Record<string, StitchReference[]> = {};
             const panelMap: Record<string, { id: string; path: string }> = {};
+            const idToTitle: Record<string, string> = {};
 
             entries.forEach((entry) => {
                 // Map title to ID and Path
                 panelMap[entry.title.toLowerCase()] = { id: entry.id, path: entry.path };
+                idToTitle[entry.id] = entry.title;
 
-                // 1. Parse outgoing stitches
+                // 1. Parse outgoing stitches (Text Links)
                 const stitches = extractStitches(entry.content);
+                const pins = extractMapPins(entry.content);
 
+                // Convert Pins to Targets (Resolve ID -> Title)
+                // Note: We need a second pass or lazy resolution if the target ID is not yet in idToTitle?
+                // Actually, we are building idToTitle in this loop too.
+                // Better approach: build idToTitle FIRST, then process links.
+                // But for now, let's assume we might miss some if order matters?
+                // No, we can just process all maps/arrays after the loop?
+                // OR: Split loop into 2 phases. Phase 1: Build Maps. Phase 2: Build Index.
+                // Let's split it.
+                // ... (Wait, splitting is cleaner)
 
-                const targets = [...new Set(stitches.map(s => s.target))]; // Unique targets
-                outgoing[entry.id] = targets;
+                // Refactor: Phase 1
+            });
 
-                // 2. Build incoming references
+            // Phase 1: Build Lookups
+            entries.forEach(entry => {
+                panelMap[entry.title.toLowerCase()] = { id: entry.id, path: entry.path };
+                idToTitle[entry.id] = entry.title;
+            });
+
+            // Phase 2: Build Index
+            entries.forEach(entry => {
+                const stitches = extractStitches(entry.content);
+                const pins = extractMapPins(entry.content);
+
+                const textTargets = stitches.map(s => s.target);
+                const pinTargets = pins.map(p => idToTitle[p.targetId]).filter(t => !!t); // Resolve ID to Title
+
+                const uniqueTargets = [...new Set([...textTargets, ...pinTargets])];
+                outgoing[entry.id] = uniqueTargets;
+
+                // 2a. Text Backstitches
                 stitches.forEach(stitch => {
-                    const targetKey = stitch.target.toLowerCase(); // Normalize for lookup
-                    if (!incoming[targetKey]) {
-                        incoming[targetKey] = [];
-                    }
+                    const targetKey = stitch.target.toLowerCase();
+                    if (!incoming[targetKey]) incoming[targetKey] = [];
 
-                    // Extract context snippet (e.g. 50 chars before/after)
                     const start = Math.max(0, stitch.start - 50);
                     const end = Math.min(entry.content.length, stitch.end + 50);
                     const context = entry.content.substring(start, end).trim();
@@ -69,10 +97,27 @@ export const useStitchStore = create<StitchStore>((set, get) => ({
                         context: context,
                     });
                 });
+
+                // 2b. Pin Backstitches
+                pins.forEach(pin => {
+                    const targetTitle = idToTitle[pin.targetId];
+                    if (!targetTitle) return;
+
+                    const targetKey = targetTitle.toLowerCase();
+                    if (!incoming[targetKey]) incoming[targetKey] = [];
+
+                    incoming[targetKey].push({
+                        sourceId: entry.id,
+                        sourceTitle: entry.title, // This map contains the pin
+                        targetTitle: targetTitle, // The pin points to this entry
+                        anchor: pin.label,
+                        context: `📍 Map Pin: ${pin.label} - ${pin.blurb || 'No Value'}`,
+                    });
+                });
             });
 
 
-            set({ index: { outgoing, incoming }, panelMap });
+            set({ index: { outgoing, incoming }, panelMap, idToTitle });
         } catch (error) {
             console.error('[useStitchStore] Failed to build stitch index:', error);
         } finally {
@@ -83,10 +128,14 @@ export const useStitchStore = create<StitchStore>((set, get) => ({
     updatePanel: (panelId, title, content, path) => {
         set((state) => {
             const { outgoing, incoming } = state.index;
-            const { panelMap } = state;
+            const { panelMap, idToTitle } = state;
 
             // Update panel map
             const newPanelMap = { ...panelMap };
+            const newIdToTitle = { ...idToTitle };
+
+            // Update Lookups
+            newIdToTitle[panelId] = title;
 
             // Remove old mapping for this ID if title changed
             // We scan to find if this ID was mapped to another title
@@ -107,12 +156,17 @@ export const useStitchStore = create<StitchStore>((set, get) => ({
                 }
             });
 
-            // 2. Parse new stitches
+            // 2. Parse new stitches & pins
             const stitches = extractStitches(content);
-            const targets = [...new Set(stitches.map(s => s.target))];
+            const pins = extractMapPins(content);
+
+            const textTargets = stitches.map(s => s.target);
+            const pinTargets = pins.map(p => newIdToTitle[p.targetId]).filter(t => !!t);
+
+            const uniqueTargets = [...new Set([...textTargets, ...pinTargets])];
 
             // 3. Update outgoing
-            const newOutgoing = { ...outgoing, [panelId]: targets };
+            const newOutgoing = { ...outgoing, [panelId]: uniqueTargets };
 
             // 4. Add new incoming refs
             stitches.forEach(stitch => {
@@ -134,12 +188,27 @@ export const useStitchStore = create<StitchStore>((set, get) => ({
                 });
             });
 
+            // 4b. Add new Pin refs
+            pins.forEach(pin => {
+                const targetTitle = newIdToTitle[pin.targetId];
+                if (!targetTitle) return;
+
+                const targetKey = targetTitle.toLowerCase();
+                if (!newIncoming[targetKey]) newIncoming[targetKey] = [];
+
+                newIncoming[targetKey].push({
+                    sourceId: panelId,
+                    sourceTitle: title,
+                    targetTitle: targetTitle,
+                    anchor: pin.label,
+                    context: `📍 Map Pin: ${pin.label}`,
+                });
+            });
+
             return {
-                index: {
-                    outgoing: newOutgoing,
-                    incoming: newIncoming,
-                },
+                index: { outgoing: newOutgoing, incoming: newIncoming },
                 panelMap: newPanelMap,
+                idToTitle: newIdToTitle
             };
         });
     },

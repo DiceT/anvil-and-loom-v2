@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Stage, Layer, Rect, Line, Circle, Image as KonvaImage, Transformer, Text, Shape } from 'react-konva';
+import { Stage, Layer, Rect, Line, Circle, Image as KonvaImage, Transformer, Text, Shape, Group, Path, Tag, Label } from 'react-konva';
 import { KonvaEventObject } from 'konva/lib/Node';
 import { useMapToolStore } from '../../stores/useMapToolStore';
 
@@ -7,7 +7,8 @@ export interface DrawingLine {
     points: number[];
     stroke: string;
     strokeWidth: number;
-    tool?: 'brush' | 'erase';
+    tool?: 'brush' | 'erase' | 'fog-reveal' | 'fog-shroud';
+    shape?: 'freehand' | 'rectangle';
 }
 
 export interface MapToken {
@@ -21,6 +22,9 @@ export interface MapToken {
     height: number;
     rotation?: number;
     linkedEntryId?: string;
+    color?: string;
+    label?: string; // Entry Title
+    blurb?: string; // Short snippet
 }
 
 export interface MapGridSettings {
@@ -33,11 +37,15 @@ export interface MapGridSettings {
 interface MapCanvasProps {
     children?: React.ReactNode;
     lines: DrawingLine[];
+    fogLines: DrawingLine[];
     tokens: MapToken[];
     gridSettings: MapGridSettings;
     onLinesChange: (lines: DrawingLine[]) => void;
+    onFogChange: (lines: DrawingLine[]) => void;
     onTokensChange: (tokens: MapToken[]) => void;
     onDebugUpdate?: (data: { scale: number; x: number; y: number; px: number; py: number; fps?: number }) => void;
+    onOpenEntry?: (id: string, newTab?: boolean) => void;
+    onTokenContextMenu?: (e: KonvaEventObject<PointerEvent>, token: MapToken) => void;
 }
 
 // Helper: Image Component for Konva
@@ -49,7 +57,6 @@ interface URLImageProps {
     draggable: boolean;
     listening?: boolean;
 }
-
 const URLImage = ({ token, isSelected, onSelect, onChange, draggable, listening = true }: URLImageProps) => {
     const [image, setImage] = useState<HTMLImageElement | null>(null);
     const shapeRef = useRef<any>(null);
@@ -98,14 +105,11 @@ const URLImage = ({ token, isSelected, onSelect, onChange, draggable, listening 
                         y: e.target.y(),
                     });
                 }}
-                onTransformEnd={(e) => {
-                    // transformer is changing scale and rotation. and width/height locally
-                    // but we want to store width/height directly, so we reset scale to 1
+                onTransformEnd={() => {
                     const node = shapeRef.current;
                     const scaleX = node.scaleX();
                     const scaleY = node.scaleY();
 
-                    // reset scale to 1
                     node.scaleX(1);
                     node.scaleY(1);
 
@@ -113,7 +117,6 @@ const URLImage = ({ token, isSelected, onSelect, onChange, draggable, listening 
                         ...token,
                         x: node.x(),
                         y: node.y(),
-                        // set minimal value
                         width: Math.max(5, node.width() * scaleX),
                         height: Math.max(5, node.height() * scaleY),
                         rotation: node.rotation()
@@ -124,7 +127,6 @@ const URLImage = ({ token, isSelected, onSelect, onChange, draggable, listening 
                 <Transformer
                     ref={trRef}
                     boundBoxFunc={(oldBox, newBox) => {
-                        // limit resize
                         if (newBox.width < 5 || newBox.height < 5) {
                             return oldBox;
                         }
@@ -136,15 +138,142 @@ const URLImage = ({ token, isSelected, onSelect, onChange, draggable, listening 
     );
 };
 
-export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange, onTokensChange, onDebugUpdate }: MapCanvasProps) {
+// MapPin Component
+interface MapPinProps {
+    token: MapToken;
+    isSelected: boolean;
+    onSelect: () => void;
+    onChange: (newToken: MapToken) => void;
+    onClick: () => void;
+    onContextMenu: (e: KonvaEventObject<PointerEvent>) => void;
+}
+
+const MapPin = React.memo(({ token, isSelected, onSelect, onChange, onClick, onContextMenu }: MapPinProps) => {
+    const groupRef = useRef<any>(null);
+    const [hovered, setHovered] = useState(false);
+    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Default Color #ef4444 (Red-500) if not set
+    const pinColor = token.color || '#ef4444';
+
+    // Clear timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        };
+    }, []);
+
+    return (
+        <Group
+            ref={groupRef}
+            x={token.x}
+            y={token.y}
+            draggable
+            onClick={(e) => {
+                if (e.evt.button === 0) { // Left Click
+                    onSelect();
+                }
+            }}
+            onContextMenu={onContextMenu}
+            onDragEnd={(e) => {
+                onChange({
+                    ...token,
+                    x: e.target.x(),
+                    y: e.target.y(),
+                });
+            }}
+            onMouseEnter={(e) => {
+                if (hoverTimeoutRef.current) {
+                    clearTimeout(hoverTimeoutRef.current);
+                    hoverTimeoutRef.current = null;
+                }
+                const container = e.target.getStage()?.container();
+                if (container) container.style.cursor = 'pointer';
+                setHovered(true);
+            }}
+            onMouseLeave={(e) => {
+                const container = e.target.getStage()?.container();
+                if (container) container.style.cursor = 'default';
+
+                hoverTimeoutRef.current = setTimeout(() => {
+                    setHovered(false);
+                }, 100);
+            }}
+        >
+            {/* Standard Map Pin SVG */}
+            <Path
+                data="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                fill={pinColor}
+                stroke={isSelected ? '#ffffff' : '#000000'}
+                strokeWidth={isSelected ? 2 : 1}
+                fillRule="evenodd" // Makes the inner circle a hole
+                scaleX={2}
+                scaleY={2}
+                offsetX={12}
+                offsetY={22}
+                shadowColor="black"
+                shadowBlur={5}
+                shadowOpacity={0.5}
+                hitStrokeWidth={10} // Easier to hover
+            />
+
+            {hovered && (
+                <Label
+                    x={0}
+                    y={-30}
+                    onClick={(e) => {
+                        e.cancelBubble = true; // Stop propagation to map
+                        onClick(); // Open entry
+                    }}
+                    onTap={(e) => {
+                        e.cancelBubble = true;
+                        onClick();
+                    }}
+                >
+                    <Tag
+                        fill="rgba(0,0,0,0.75)"
+                        pointerDirection="down"
+                        pointerWidth={0}
+                        pointerHeight={0}
+                        cornerRadius={4}
+                    />
+                    <Text
+                        text={`${token.label || 'Unknown Entry'}`}
+                        fontSize={14}
+                        padding={6}
+                        fill="white"
+                        align="center"
+                    />
+                </Label>
+            )}
+        </Group>
+    );
+});
+
+const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, onLinesChange, onFogChange, onTokensChange, onDebugUpdate, onOpenEntry, onTokenContextMenu }: MapCanvasProps) => {
     const stageRef = useRef<any>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
+    const lastDebugUpdateTimeRef = useRef(0);
 
     // FPS State
     const lastTimeRef = useRef(performance.now());
     const frameCountRef = useRef(0);
     const [fps, setFps] = useState(0);
+
+    // Store Access
+    const { activeTool, brushColor, brushSize, isMapLocked, isFogEnabled } = useMapToolStore();
+
+    // Viewport State
+    const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
+    const [scale, setScale] = useState(1);
+
+    // Pass FPS and Debug Info
+    useEffect(() => {
+        if (onDebugUpdate) {
+            onDebugUpdate({ scale, x: stagePos.x, y: stagePos.y, px: undefined as any, py: undefined as any, fps });
+        }
+    }, [fps]);
 
     useEffect(() => {
         let frameId: number;
@@ -164,31 +293,35 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         return () => cancelAnimationFrame(frameId);
     }, []);
 
-    // Pass FPS to debug update
-    // Pass FPS to debug update
+    // Center on Load
+    const hasCenteredRef = useRef(false);
     useEffect(() => {
-        if (onDebugUpdate) {
-            // Only send FPS, let MapEditor merge it
-            onDebugUpdate({ scale, x: stagePos.x, y: stagePos.y, px: undefined as any, py: undefined as any, fps });
+        if (dimensions.width > 0 && dimensions.height > 0 && !hasCenteredRef.current) {
+            setStagePos({
+                x: dimensions.width / 2,
+                y: dimensions.height / 2
+            });
+            hasCenteredRef.current = true;
         }
-    }, [fps]);
+    }, [dimensions.width, dimensions.height]);
 
-    // Store Access
-    const { activeTool, brushColor, brushSize, isMapLocked } = useMapToolStore();
-
-    // Viewport State
-    const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
-    const [scale, setScale] = useState(1);
-
-    // Drawing State (Local current line only)
+    // Drawing State
     const [currentLine, setCurrentLine] = useState<DrawingLine | null>(null);
     const isDrawing = useRef(false);
     const lastPointerPos = useRef<{ x: number, y: number } | null>(null);
 
+    // Selection State
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+
+    // Measurement State
+    const [measureState, setMeasureState] = useState<{ start: { x: number, y: number }, end: { x: number, y: number }, finalized: boolean } | null>(null);
+
+    // Cursor State
+    const [cursorPos, setCursorPos] = useState<{ x: number, y: number } | null>(null);
+
     // Resize Observer
     useEffect(() => {
         if (!containerRef.current) return;
-
         const observer = new ResizeObserver(() => {
             if (containerRef.current) {
                 setDimensions({
@@ -197,10 +330,27 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
                 });
             }
         });
-
         observer.observe(containerRef.current);
         return () => observer.disconnect();
     }, []);
+
+    // Reset measurement when tool changes
+    useEffect(() => {
+        if (activeTool !== 'measure') {
+            setMeasureState(null);
+        }
+    }, [activeTool]);
+
+    // Helpers
+    const checkDeselect = (e: KonvaEventObject<MouseEvent> | KonvaEventObject<TouchEvent>) => {
+        const target = e.target;
+        const isStage = target === target.getStage();
+        const isBackground = target.name() === 'background';
+        if (activeTool === 'measure') setSelectedId(null);
+        if ((isStage || isBackground) && activeTool === 'select') setSelectedId(null);
+    };
+
+
 
     const handleWheel = (e: KonvaEventObject<WheelEvent>) => {
         e.evt.preventDefault();
@@ -229,9 +379,6 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         setScale(finalScale);
     };
 
-    // Cursor State
-    const [cursorPos, setCursorPos] = useState<{ x: number, y: number } | null>(null);
-
     const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
         const stage = stageRef.current;
         if (!stage) return;
@@ -243,15 +390,14 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         }
 
         // Transform pointer to local stage coordinates for the cursor shape
-        // The cursor shape will live in the world space (so it scales with zoom)
-        // effectively showing the "Map Unit" size of the brush.
         const x = (ptr.x - stagePos.x) / scale;
         const y = (ptr.y - stagePos.y) / scale;
 
         setCursorPos({ x, y });
 
-        // Debug Broadcast
-        if (onDebugUpdate) {
+        // Debug Broadcast - Throttled to ~30fps roughly (32ms) to prevent React Thrashing
+        const now = performance.now();
+        if (onDebugUpdate && (now - lastDebugUpdateTimeRef.current) > 32) {
             onDebugUpdate({
                 scale,
                 x: stagePos.x,
@@ -259,6 +405,7 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
                 px: ptr.x,
                 py: ptr.y
             });
+            lastDebugUpdateTimeRef.current = now;
         }
 
         // Handle Middle Mouse Pan
@@ -274,33 +421,47 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
 
         // Handle Measure Move
         if (activeTool === 'measure' && measureState && !measureState.finalized) {
-            const x = (ptr.x - stagePos.x) / scale;
-            const y = (ptr.y - stagePos.y) / scale;
             setMeasureState(prev => prev ? { ...prev, end: { x, y } } : null);
             return;
         }
 
-        // Handle Drawing Move
+        // Handle Drawing Move (Brush, Erase, Fog)
         if (!isDrawing.current || !currentLine) {
             lastPointerPos.current = ptr;
             return;
         }
 
-        setCurrentLine(prev => prev ? {
-            ...prev,
-            points: [...prev.points, x, y]
-        } : null);
+        // If Rectangle Shape, we update the Last Point (Index 2,3) instead of appending
+        if (currentLine.shape === 'rectangle') {
+            setCurrentLine(prev => prev ? {
+                ...prev,
+                points: [prev.points[0], prev.points[1], x, y]
+            } : null);
+        } else {
+            // Freehand: Append
+            setCurrentLine(prev => prev ? {
+                ...prev,
+                points: [...prev.points, x, y]
+            } : null);
+        }
 
         lastPointerPos.current = ptr;
     };
+
+
 
     const handleMouseLeave = () => {
         isDrawing.current = false;
         lastPointerPos.current = null;
         setCursorPos(null);
         if (currentLine) {
-            const newLines = [...lines, currentLine];
-            onLinesChange(newLines);
+            if (currentLine.tool === 'fog-reveal' || currentLine.tool === 'fog-shroud') {
+                const newFogLines = [...fogLines, currentLine];
+                onFogChange(newFogLines);
+            } else {
+                const newLines = [...lines, currentLine];
+                onLinesChange(newLines);
+            }
             setCurrentLine(null);
         }
     };
@@ -344,20 +505,46 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
             return;
         }
 
-        // Left Click Drawing (Brush or Erase)
+        // Left Click Drawing (Brush, Erase, Fog)
         const isBrush = activeTool === 'brush';
         const isErase = activeTool === 'erase';
+        const isFogReveal = activeTool === 'fog-reveal';
+        const isFogShroud = activeTool === 'fog-shroud';
 
-        if ((isBrush || isErase) && e.evt.button === 0) {
+        if ((isBrush || isErase || isFogReveal || isFogShroud) && e.evt.button === 0) {
             isDrawing.current = true;
             const x = (ptr.x - stagePos.x) / scale;
             const y = (ptr.y - stagePos.y) / scale;
 
+            let stroke = brushColor;
+            let strokeWidth = brushSize;
+            let tool = activeTool;
+
+            if (isErase) {
+                stroke = '#000000'; // Doesn't matter for destination-out
+                strokeWidth = brushSize * 2;
+                tool = 'erase';
+            } else if (isFogReveal) {
+                stroke = '#000000'; // Doesn't matter for destination-out
+                tool = 'fog-reveal';
+            } else if (isFogShroud) {
+                stroke = '#000000'; // Fog is black?
+                tool = 'fog-shroud';
+            } else {
+                tool = 'brush';
+            }
+
+            // Get current shape from store (we need to access it inside the component, likely via store hook)
+            // But we didn't destructure `drawingShape` yet.
+            // Accessing directly from store state for freshness or adding to destructure list.
+            const shape = useMapToolStore.getState().drawingShape;
+
             setCurrentLine({
-                points: [x, y],
-                stroke: isErase ? '#000000' : brushColor,
-                strokeWidth: isErase ? brushSize * 2 : brushSize, // Eraser usually larger
-                tool: isErase ? 'erase' : 'brush'
+                points: shape === 'rectangle' ? [x, y, x, y] : [x, y], // Rect starts as point
+                stroke,
+                strokeWidth,
+                tool: tool as any,
+                shape: shape as any // 'freehand' | 'rectangle'
             });
         }
     };
@@ -366,8 +553,13 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         isDrawing.current = false;
         lastPointerPos.current = null;
         if (currentLine) {
-            const newLines = [...lines, currentLine];
-            onLinesChange(newLines);
+            if (currentLine.tool === 'fog-reveal' || currentLine.tool === 'fog-shroud') {
+                const newFogLines = [...fogLines, currentLine];
+                onFogChange(newFogLines);
+            } else {
+                const newLines = [...lines, currentLine];
+                onLinesChange(newLines);
+            }
             setCurrentLine(null);
         }
     };
@@ -390,7 +582,7 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
     const renderGridLines = () => {
         if (gridSettings.type === 'none') return null;
 
-        const gridSize = 100 * gridSettings.scale;
+        const gridSize = 20 * gridSettings.scale;
 
         // Render range (large enough to cover map)
         const range = 5000;
@@ -554,19 +746,23 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
 
         // Handle Node Drop (Pins)
         const nodeData = e.dataTransfer.getData('application/tapestry-node');
+        console.error('Dropping:', e.dataTransfer.types, nodeData); // DEBUG
         if (nodeData) {
             try {
                 const node = JSON.parse(nodeData);
+                console.error('Parsed Node:', node); // DEBUG
                 newTokens.push({
                     id: crypto.randomUUID(),
                     x,
                     y,
-                    src: '', // TODO: Default Icon for Pin
+                    src: '',
                     type: 'pin',
                     zLevel: 60, // MapLayers.MARKERS.min
                     width: 32,
                     height: 32,
-                    linkedEntryId: node.id
+                    linkedEntryId: node.id,
+                    label: node.title || 'Untitled Entry',
+                    blurb: node.blurb // Assuming dropped node has blurb, if not, we might need to fetch it or leave empty
                 });
             } catch (err) {
                 console.error('Failed to parse dropped node', err);
@@ -611,38 +807,7 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         );
     };
 
-    // Selection State
-    const [selectedId, setSelectedId] = useState<string | null>(null);
 
-    const checkDeselect = (e: KonvaEventObject<MouseEvent> | KonvaEventObject<TouchEvent>) => {
-        const target = e.target;
-        const isStage = target === target.getStage();
-        const isBackground = target.name() === 'background';
-
-        // Also deselect if clicking with measure tool start
-        if (activeTool === 'measure') {
-            setSelectedId(null);
-        }
-
-        if ((isStage || isBackground) && activeTool === 'select') {
-            setSelectedId(null);
-        }
-    };
-
-    const updateToken = (newToken: MapToken) => {
-        const newTokens = tokens.map(t => t.id === newToken.id ? newToken : t);
-        onTokensChange(newTokens);
-    };
-
-    // Measurement State
-    const [measureState, setMeasureState] = useState<{ start: { x: number, y: number }, end: { x: number, y: number }, finalized: boolean } | null>(null);
-
-    // Reset measurement when tool changes
-    useEffect(() => {
-        if (activeTool !== 'measure') {
-            setMeasureState(null);
-        }
-    }, [activeTool]);
 
     const renderMeasurement = () => {
         if (!measureState) return null;
@@ -663,14 +828,11 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         const label = `${units.toFixed(1)} ${gridSettings.unitType}`;
 
         // Perpendicular Ticks
-        // Vector v = (dx, dy). Normalized vn.
-        // Perpendicular p = (-dy, dx). Normalized pn.
         const len = distPixels || 1; // Avoid divide by zero
         const pnx = -dy / len;
         const pny = dx / len;
 
-        const tickSize = 10 / scale; // Screen-relative size? Or World relative? 
-        // User asked for "short perpendicular line". 10 units in world space seems fine.
+        const tickSize = 10 / scale;
 
         const startTick = [
             start.x + pnx * tickSize, start.y + pny * tickSize,
@@ -708,10 +870,6 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
                     stroke="rgba(255, 255, 255, 0.75)"
                     strokeWidth={2 / scale}
                 />
-                {/* Label Background */}
-                {/* Label Text */}
-                {/* Konva Text doesn't support background color easily, usually need a Rect behind it if needed. 
-                     But user just asked for text. White with 75% transparency? */}
                 <Text
                     x={mx + pnx * offset}
                     y={my + pny * offset}
@@ -720,11 +878,8 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
                     fill="rgba(255, 255, 255, 0.9)"
                     align="center"
                     verticalAlign="middle"
-                    offsetX={50} // Rough centering? Text centering is tricky without measuring text width.
-                // Actually, let's use a simpler label placement
+                    offsetX={50}
                 />
-                {/* Better Text Centering */}
-                {/* Actually, let's use a HTML overlay or just simple text for now. */}
             </Layer>
         );
     };
@@ -756,7 +911,6 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
             className="w-full h-full bg-slate-950 overflow-hidden relative"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-        // Add global listener to deselect? No, Stage handles it.
         >
             <Stage
                 ref={stageRef}
@@ -796,25 +950,62 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
                 {/* --- LAYER 0: BACKGROUND (Color) --- */}
                 {renderBackground()}
 
-                {/* --- LAYER 1: BASE MAP (Images) --- */}
-                <Layer id="base-layer">
+                {/* --- LAYER 1: TOKENS & PINS --- */}
+                <Layer id="token-layer">
                     {tokens
-                        .filter(t => t.zLevel >= 0 && t.zLevel < 10)
-                        .map(token => (
-                            <URLImage
-                                key={token.id}
-                                token={token}
-                                isSelected={token.id === selectedId}
-                                onSelect={() => {
-                                    if (activeTool === 'select') {
-                                        setSelectedId(token.id);
-                                    }
-                                }}
-                                onChange={updateToken}
-                                draggable={!isMapLocked && activeTool === 'select'}
-                                listening={!isMapLocked}
-                            />
-                        ))}
+                        .filter(t => t.zLevel >= 0 && t.zLevel < 100) // Render all tokens
+                        .sort((a, b) => a.zLevel - b.zLevel) // Sort by Z-level
+                        .map(token => {
+                            if (token.type === 'pin') {
+                                return (
+                                    <MapPin
+                                        key={token.id}
+                                        token={token}
+                                        isSelected={token.id === selectedId}
+                                        onSelect={() => {
+                                            if (activeTool === 'select') {
+                                                setSelectedId(token.id);
+                                            }
+                                        }}
+                                        onChange={(newToken) => {
+                                            const newTokens = tokens.map(t => t.id === newToken.id ? newToken : t)
+                                            onTokensChange(newTokens);
+                                        }}
+                                        onClick={() => {
+                                            if (token.linkedEntryId && onOpenEntry) {
+                                                onOpenEntry(token.linkedEntryId);
+                                            }
+                                        }}
+                                        onContextMenu={(e) => {
+                                            e.evt.preventDefault();
+                                            if (onTokenContextMenu) {
+                                                onTokenContextMenu(e, token);
+                                            }
+                                        }}
+                                    />
+                                );
+                            }
+
+                            return (
+                                <URLImage
+                                    key={token.id}
+                                    token={token}
+                                    isSelected={token.id === selectedId}
+                                    onSelect={() => {
+                                        if (activeTool === 'select') {
+                                            setSelectedId(token.id);
+                                        }
+                                    }}
+                                    onChange={(newToken) => {
+                                        // Use reference from updateToken or inline
+                                        const newTokens = tokens.map((t) => (t.id === newToken.id ? newToken : t));
+                                        onTokensChange(newTokens);
+                                    }}
+                                    draggable={!isMapLocked && activeTool === 'select'}
+                                    listening={!isMapLocked}
+                                />
+                            );
+                        })}
                 </Layer>
 
                 {/* --- LAYER 1.5: GRID LINES --- */}
@@ -855,45 +1046,85 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
                 </Layer>
 
                 {/* --- LAYER 3: OBJECTS (Tokens) --- */}
-                <Layer id="objects-layer">
-                    {tokens
-                        .filter(t => t.zLevel >= 30 && t.zLevel < 60)
-                        .map(token => (
-                            <URLImage
-                                key={token.id}
-                                token={token}
-                                isSelected={token.id === selectedId}
-                                onSelect={() => {
-                                    if (activeTool === 'select') {
-                                        setSelectedId(token.id);
-                                    }
-                                }}
-                                onChange={updateToken}
-                                draggable={activeTool === 'select'}
-                            />
-                        ))}
-                </Layer>
 
-                {/* --- LAYER 3.5: MARKERS (Pins) --- */}
-                <Layer id="markers-layer">
-                    {tokens
-                        .filter(t => t.zLevel >= 60 && t.zLevel < 90)
-                        .map(token => (
-                            // Placeholder for Pin visualization
-                            <Circle
-                                key={token.id}
-                                x={token.x}
-                                y={token.y}
-                                radius={10}
-                                fill="#818cf8"
-                                stroke="#ffffff"
-                                strokeWidth={2}
-                            />
-                        ))}
-                </Layer>
+
+                {/* --- LAYER 3.5: MARKERS (Pins) - REMOVED (Handled in Token Layer) --- */}
 
                 {/* --- LAYER 4: ATMOSPHERE (Fog of War) --- */}
-                {/* Placeholder: Fog will go here */}
+                {/* --- LAYER 4: ATMOSPHERE (Fog of War) --- */}
+                {/* 
+                    If Fog is disabled, we hide the layer. 
+                    If enabled, we render it with global opacity.
+                */}
+                <Layer id="fog-layer" listening={false} visible={isFogEnabled} opacity={0.9}>
+                    <Rect
+                        x={-5000}
+                        y={-5000}
+                        width={10000}
+                        height={10000}
+                        fill="#000000"
+                        // Opacity is now on the Layer to ensure Shroud lines match Base Fog
+                        listening={false}
+                    />
+                    {fogLines.map((line, i) => {
+                        if (line.shape === 'rectangle' && line.points.length === 4) {
+                            const [x1, y1, x2, y2] = line.points;
+                            return (
+                                <Rect
+                                    key={i}
+                                    x={Math.min(x1, x2)}
+                                    y={Math.min(y1, y2)}
+                                    width={Math.abs(x2 - x1)}
+                                    height={Math.abs(y2 - y1)}
+                                    fill={line.tool === 'fog-shroud' ? '#000000' : '#000000'}
+                                    globalCompositeOperation={
+                                        line.tool === 'fog-reveal' ? 'destination-out' : 'source-over'
+                                    }
+                                />
+                            );
+                        }
+                        return (
+                            <Line
+                                key={i}
+                                points={line.points}
+                                stroke="#000000"
+                                strokeWidth={line.strokeWidth}
+                                tension={0.5}
+                                lineCap="round"
+                                lineJoin="round"
+                                globalCompositeOperation={
+                                    line.tool === 'fog-reveal' ? 'destination-out' : 'source-over'
+                                }
+                            />
+                        );
+                    })}
+                    {currentLine && (currentLine.tool === 'fog-reveal' || currentLine.tool === 'fog-shroud') && (
+                        currentLine.shape === 'rectangle' && currentLine.points.length >= 4 ? (
+                            <Rect
+                                x={Math.min(currentLine.points[0], currentLine.points[2])}
+                                y={Math.min(currentLine.points[1], currentLine.points[3])}
+                                width={Math.abs(currentLine.points[2] - currentLine.points[0])}
+                                height={Math.abs(currentLine.points[3] - currentLine.points[1])}
+                                fill="#000000"
+                                globalCompositeOperation={
+                                    currentLine.tool === 'fog-reveal' ? 'destination-out' : 'source-over'
+                                }
+                            />
+                        ) : (
+                            <Line
+                                points={currentLine.points}
+                                stroke="#000000"
+                                strokeWidth={currentLine.strokeWidth}
+                                tension={0.5}
+                                lineCap="round"
+                                lineJoin="round"
+                                globalCompositeOperation={
+                                    currentLine.tool === 'fog-reveal' ? 'destination-out' : 'source-over'
+                                }
+                            />
+                        )
+                    )}
+                </Layer>
 
                 {/* --- LAYER 5: INTERFACE (Cursor & Gizmos) --- */}
                 {renderCursor()}
@@ -903,3 +1134,5 @@ export function MapCanvas({ children, lines, tokens, gridSettings, onLinesChange
         </div>
     );
 }
+
+export const MapCanvas = React.memo(MapCanvasComponent);

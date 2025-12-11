@@ -1,8 +1,8 @@
-import { MousePointer2, Hand, Pen, Eraser, CloudFog, Ruler } from 'lucide-react';
+import { MousePointer2, Hand, Pen, Eraser, Ruler, Eye, Cloud, AudioWaveform } from 'lucide-react';
 import { useMapToolStore, MapToolType } from '../../stores/useMapToolStore';
 
 export function LeftToolbar() {
-    const { activeTool, setTool, brushColor, setBrushColor, brushSize, setBrushSize } = useMapToolStore();
+    const { activeTool, setTool, brushColor, setBrushColor, brushSize, setBrushSize, isFogEnabled, toggleFog } = useMapToolStore();
 
     const tools: { id: MapToolType; icon: React.ElementType; label: string }[] = [
         { id: 'select', icon: MousePointer2, label: 'Select' },
@@ -10,7 +10,8 @@ export function LeftToolbar() {
         { id: 'measure', icon: Ruler, label: 'Ruler' },
         { id: 'brush', icon: Pen, label: 'Draw' },
         { id: 'erase', icon: Eraser, label: 'Erase' },
-        { id: 'fog', icon: CloudFog, label: 'Fog' },
+        { id: 'fog-reveal', icon: Eye, label: 'Reveal Fog' },
+        { id: 'fog-shroud', icon: Cloud, label: 'Shroud Fog' },
     ];
 
     return (
@@ -37,8 +38,8 @@ export function LeftToolbar() {
                 </button>
             ))}
 
-            {/* Brush & Eraser Settings */}
-            {(activeTool === 'brush' || activeTool === 'erase') && (
+            {/* Brush & Eraser & Fog Settings */}
+            {(activeTool === 'brush' || activeTool === 'erase' || activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
                 <div className="flex flex-col gap-2 pt-2 border-t border-slate-700 mt-1">
                     {/* Colors (Brush Only) */}
                     {activeTool === 'brush' && (
@@ -61,9 +62,9 @@ export function LeftToolbar() {
                         </div>
                     )}
 
-                    {/* Sizes (Both) */}
+                    {/* Sizes (All Brushes) */}
                     <div className="flex justify-between items-center px-1 mt-1">
-                        {[2, 5, 10, 20].map(size => (
+                        {[2, 5, 10, 20, 50, 100].map(size => (
                             <button
                                 key={size}
                                 onClick={() => setBrushSize(size)}
@@ -78,11 +79,47 @@ export function LeftToolbar() {
                             >
                                 <div
                                     className="rounded-full bg-current"
-                                    style={{ width: Math.max(2, size / 2), height: Math.max(2, size / 2) }}
+                                    style={{ width: Math.max(2, size > 20 ? 10 : size / 2), height: Math.max(2, size > 20 ? 10 : size / 2) }}
                                 />
                             </button>
                         ))}
                     </div>
+
+                    {/* Fog Visibility Toggle */}
+                    {(activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
+                        <div className="flex flex-col gap-2 px-1 mt-2 pt-2 border-t border-slate-700">
+                            {/* Shape Toggle */}
+                            <div className="flex gap-1 bg-slate-800 p-0.5 rounded border border-slate-700">
+                                <button
+                                    onClick={() => useMapToolStore.getState().setDrawingShape('freehand')}
+                                    className={`flex-1 p-1 rounded text-xs flex items-center justify-center ${useMapToolStore.getState().drawingShape === 'freehand' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                                    title="Freehand"
+                                >
+                                    <AudioWaveform className="w-3 h-3" />
+                                </button>
+                                <button
+                                    onClick={() => useMapToolStore.getState().setDrawingShape('rectangle')}
+                                    className={`flex-1 p-1 rounded text-xs flex items-center justify-center ${useMapToolStore.getState().drawingShape === 'rectangle' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                                    title="Rectangle"
+                                >
+                                    <div className="w-3 h-3 border border-current" />
+                                </button>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={isFogEnabled}
+                                    onChange={() => toggleFog()}
+                                    className="rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                                    id="fog-toggle"
+                                />
+                                <label htmlFor="fog-toggle" className="text-xs text-slate-300 cursor-pointer select-none">
+                                    Enable Fog Layer
+                                </label>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useStitchStore } from '../../stores/useStitchStore';
 import { useEditorStore } from '../../stores/useEditorStore';
-import { ArrowRight, ArrowLeft, Link as LinkIcon } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Link as LinkIcon, MapPin } from 'lucide-react';
 
 export function Stitchboard() {
     const { activeEntryId, openEntries } = useEditorStore();
@@ -29,23 +29,7 @@ export function Stitchboard() {
         }
     };
 
-    const handleNavigateById = async (id: string, path?: string) => {
-        // We need path. If we have ID, we might need to look it up if path not provided.
-        // Incoming refs have sourceId and sourceTitle.
-        // We need source path.
-        // useStitchStore incoming refs don't store path currently.
-        // I should update useStitchStore to store path in incoming refs too.
 
-        // For now, let's try to resolve by title if path missing, or update store.
-        // Let's update store to be safe.
-        // But for P0, I can try to resolve by title since I have sourceTitle.
-
-        const resolved = resolvePanel(id); // Wait, resolvePanel takes TITLE.
-        // I need resolvePanelById? Or just use title.
-        // Incoming ref has sourceTitle.
-
-        // Let's use sourceTitle for now.
-    };
 
     return (
         <div className="flex flex-col h-full bg-slate-900 text-slate-200 overflow-y-auto">
@@ -125,19 +109,25 @@ export function Stitchboard() {
                     <p className="text-xs text-slate-600 italic">No backstitches</p>
                 ) : (
                     <div className="space-y-4">
-                        {incoming.map((ref, idx) => (
-                            <div key={`${ref.sourceId}-${idx}`} className="bg-slate-800/50 rounded p-3 text-sm">
-                                <button
-                                    onClick={() => handleNavigate(ref.sourceTitle)}
-                                    className="font-medium text-purple-400 hover:text-purple-300 hover:underline mb-1 block"
-                                >
-                                    {ref.sourceTitle}
-                                </button>
-                                <div className="text-xs text-slate-500 bg-slate-900/50 p-2 rounded border-l-2 border-slate-700 italic">
-                                    "...{ref.context}..."
+                        {incoming.map((ref, idx) => {
+                            const isMapPin = ref.context.startsWith('📍');
+                            return (
+                                <div key={`${ref.sourceId}-${idx}`} className="bg-slate-800/50 rounded p-3 text-sm">
+                                    <button
+                                        onClick={() => handleNavigate(ref.sourceTitle)}
+                                        className="font-medium text-purple-400 hover:text-purple-300 hover:underline mb-1 flex items-center gap-2"
+                                    >
+                                        {isMapPin && <MapPin size={14} className="text-orange-400" />}
+                                        {ref.sourceTitle}
+                                    </button>
+                                    {!isMapPin && (
+                                        <div className="text-xs text-slate-500 bg-slate-900/50 p-2 rounded border-l-2 border-slate-700 italic">
+                                            "...{ref.context}..."
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
