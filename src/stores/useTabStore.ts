@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type TabType = 'entry' | 'weave' | 'tableforge';
+export type TabType = 'entry' | 'weave' | 'tableforge' | 'map';
 
 export interface Tab {
   id: string;

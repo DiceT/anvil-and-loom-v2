@@ -4,6 +4,7 @@ import { useEditorStore } from '../../stores/useEditorStore';
 import { WeaveEditor } from '../weave/WeaveEditor';
 import { TapestryEditor } from '../tapestry/TapestryEditor';
 import { TableForgePanel } from '../tableforge/TableForgePanel';
+import { MapEditor } from '../map/MapEditor';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
@@ -27,6 +28,8 @@ export function CenterLane() {
         return <TapestryEditor />;
       case 'tableforge':
         return <TableForgePanel />;
+      case 'map':
+        return <MapEditor key={activeTab.id} panelId={activeTab.id} filePath={activeTab.data?.path} />;
       default:
         return null;
     }
@@ -34,17 +37,16 @@ export function CenterLane() {
 
   return (
     <div className="bg-slate-950 h-full flex flex-col">
-      {/* Tab Bar - Only show if multiple tabs */}
-      {tabs.length > 1 && (
+      {/* Tab Bar - Always show if tabs exist */}
+      {tabs.length > 0 && (
         <div className="flex items-center gap-0 bg-slate-950 border-b border-slate-800 px-2 overflow-x-auto">
           {tabs.map((tab) => (
             <div
               key={tab.id}
-              className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors border-b-2 ${
-                activeTabId === tab.id
-                  ? 'border-b-purple-500 text-slate-200'
-                  : 'border-b-transparent text-slate-400 hover:text-slate-200'
-              }`}
+              className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors border-b-2 ${activeTabId === tab.id
+                ? 'border-b-purple-500 text-slate-200'
+                : 'border-b-transparent text-slate-400 hover:text-slate-200'
+                }`}
               onClick={() => {
                 setActiveTab(tab.id);
                 if (tab.type === 'entry') {

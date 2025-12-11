@@ -20,6 +20,7 @@ export type EntryCategory =
     | 'npc'
     | 'lore'
     | 'mechanics'
+    | 'map'
     | 'other';
 
 export interface TapestryConfig {

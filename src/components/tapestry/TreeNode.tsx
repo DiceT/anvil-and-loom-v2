@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, FileText } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FileText, MapPin } from 'lucide-react';
 import { TapestryNode } from '../../types/tapestry';
 import { CategoryBadge } from './CategoryBadge';
 import { TreeContextMenu } from './TreeContextMenu';
@@ -74,7 +74,11 @@ export function TreeNode({
                         <ChevronRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     )
                 ) : (
-                    <FileText className="w-4 h-4 text-slate-400 flex-shrink-0 ml-4" />
+                    node.category === 'map' ? (
+                        <MapPin className="w-4 h-4 text-indigo-400 flex-shrink-0 ml-4" />
+                    ) : (
+                        <FileText className="w-4 h-4 text-slate-400 flex-shrink-0 ml-4" />
+                    )
                 )}
 
                 {isFolder && <Folder className="w-4 h-4 text-slate-400 flex-shrink-0" />}

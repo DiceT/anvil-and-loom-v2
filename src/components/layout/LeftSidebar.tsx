@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Settings, BookImage } from 'lucide-react';
+import { Plus, Settings, BookImage, MapPin } from 'lucide-react';
 import { useTapestryStore } from '../../stores/useTapestryStore';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { useTabStore } from '../../stores/useTabStore';
@@ -14,6 +14,8 @@ export function LeftSidebar() {
 
   const [showNewPlaceDialog, setShowNewPlaceDialog] = useState(false);
   const [newPlaceName, setNewPlaceName] = useState('');
+  const [showNewMapDialog, setShowNewMapDialog] = useState(false);
+  const [newMapName, setNewMapName] = useState('');
   const [showSettings, setShowSettings] = useState(false);
 
   const handleNewPlace = () => {
@@ -47,6 +49,37 @@ export function LeftSidebar() {
     }
   };
 
+  const handleNewMap = () => {
+    setNewMapName('New Map');
+    setShowNewMapDialog(true);
+  };
+
+  const confirmNewMap = async () => {
+    if (!newMapName.trim() || !tree) return;
+
+    try {
+      // Create with type 'map' instead of 'place'
+      const result = await window.electron.tapestry.createEntry(tree.path, newMapName.trim(), 'map');
+      await loadTree();
+      setShowNewMapDialog(false);
+
+      if (result?.path) {
+        const entry = await window.electron.tapestry.loadEntry(result.path);
+        if (entry) {
+          openTab({
+            id: entry.id,
+            type: 'map',  // Distinct tab type
+            title: entry.title,
+            data: { path: result.path },
+          });
+          // We don't call openEntry here because maps use MapEditor, not the text editor
+        }
+      }
+    } catch (err) {
+      console.error('Failed to create map:', err);
+    }
+  };
+
   return (
     <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center justify-between py-2">
       {/* Top Toolbar - Creation/Templates */}
@@ -64,6 +97,12 @@ export function LeftSidebar() {
           size="m"
           tooltip="New Place"
           onClick={handleNewPlace}
+        />
+        <IconButton
+          icon={MapPin}
+          size="m"
+          tooltip="New Map"
+          onClick={handleNewMap}
         />
       </div>
 
@@ -100,6 +139,36 @@ export function LeftSidebar() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && newPlaceName.trim()) {
                   confirmNewPlace();
+                }
+              }}
+            />
+          </div>
+        </Dialog>
+      )}
+
+      {/* New Map Dialog */}
+      {showNewMapDialog && (
+        <Dialog
+          title="New Map"
+          onClose={() => setShowNewMapDialog(false)}
+          onConfirm={confirmNewMap}
+          confirmText="Create"
+          confirmDisabled={!newMapName.trim()}
+        >
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Map Name <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={newMapName}
+              onChange={(e) => setNewMapName(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              placeholder="Map name..."
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newMapName.trim()) {
+                  confirmNewMap();
                 }
               }}
             />

@@ -87,15 +87,19 @@ export function TapestryTree() {
             }
 
             // Open tab in useTabStore
+            const isMap = entry.category === 'map';
             openTab({
                 id: entry.id,
-                type: 'entry',
+                type: isMap ? 'map' : 'entry',
                 title: entry.title,
                 data: { path },
             });
 
-            // Open entry in useEditorStore
-            await openEntry(path);
+            // If it's a map, we don't open the text editor
+            if (!isMap) {
+                // Open entry in useEditorStore
+                await openEntry(path);
+            }
         } catch (err) {
             console.error('Failed to open entry:', err);
         }

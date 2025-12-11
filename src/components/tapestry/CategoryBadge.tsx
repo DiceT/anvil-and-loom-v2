@@ -6,6 +6,7 @@ interface CategoryBadgeProps {
 }
 
 const categoryConfig: Record<EntryCategory, { label: string; color: string }> = {
+    map: { label: 'Map', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' },
     world: { label: 'World', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
     session: { label: 'Session', color: 'bg-blue-500/20 text-blue-300 border-blue-500/30' },
     place: { label: 'Place', color: 'bg-teal-500/20 text-teal-300 border-teal-500/30' },
