@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { DEFAULT_DRAWING_Z } from '../components/map/MapConstants';
 
-export type MapToolType = 'select' | 'pan' | 'measure' | 'brush' | 'erase' | 'fog-reveal' | 'fog-shroud';
+export type MapToolType = 'select' | 'pan' | 'measure' | 'brush' | 'erase' | 'room' | 'fog-reveal' | 'fog-shroud' | 'stamp';
+
+export type StampType = 'door' | 'stairs' | 'column' | 'trap' | 'statue' | 'chest' | 'secret-door';
 
 interface MapToolState {
     activeTool: MapToolType;
@@ -12,6 +14,8 @@ interface MapToolState {
     isMapLocked: boolean;
     isFogEnabled: boolean;
     drawingShape: 'freehand' | 'rectangle';
+    isGridSnapEnabled: boolean;
+    activeStamp: StampType;
 
     setTool: (tool: MapToolType) => void;
     setBrushColor: (color: string) => void;
@@ -19,8 +23,10 @@ interface MapToolState {
     setOpacity: (opacity: number) => void;
     setDrawingShape: (shape: 'freehand' | 'rectangle') => void;
     setZLevel: (level: number) => void;
+    setActiveStamp: (stamp: StampType) => void;
     toggleMapLock: () => void;
     toggleFog: () => void;
+    toggleGridSnap: () => void;
 }
 
 export const useMapToolStore = create<MapToolState>((set) => ({
@@ -32,6 +38,8 @@ export const useMapToolStore = create<MapToolState>((set) => ({
     isMapLocked: true,
     isFogEnabled: false,
     drawingShape: 'freehand',
+    isGridSnapEnabled: false,
+    activeStamp: 'door',
 
     setTool: (tool) => set({ activeTool: tool }),
     setBrushColor: (color) => set({ brushColor: color }),
@@ -39,6 +47,8 @@ export const useMapToolStore = create<MapToolState>((set) => ({
     setOpacity: (opacity) => set({ opacity }),
     setDrawingShape: (shape) => set({ drawingShape: shape }),
     setZLevel: (level) => set({ zLevel: level }),
+    setActiveStamp: (stamp) => set({ activeStamp: stamp }),
     toggleMapLock: () => set((state) => ({ isMapLocked: !state.isMapLocked })),
     toggleFog: () => set((state) => ({ isFogEnabled: !state.isFogEnabled })),
+    toggleGridSnap: () => set((state) => ({ isGridSnapEnabled: !state.isGridSnapEnabled })),
 }));

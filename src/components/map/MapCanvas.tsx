@@ -7,15 +7,17 @@ export interface DrawingLine {
     points: number[];
     stroke: string;
     strokeWidth: number;
-    tool?: 'brush' | 'erase' | 'fog-reveal' | 'fog-shroud';
+    tool?: 'brush' | 'erase' | 'fog-reveal' | 'fog-shroud' | 'room';
     shape?: 'freehand' | 'rectangle';
+    fill?: string;
+    closed?: boolean;
 }
 
 export interface MapToken {
     id: string;
     x: number;
     y: number;
-    src: string; // URL or Local Path
+    src: string; // URL or Local Path or 'stamp:type'
     type: 'token' | 'pin';
     zLevel: number;
     width: number;
@@ -148,6 +150,104 @@ interface MapPinProps {
     onContextMenu: (e: KonvaEventObject<PointerEvent>) => void;
 }
 
+// MapStamp Component (Simple Vector Graphics)
+const MapStamp = React.memo(({ token, isSelected, onSelect, onChange, draggable }: { token: MapToken, isSelected: boolean, onSelect: () => void, onChange: (t: MapToken) => void, draggable: boolean }) => {
+    const shapeRef = useRef<any>(null);
+    const trRef = useRef<any>(null);
+    const stampType = token.src.split(':')[1] || 'door';
+
+    useEffect(() => {
+        if (isSelected && trRef.current && shapeRef.current) {
+            trRef.current.nodes([shapeRef.current]);
+            trRef.current.getLayer().batchDraw();
+        }
+    }, [isSelected]);
+
+    const commonProps = {
+        x: token.x,
+        y: token.y,
+        width: token.width,
+        height: token.height,
+        offsetX: token.width / 2,
+        offsetY: token.height / 2,
+        rotation: token.rotation,
+        draggable,
+        onClick: onSelect,
+        onTap: onSelect,
+        onDragEnd: (e: any) => onChange({ ...token, x: e.target.x(), y: e.target.y() }),
+        onTransformEnd: () => {
+            const node = shapeRef.current;
+            const scaleX = node.scaleX();
+            const scaleY = node.scaleY();
+            node.scaleX(1); node.scaleY(1);
+            onChange({
+                ...token,
+                x: node.x(),
+                y: node.y(),
+                width: Math.max(5, node.width() * scaleX),
+                height: Math.max(5, node.height() * scaleY),
+                rotation: node.rotation()
+            });
+        }
+    };
+
+    const renderShape = () => {
+        switch (stampType) {
+            case 'door':
+                return <Rect {...commonProps} ref={shapeRef} fill="#ffffff" stroke="#4493BE" strokeWidth={2} />;
+            case 'secret-door':
+                return (
+                    <Group {...commonProps} ref={shapeRef}>
+                        <Text text="S" fontSize={token.height} fontFamily="serif" fill="#4493BE" align="center" verticalAlign="middle" width={token.width} height={token.height} />
+                    </Group>
+                );
+            case 'stairs':
+                return (
+                    <Group {...commonProps} ref={shapeRef}>
+                        <Rect width={token.width} height={token.height} fill="transparent" stroke="#4493BE" strokeWidth={1} />
+                        {[0, 0.2, 0.4, 0.6, 0.8].map((off, i) => (
+                            <Line key={i} points={[0, token.height * off, token.width, token.height * off]} stroke="#4493BE" strokeWidth={1} />
+                        ))}
+                    </Group>
+                );
+            case 'column':
+                return <Circle {...commonProps} ref={shapeRef} radius={token.width / 2} fill="#ffffff" stroke="#4493BE" strokeWidth={1} />;
+            case 'trap':
+                return (
+                    <Group {...commonProps} ref={shapeRef}>
+                        <Text text="T" fontSize={token.height} fontFamily="serif" fill="#4493BE" fontStyle="bold" align="center" verticalAlign="middle" width={token.width} height={token.height} />
+                        <Rect width={token.width} height={token.height} stroke="#4493BE" strokeWidth={1} dash={[2, 2]} />
+                    </Group>
+                );
+            case 'statue':
+                return (
+                    <Group {...commonProps} ref={shapeRef}>
+                        <Circle radius={token.width / 2} stroke="#4493BE" strokeWidth={1} x={token.width / 2} y={token.height / 2} />
+                        <Text text="★" fontSize={token.width * 0.8} fill="#4493BE" align="center" verticalAlign="middle" width={token.width} height={token.height} />
+                    </Group>
+                );
+            case 'chest':
+                return (
+                    <Group {...commonProps} ref={shapeRef}>
+                        <Rect width={token.width} height={token.height} fill="transparent" stroke="#4493BE" strokeWidth={2} />
+                        <Text text="C" fontSize={token.height * 0.6} fill="#4493BE" align="center" verticalAlign="middle" width={token.width} height={token.height} />
+                    </Group>
+                );
+            default:
+                return <Rect {...commonProps} ref={shapeRef} fill="pink" />;
+        }
+    };
+
+    return (
+        <>
+            {renderShape()}
+            {isSelected && (
+                <Transformer ref={trRef} boundBoxFunc={(oldBox, newBox) => newBox.width < 5 || newBox.height < 5 ? oldBox : newBox} />
+            )}
+        </>
+    );
+});
+
 const MapPin = React.memo(({ token, isSelected, onSelect, onChange, onClick, onContextMenu }: MapPinProps) => {
     const groupRef = useRef<any>(null);
     const [hovered, setHovered] = useState(false);
@@ -262,7 +362,7 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
     const [fps, setFps] = useState(0);
 
     // Store Access
-    const { activeTool, brushColor, brushSize, isMapLocked, isFogEnabled } = useMapToolStore();
+    const { activeTool, brushColor, brushSize, isMapLocked, isFogEnabled, isGridSnapEnabled, activeStamp } = useMapToolStore();
 
     // Viewport State
     const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
@@ -379,6 +479,76 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
         setScale(finalScale);
     };
 
+    const snapToGrid = (rawX: number, rawY: number, mode: 'intersection' | 'center' | 'edge' | 'any' = 'intersection') => {
+        if (!isGridSnapEnabled || gridSettings.type === 'none') return { x: rawX, y: rawY };
+        const gridSize = 20 * gridSettings.scale;
+
+        if (gridSettings.type === 'square') {
+            if (mode === 'center') {
+                return {
+                    x: Math.floor(rawX / gridSize) * gridSize + gridSize / 2,
+                    y: Math.floor(rawY / gridSize) * gridSize + gridSize / 2
+                };
+            }
+            if (mode === 'edge') {
+                // Snap to nearest grid line OR intersection
+                const snapX = Math.round(rawX / gridSize) * gridSize;
+                const snapY = Math.round(rawY / gridSize) * gridSize;
+
+                // Distance to X grid line vs Y grid line vs Intersection
+                const dx = Math.abs(rawX - snapX);
+                const dy = Math.abs(rawY - snapY);
+
+                // Wait, "Snap to Edge" usually means snapping to the line segment. 
+                // If we are closer to a vertical line, snap X but keep Y free (or snapped to half-grid?)
+                // User said: "snaps to either a point or the midpoint of a point" (implied midpoint of edge)
+
+                // Let's support Intersection + Midpoint of Edges
+                const halfGrid = gridSize / 2;
+
+                // Candidates:
+                // 1. Intersection: (round(X), round(Y))
+                // 2. Horizontal Mid: (round(X) + 0.5, round(Y)) -- Nonon, (Center X, Line Y) or (Line X, Center Y)
+
+                // Normalized coordinates
+                const nx = rawX / gridSize;
+                const ny = rawY / gridSize;
+
+                const rx = Math.round(nx);
+                const ry = Math.round(ny);
+
+                // Intersection
+                const ix = rx * gridSize;
+                const iy = ry * gridSize;
+
+                // Horizontal Edge Midpoint (x is half, y is integer)
+                const hx = (Math.floor(nx) + 0.5) * gridSize;
+                const hy = ry * gridSize; // On the line
+
+                // Vertical Edge Midpoint (x is integer, y is half)
+                const vx = rx * gridSize; // On the line
+                const vy = (Math.floor(ny) + 0.5) * gridSize;
+
+                // Distances
+                const dI = (rawX - ix) ** 2 + (rawY - iy) ** 2;
+                const dH = (rawX - hx) ** 2 + (rawY - hy) ** 2;
+                const dV = (rawX - vx) ** 2 + (rawY - vy) ** 2;
+
+                const min = Math.min(dI, dH, dV);
+                if (min === dI) return { x: ix, y: iy };
+                if (min === dH) return { x: hx, y: hy };
+                return { x: vx, y: vy };
+            }
+
+            // Default: Intersection
+            return {
+                x: Math.round(rawX / gridSize) * gridSize,
+                y: Math.round(rawY / gridSize) * gridSize
+            };
+        }
+        return { x: rawX, y: rawY };
+    };
+
     const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
         const stage = stageRef.current;
         if (!stage) return;
@@ -390,8 +560,10 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
         }
 
         // Transform pointer to local stage coordinates for the cursor shape
-        const x = (ptr.x - stagePos.x) / scale;
-        const y = (ptr.y - stagePos.y) / scale;
+        const rawX = (ptr.x - stagePos.x) / scale;
+        const rawY = (ptr.y - stagePos.y) / scale;
+
+        const { x, y } = snapToGrid(rawX, rawY);
 
         setCursorPos({ x, y });
 
@@ -432,10 +604,18 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
         }
 
         // If Rectangle Shape, we update the Last Point (Index 2,3) instead of appending
+        // If Rectangle Shape, we update to be a closed box
         if (currentLine.shape === 'rectangle') {
+            const startX = currentLine.points[0];
+            const startY = currentLine.points[1];
+
+            // We need 4 points: Start, Corner1, End, Corner2
+            // Start: (x1, y1)
+            // End: (x2, y2)
+            // Path: (x1, y1) -> (x2, y1) -> (x2, y2) -> (x1, y2)
             setCurrentLine(prev => prev ? {
                 ...prev,
-                points: [prev.points[0], prev.points[1], x, y]
+                points: [startX, startY, x, startY, x, y, startX, y]
             } : null);
         } else {
             // Freehand: Append
@@ -480,6 +660,16 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
             return;
         }
 
+        if (e.evt.button === 2) {
+            // Right Click - Cancel Drawing if active
+            if (isDrawing.current) {
+                isDrawing.current = false;
+                setCurrentLine(null);
+                setMeasureState(null);
+                return;
+            }
+        }
+
         // Measure Tool
         if (activeTool === 'measure' && e.evt.button === 0) {
             const x = (ptr.x - stagePos.x) / scale;
@@ -510,11 +700,13 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
         const isErase = activeTool === 'erase';
         const isFogReveal = activeTool === 'fog-reveal';
         const isFogShroud = activeTool === 'fog-shroud';
+        const isRoom = activeTool === 'room';
 
-        if ((isBrush || isErase || isFogReveal || isFogShroud) && e.evt.button === 0) {
+        if ((isBrush || isErase || isFogReveal || isFogShroud || isRoom) && e.evt.button === 0) {
             isDrawing.current = true;
-            const x = (ptr.x - stagePos.x) / scale;
-            const y = (ptr.y - stagePos.y) / scale;
+            const rawX = (ptr.x - stagePos.x) / scale;
+            const rawY = (ptr.y - stagePos.y) / scale;
+            const { x, y } = snapToGrid(rawX, rawY);
 
             let stroke = brushColor;
             let strokeWidth = brushSize;
@@ -530,6 +722,10 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
             } else if (isFogShroud) {
                 stroke = '#000000'; // Fog is black?
                 tool = 'fog-shroud';
+            } else if (activeTool === 'room') {
+                stroke = 'white';
+                strokeWidth = 2;
+                tool = 'room';
             } else {
                 tool = 'brush';
             }
@@ -537,15 +733,43 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
             // Get current shape from store (we need to access it inside the component, likely via store hook)
             // But we didn't destructure `drawingShape` yet.
             // Accessing directly from store state for freshness or adding to destructure list.
-            const shape = useMapToolStore.getState().drawingShape;
+            const shape = activeTool === 'room' ? 'rectangle' : useMapToolStore.getState().drawingShape;
 
             setCurrentLine({
                 points: shape === 'rectangle' ? [x, y, x, y] : [x, y], // Rect starts as point
                 stroke,
                 strokeWidth,
                 tool: tool as any,
-                shape: shape as any // 'freehand' | 'rectangle'
+                shape: shape as any, // 'freehand' | 'rectangle'
+                fill: activeTool === 'room' ? 'white' : undefined,
+                closed: activeTool === 'room' || shape === 'rectangle'
             });
+        }
+
+        // Stamp Tool Placement
+        if (activeTool === 'stamp' && e.evt.button === 0) {
+            const rawX = (ptr.x - stagePos.x) / scale;
+            const rawY = (ptr.y - stagePos.y) / scale;
+
+            let snapMode: 'center' | 'edge' = 'center';
+            if (activeStamp === 'door' || activeStamp === 'secret-door') {
+                snapMode = 'edge';
+            }
+
+            const { x, y } = snapToGrid(rawX, rawY, snapMode);
+
+            const newTokens = [...tokens, {
+                id: crypto.randomUUID(),
+                x,
+                y,
+                src: `stamp:${activeStamp}`,
+                type: 'token' as const, // We use 'token' type but with special src
+                zLevel: 40, // Objects Layer
+                width: 10, // 25% of previous 40 = 10
+                height: 10,
+                rotation: 0
+            }];
+            onTokensChange(newTokens);
         }
     };
 
@@ -566,17 +790,15 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
 
     // Grid Renderer (Optimized with Shape)
     const renderBackground = () => (
-        <Layer id="background-layer">
-            <Rect
-                x={-5000}
-                y={-5000}
-                width={10000}
-                height={10000}
-                fill="#99C4E3"
-                name="background"
-                listening={true}
-            />
-        </Layer>
+        <Rect
+            x={-5000}
+            y={-5000}
+            width={10000}
+            height={10000}
+            fill="#4493BE"
+            name="background"
+            listening={true}
+        />
     );
 
     const renderGridLines = () => {
@@ -591,38 +813,35 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
 
         if (gridSettings.type === 'square') {
             return (
-                <Layer id="grid-layer" listening={false}>
-                    <Shape
-                        sceneFunc={(context, shape) => {
-                            context.beginPath();
-                            context.lineWidth = 1;
-                            context.strokeStyle = "rgba(0,0,0,0.5)";
+                <Shape
+                    sceneFunc={(context, shape) => {
+                        context.beginPath();
+                        context.lineWidth = 1;
+                        context.strokeStyle = "#4493BE"; // Background color for 'Grid on Room' effect
 
-                            // Vertical
-                            for (let x = start; x <= end; x += gridSize) {
-                                context.moveTo(x, start);
-                                context.lineTo(x, end);
-                            }
-                            // Horizontal
-                            for (let y = start; y <= end; y += gridSize) {
-                                context.moveTo(start, y);
-                                context.lineTo(end, y);
-                            }
-                            context.stroke();
+                        // Vertical
+                        for (let x = start; x <= end; x += gridSize) {
+                            context.moveTo(x, start);
+                            context.lineTo(x, end);
+                        }
+                        // Horizontal
+                        for (let y = start; y <= end; y += gridSize) {
+                            context.moveTo(start, y);
+                            context.lineTo(end, y);
+                        }
+                        context.stroke();
 
-                            // Center Markers (Red)
-                            context.beginPath();
-                            context.lineWidth = 2;
-                            context.strokeStyle = "#ef4444";
-                            context.moveTo(-50, 0);
-                            context.lineTo(50, 0);
-                            context.moveTo(0, -50);
-                            context.lineTo(0, 50);
-                            context.stroke();
-                        }}
-                        listening={false}
-                    />
-                </Layer>
+                        // Center Markers (Red)
+                        context.beginPath();
+                        context.lineWidth = 2;
+                        context.strokeStyle = "#ef4444";
+                        context.moveTo(-50, 0);
+                        context.lineTo(50, 0);
+                        context.moveTo(0, -50);
+                        context.lineTo(0, 50);
+                        context.stroke();
+                    }}
+                />
             );
         }
 
@@ -632,56 +851,54 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
             const rowHeight = 1.5 * size;
 
             return (
-                <Layer id="grid-layer" listening={false}>
-                    <Shape
-                        sceneFunc={(context, shape) => {
-                            context.beginPath();
-                            context.lineWidth = 1;
-                            context.strokeStyle = "rgba(0,0,0,0.5)";
+                <Shape
+                    sceneFunc={(context, shape) => {
+                        context.beginPath();
+                        context.lineWidth = 1;
+                        context.strokeStyle = "rgba(0,0,0,0.5)";
 
-                            const cols = Math.ceil(range * 2 / width);
-                            const rows = Math.ceil(range * 2 / rowHeight);
+                        const cols = Math.ceil(range * 2 / width);
+                        const rows = Math.ceil(range * 2 / rowHeight);
 
-                            // Hexagon Point Helper
-                            const drawHex = (cx: number, cy: number) => {
-                                for (let i = 0; i < 6; i++) {
-                                    const angle_deg = 60 * i - 30;
-                                    const angle_rad = Math.PI / 180 * angle_deg;
-                                    const px = cx + size * Math.cos(angle_rad);
-                                    const py = cy + size * Math.sin(angle_rad);
-                                    if (i === 0) context.moveTo(px, py);
-                                    else context.lineTo(px, py);
-                                }
-                                context.closePath();
+                        // Hexagon Point Helper
+                        const drawHex = (cx: number, cy: number) => {
+                            for (let i = 0; i < 6; i++) {
+                                const angle_deg = 60 * i - 30;
+                                const angle_rad = Math.PI / 180 * angle_deg;
+                                const px = cx + size * Math.cos(angle_rad);
+                                const py = cy + size * Math.sin(angle_rad);
+                                if (i === 0) context.moveTo(px, py);
+                                else context.lineTo(px, py);
                             }
+                            context.closePath();
+                        }
 
-                            for (let r = 0; r < rows; r++) {
-                                for (let c = 0; c < cols; c++) {
-                                    const xOffset = (r % 2 === 1) ? width / 2 : 0;
-                                    const cx = start + c * width + xOffset;
-                                    const cy = start + r * rowHeight;
+                        for (let r = 0; r < rows; r++) {
+                            for (let c = 0; c < cols; c++) {
+                                const xOffset = (r % 2 === 1) ? width / 2 : 0;
+                                const cx = start + c * width + xOffset;
+                                const cy = start + r * rowHeight;
 
-                                    // Cull
-                                    if (cx < -range || cx > range || cy < -range || cy > range) continue;
+                                // Cull
+                                if (cx < -range || cx > range || cy < -range || cy > range) continue;
 
-                                    drawHex(cx, cy);
-                                }
+                                drawHex(cx, cy);
                             }
-                            context.stroke();
+                        }
+                        context.stroke();
 
-                            // Center Markers
-                            context.beginPath();
-                            context.lineWidth = 2;
-                            context.strokeStyle = "#ef4444";
-                            context.moveTo(-50, 0);
-                            context.lineTo(50, 0);
-                            context.moveTo(0, -50);
-                            context.lineTo(0, 50);
-                            context.stroke();
-                        }}
-                        listening={false}
-                    />
-                </Layer>
+                        // Center Markers
+                        context.beginPath();
+                        context.lineWidth = 2;
+                        context.strokeStyle = "#ef4444";
+                        context.moveTo(-50, 0);
+                        context.lineTo(50, 0);
+                        context.moveTo(0, -50);
+                        context.lineTo(0, 50);
+                        context.stroke();
+                    }}
+                    listening={false}
+                />
             );
         }
 
@@ -945,102 +1162,101 @@ const MapCanvasComponent = ({ children, lines, fogLines, tokens, gridSettings, o
                             : 'default'
                 }}
             >
-                {/* --- LAYER 0: BACKGROUND (Color) --- */}
-                {renderBackground()}
+                {/* --- LAYER 0: BACKGROUND --- */}
+                <Layer id="background-layer">
+                    {renderBackground()}
+                </Layer>
 
-                {/* --- LAYER 1: TOKENS & PINS --- */}
-                <Layer id="token-layer">
-                    {tokens
-                        .filter(t => t.zLevel >= 0 && t.zLevel < 100) // Render all tokens
-                        .sort((a, b) => a.zLevel - b.zLevel) // Sort by Z-level
-                        .map(token => {
-                            if (token.type === 'pin') {
+                {/* --- MAIN LAYER (Surface, Grid, Tokens) --- */}
+                <Layer id="main-layer">
+                    {/* Rooms/Drawings */}
+                    <Group id="surface-group">
+                        {lines.map((line, i) => (
+                            <Line
+                                key={i}
+                                points={line.points}
+                                stroke={line.stroke}
+                                strokeWidth={line.strokeWidth}
+                                tension={line.shape === 'freehand' ? 0.5 : 0}
+                                lineCap="round"
+                                lineJoin="round"
+                                globalCompositeOperation={
+                                    line.tool === 'erase' ? 'destination-out' : 'source-over'
+                                }
+                                fill={line.fill}
+                                closed={line.closed || line.shape === 'rectangle'}
+                            />
+                        ))}
+                        {currentLine && (
+                            <Line
+                                points={currentLine.points}
+                                stroke={currentLine.stroke}
+                                strokeWidth={currentLine.strokeWidth}
+                                tension={currentLine.shape === 'freehand' ? 0.5 : 0}
+                                lineCap="round"
+                                lineJoin="round"
+                                globalCompositeOperation={
+                                    currentLine.tool === 'erase' ? 'destination-out' : 'source-over'
+                                }
+                                fill={currentLine.tool === 'room' ? 'rgba(255, 255, 255, 0.5)' : currentLine.fill}
+                                closed={currentLine.closed || currentLine.shape === 'rectangle'}
+                            />
+                        )}
+                    </Group>
+
+                    {/* Grid Overlay */}
+                    <Group id="grid-group" listening={false}>
+                        {renderGridLines()}
+                    </Group>
+
+                    {/* Tokens & Objects */}
+                    <Group id="token-group">
+                        {tokens
+                            .filter(t => t.zLevel >= 0 && t.zLevel < 100)
+                            .sort((a, b) => a.zLevel - b.zLevel)
+                            .map(token => {
+                                if (token.type === 'pin') {
+                                    return (
+                                        <MapPin
+                                            key={token.id}
+                                            token={token}
+                                            isSelected={token.id === selectedId}
+                                            onSelect={() => activeTool === 'select' && setSelectedId(token.id)}
+                                            onChange={(newToken) => onTokensChange(tokens.map(t => t.id === newToken.id ? newToken : t))}
+                                            onClick={() => token.linkedEntryId && onOpenEntry && onOpenEntry(token.linkedEntryId)}
+                                            onContextMenu={(e) => { e.evt.preventDefault(); if (onTokenContextMenu) onTokenContextMenu(e, token); }}
+                                        />
+                                    );
+                                } else if (token.src.startsWith('stamp:')) {
+                                    return (
+                                        <MapStamp
+                                            key={token.id}
+                                            token={token}
+                                            isSelected={token.id === selectedId}
+                                            draggable={activeTool === 'select' && !isMapLocked}
+                                            onSelect={() => activeTool === 'select' && setSelectedId(token.id)}
+                                            onChange={(newToken) => onTokensChange(tokens.map(t => t.id === newToken.id ? newToken : t))}
+                                        />
+                                    );
+                                }
                                 return (
-                                    <MapPin
+                                    <URLImage
                                         key={token.id}
                                         token={token}
                                         isSelected={token.id === selectedId}
-                                        onSelect={() => {
-                                            if (activeTool === 'select') {
-                                                setSelectedId(token.id);
-                                            }
-                                        }}
-                                        onChange={(newToken) => {
-                                            const newTokens = tokens.map(t => t.id === newToken.id ? newToken : t)
-                                            onTokensChange(newTokens);
-                                        }}
-                                        onClick={() => {
-                                            if (token.linkedEntryId && onOpenEntry) {
-                                                onOpenEntry(token.linkedEntryId);
-                                            }
-                                        }}
-                                        onContextMenu={(e) => {
-                                            e.evt.preventDefault();
-                                            if (onTokenContextMenu) {
-                                                onTokenContextMenu(e, token);
-                                            }
-                                        }}
+                                        onSelect={() => activeTool === 'select' && setSelectedId(token.id)}
+                                        onChange={(newToken) => onTokensChange(tokens.map(t => t.id === newToken.id ? newToken : t))}
+                                        draggable={!isMapLocked && activeTool === 'select'}
+                                        listening={!isMapLocked}
                                     />
                                 );
-                            }
+                            })}
+                    </Group>
 
-                            return (
-                                <URLImage
-                                    key={token.id}
-                                    token={token}
-                                    isSelected={token.id === selectedId}
-                                    onSelect={() => {
-                                        if (activeTool === 'select') {
-                                            setSelectedId(token.id);
-                                        }
-                                    }}
-                                    onChange={(newToken) => {
-                                        // Use reference from updateToken or inline
-                                        const newTokens = tokens.map((t) => (t.id === newToken.id ? newToken : t));
-                                        onTokensChange(newTokens);
-                                    }}
-                                    draggable={!isMapLocked && activeTool === 'select'}
-                                    listening={!isMapLocked}
-                                />
-                            );
-                        })}
-                </Layer>
-
-                {/* --- LAYER 1.5: GRID LINES --- */}
-                {renderGridLines()}
-
-                {/* --- LAYER 1.6: MEASUREMENT --- */}
-                {renderMeasurement()}
-
-                {/* --- LAYER 2: SURFACE (Drawings) --- */}
-                <Layer id="surface-layer">
-                    {lines.map((line, i) => (
-                        <Line
-                            key={i}
-                            points={line.points}
-                            stroke={line.stroke}
-                            strokeWidth={line.strokeWidth}
-                            tension={0.5}
-                            lineCap="round"
-                            lineJoin="round"
-                            globalCompositeOperation={
-                                line.tool === 'erase' ? 'destination-out' : 'source-over'
-                            }
-                        />
-                    ))}
-                    {currentLine && (
-                        <Line
-                            points={currentLine.points}
-                            stroke={currentLine.stroke}
-                            strokeWidth={currentLine.strokeWidth}
-                            tension={0.5}
-                            lineCap="round"
-                            lineJoin="round"
-                            globalCompositeOperation={
-                                currentLine.tool === 'erase' ? 'destination-out' : 'source-over'
-                            }
-                        />
-                    )}
+                    {/* Measurements */}
+                    <Group id="measurement-group">
+                        {renderMeasurement()}
+                    </Group>
                 </Layer>
 
                 {/* --- LAYER 3: OBJECTS (Tokens) --- */}

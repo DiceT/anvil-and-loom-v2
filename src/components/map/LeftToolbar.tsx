@@ -1,8 +1,8 @@
-import { MousePointer2, Hand, Pen, Eraser, Ruler, Eye, Cloud, AudioWaveform } from 'lucide-react';
-import { useMapToolStore, MapToolType } from '../../stores/useMapToolStore';
+import { MousePointer2, Hand, Pen, Eraser, Ruler, Eye, Cloud, AudioWaveform, Magnet, Stamp, Square } from 'lucide-react';
+import { useMapToolStore, MapToolType, StampType } from '../../stores/useMapToolStore';
 
 export function LeftToolbar() {
-    const { activeTool, setTool, brushColor, setBrushColor, brushSize, setBrushSize, isFogEnabled, toggleFog } = useMapToolStore();
+    const { activeTool, setTool, brushColor, setBrushColor, brushSize, setBrushSize, isFogEnabled, toggleFog, isGridSnapEnabled, toggleGridSnap, drawingShape, setDrawingShape, activeStamp, setActiveStamp } = useMapToolStore();
 
     const tools: { id: MapToolType; icon: React.ElementType; label: string }[] = [
         { id: 'select', icon: MousePointer2, label: 'Select' },
@@ -10,8 +10,20 @@ export function LeftToolbar() {
         { id: 'measure', icon: Ruler, label: 'Ruler' },
         { id: 'brush', icon: Pen, label: 'Draw' },
         { id: 'erase', icon: Eraser, label: 'Erase' },
+        { id: 'room', icon: Square, label: 'Room' },
+        { id: 'stamp', icon: Stamp, label: 'Stamp' },
         { id: 'fog-reveal', icon: Eye, label: 'Reveal Fog' },
         { id: 'fog-shroud', icon: Cloud, label: 'Shroud Fog' },
+    ];
+
+    const stamps: { id: StampType; label: string }[] = [
+        { id: 'door', label: 'Door' },
+        { id: 'secret-door', label: 'Secret Door' },
+        { id: 'stairs', label: 'Stairs' },
+        { id: 'column', label: 'Column' },
+        { id: 'trap', label: 'Trap' },
+        { id: 'statue', label: 'Statue' },
+        { id: 'chest', label: 'Chest' },
     ];
 
     return (
@@ -38,8 +50,8 @@ export function LeftToolbar() {
                 </button>
             ))}
 
-            {/* Brush & Eraser & Fog Settings */}
-            {(activeTool === 'brush' || activeTool === 'erase' || activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
+            {/* Brush & Eraser & Fog & Room Settings */}
+            {(activeTool === 'brush' || activeTool === 'erase' || activeTool === 'room' || activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
                 <div className="flex flex-col gap-2 pt-2 border-t border-slate-700 mt-1">
                     {/* Colors (Brush Only) */}
                     {activeTool === 'brush' && (
@@ -85,41 +97,92 @@ export function LeftToolbar() {
                         ))}
                     </div>
 
-                    {/* Fog Visibility Toggle */}
-                    {(activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
-                        <div className="flex flex-col gap-2 px-1 mt-2 pt-2 border-t border-slate-700">
-                            {/* Shape Toggle */}
-                            <div className="flex gap-1 bg-slate-800 p-0.5 rounded border border-slate-700">
-                                <button
-                                    onClick={() => useMapToolStore.getState().setDrawingShape('freehand')}
-                                    className={`flex-1 p-1 rounded text-xs flex items-center justify-center ${useMapToolStore.getState().drawingShape === 'freehand' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                                    title="Freehand"
-                                >
-                                    <AudioWaveform className="w-3 h-3" />
-                                </button>
-                                <button
-                                    onClick={() => useMapToolStore.getState().setDrawingShape('rectangle')}
-                                    className={`flex-1 p-1 rounded text-xs flex items-center justify-center ${useMapToolStore.getState().drawingShape === 'rectangle' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                                    title="Rectangle"
-                                >
-                                    <div className="w-3 h-3 border border-current" />
-                                </button>
-                            </div>
+                </div>
+            )}
 
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={isFogEnabled}
-                                    onChange={() => toggleFog()}
-                                    className="rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-0 w-4 h-4 cursor-pointer"
-                                    id="fog-toggle"
-                                />
-                                <label htmlFor="fog-toggle" className="text-xs text-slate-300 cursor-pointer select-none">
-                                    Enable Fog Layer
-                                </label>
-                            </div>
+            {/* Shape & Snap Settings for Draw Tools */}
+            {(activeTool === 'brush' || activeTool === 'erase' || activeTool === 'room' || activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
+                <div className="flex flex-col gap-2 pt-2 border-t border-slate-700 mt-1">
+                    <div className="flex gap-1">
+                        {/* Shape Toggle */}
+                        <div className="flex flex-1 gap-1 bg-slate-800 p-0.5 rounded border border-slate-700">
+                            <button
+                                onClick={() => setDrawingShape('freehand')}
+                                className={`flex-1 p-1 rounded text-xs flex items-center justify-center ${drawingShape === 'freehand' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                                title="Freehand"
+                            >
+                                <AudioWaveform className="w-3 h-3" />
+                            </button>
+                            <button
+                                onClick={() => setDrawingShape('rectangle')}
+                                className={`flex-1 p-1 rounded text-xs flex items-center justify-center ${drawingShape === 'rectangle' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                                title="Rectangle"
+                            >
+                                <div className="w-3 h-3 border border-current" />
+                            </button>
+                        </div>
+
+                        {/* Snap Toggle */}
+                        <button
+                            onClick={() => toggleGridSnap()}
+                            className={`p-1.5 rounded border border-slate-700 flex items-center justify-center ${isGridSnapEnabled ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            title="Snap to Grid"
+                        >
+                            <Magnet className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Fog specific toggle */}
+                    {(activeTool === 'fog-reveal' || activeTool === 'fog-shroud') && (
+                        <div className="flex items-center gap-2 mt-1">
+                            <input
+                                type="checkbox"
+                                checked={isFogEnabled}
+                                onChange={() => toggleFog()}
+                                className="rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-0 w-4 h-4 cursor-pointer"
+                                id="fog-toggle"
+                            />
+                            <label htmlFor="fog-toggle" className="text-xs text-slate-300 cursor-pointer select-none">
+                                Enable Fog Layer
+                            </label>
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Stamp Settings */}
+            {activeTool === 'stamp' && (
+                <div className="flex flex-col gap-2 pt-2 border-t border-slate-700 mt-1">
+                    <div className="grid grid-cols-2 gap-1.5">
+                        {stamps.map(stamp => (
+                            <button
+                                key={stamp.id}
+                                onClick={() => setActiveStamp(stamp.id)}
+                                className={`
+                                    px-2 py-1 text-xs rounded border border-slate-600 truncate
+                                    ${activeStamp === stamp.id
+                                        ? 'bg-indigo-600 text-white border-indigo-500'
+                                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                    }
+                                `}
+                                title={stamp.label}
+                            >
+                                {stamp.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex gap-1 mt-1">
+                        {/* Snap Toggle for Stamps */}
+                        <button
+                            onClick={() => toggleGridSnap()}
+                            className={`flex-1 p-1.5 rounded border border-slate-700 flex items-center justify-center gap-2 text-xs ${isGridSnapEnabled ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                            title="Snap to Grid"
+                        >
+                            <Magnet className="w-3 h-3" />
+                            <span>Snap</span>
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
