@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { MapCanvas, DrawingLine, MapToken } from './MapCanvas';
+import { PloughCanvas, PloughCanvasHandle } from './PloughCanvas';
 import { MapDevOverlay } from './MapDevOverlay';
 import { LeftToolbar } from './LeftToolbar';
 import { MapSettingsModal } from './MapSettingsModal';
@@ -17,6 +17,8 @@ interface MapEditorProps {
 }
 
 export function MapEditor({ panelId, filePath }: MapEditorProps) {
+    const ploughRef = useRef<PloughCanvasHandle>(null);
+
     const [debugInfo, setDebugInfo] = useState<{
         scale: number;
         stageX: number;
@@ -32,9 +34,6 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
         pointerY: 0
     });
 
-    const [lines, setLines] = useState<DrawingLine[]>([]);
-    const [tokens, setTokens] = useState<MapToken[]>([]);
-    const [fogLines, setFogLines] = useState<DrawingLine[]>([]);
     const [gridSettings, setGridSettings] = useState<any>({ // TODO: Type this properly
         type: 'square',
         scale: 1,
@@ -42,6 +41,7 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
         unitType: 'ft'
     });
     const [loaded, setLoaded] = useState(false);
+    const [mapData, setMapData] = useState<any>(null); // Initial data
     const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
     // Load Entry Data
@@ -57,10 +57,13 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
             if (match && match[1]) {
                 try {
                     const data = JSON.parse(match[1]);
-                    if (data.lines) setLines(data.lines);
-                    if (data.fogLines) setFogLines(data.fogLines);
-                    if (data.tokens) setTokens(data.tokens);
-                    if (data.grid) setGridSettings({ ...gridSettings, ...data.grid }); // Merge with defaults
+                    setMapData(data);
+                    if (data.grid) setGridSettings({ ...gridSettings, ...data.grid });
+
+                    // If engine already mounted, load directly
+                    if (ploughRef.current) {
+                        ploughRef.current.loadData(data);
+                    }
                 } catch (e) {
                     console.error('Failed to parse map data', e);
                 }
@@ -71,13 +74,16 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
     }, [filePath]);
 
     // Save Logic
-    const saveMap = useCallback(async (newLines: DrawingLine[], newFogLines: DrawingLine[], newTokens: MapToken[], newGrid: any) => {
-        if (!filePath) return;
+    const saveMap = useCallback(async () => {
+        if (!filePath || !ploughRef.current) return;
+
+        const currentData = ploughRef.current.getData();
+        if (!currentData) return;
 
         const freshEntry = await window.electron.tapestry.loadEntry(filePath);
         if (!freshEntry) return;
 
-        const jsonBlock = `\`\`\`json:map-data\n${JSON.stringify({ lines: newLines, fogLines: newFogLines, tokens: newTokens, grid: newGrid }, null, 2)}\n\`\`\``;
+        const jsonBlock = `\`\`\`json:map-data\n${JSON.stringify(currentData, null, 2)}\n\`\`\``;
 
         let newContent = freshEntry.content;
         const regex = /```json:map-data[\s\S]*?```/;
@@ -92,32 +98,24 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
         await window.electron.tapestry.saveEntry(freshEntry);
     }, [filePath]);
 
-    const triggerSave = useCallback((currentLines: DrawingLine[], currentFogLines: DrawingLine[], currentTokens: MapToken[], currentGrid: any) => {
+    const triggerSave = useCallback(() => {
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
         saveTimeoutRef.current = setTimeout(() => {
-            saveMap(currentLines, currentFogLines, currentTokens, currentGrid);
+            saveMap();
         }, 1000);
     }, [saveMap]);
 
-    const handleLinesChange = useCallback((newLines: DrawingLine[]) => {
-        setLines(newLines);
-        triggerSave(newLines, fogLines, tokens, gridSettings);
-    }, [fogLines, tokens, gridSettings, triggerSave]);
-
-    const handleFogChange = useCallback((newFogLines: DrawingLine[]) => {
-        setFogLines(newFogLines);
-        triggerSave(lines, newFogLines, tokens, gridSettings);
-    }, [lines, tokens, gridSettings, triggerSave]);
-
-    const handleTokensChange = useCallback((newTokens: MapToken[]) => {
-        setTokens(newTokens);
-        triggerSave(lines, fogLines, newTokens, gridSettings);
-    }, [lines, fogLines, gridSettings, triggerSave]);
+    // Passed to PloughCanvas to trigger updates
+    const handleDataChange = useCallback(() => {
+        triggerSave();
+    }, [triggerSave]);
 
     const handleGridChange = useCallback((newGrid: any) => {
         setGridSettings(newGrid);
-        triggerSave(lines, fogLines, tokens, newGrid);
-    }, [lines, fogLines, tokens, triggerSave]);
+        // TODO: Push to Plough Engine via ref
+        // if (ploughRef.current) ploughRef.current.updateGrid(newGrid);
+        triggerSave();
+    }, [triggerSave]);
 
     const handleDebugUpdate = useCallback((info: any) => {
         setDebugInfo(prev => ({
@@ -139,55 +137,49 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
     };
 
     const handleDrop = async (e: React.DragEvent) => {
-        // ... (existing drop logic passed to Canvas via props? No, Canvas handles drop)
-        // MapEditor handles drag over only for container
         e.preventDefault();
         e.stopPropagation();
     };
 
     const [isSettingsOpen, setSettingsOpen] = useState(false);
-    const [contextMenu, setContextMenu] = useState<{ x: number, y: number, tokenId: string, color?: string } | null>(null);
 
-    const handleTokenContextMenu = (e: any, token: MapToken) => {
-        // e is KonvaEventObject
-        e.evt.preventDefault();
+    // Context Menu handled by Engine internally now? 
+    // Or we need to implement a bridge. For now disable old context menu.
+    const [contextMenu, setContextMenu] = useState<any>(null);
+
+    const handleTokenContextMenu = (e: any, token: any) => {
+        // e comes from PloughCanvas { x, y, token }
+        // Prevent default if it was a DOM event, but here e is data object
         setContextMenu({
-            x: e.evt.clientX,
-            y: e.evt.clientY,
+            x: e.x,
+            y: e.y,
             tokenId: token.id,
-            color: token.color
+            color: token.properties?.fill // Adapt to Plough model
         });
     };
 
     const handleColorChange = (color: string) => {
-        if (!contextMenu) return;
-        const newTokens = tokens.map(t => t.id === contextMenu.tokenId ? { ...t, color } : t);
-        setTokens(newTokens);
-        triggerSave(lines, fogLines, newTokens, gridSettings);
+        if (!contextMenu || !ploughRef.current) return;
+        ploughRef.current.updateToken(contextMenu.tokenId, { color });
+        triggerSave();
     };
 
     const handleDeletePin = () => {
-        if (!contextMenu) return;
-        const newTokens = tokens.filter(t => t.id !== contextMenu.tokenId);
-        setTokens(newTokens);
-        triggerSave(lines, fogLines, newTokens, gridSettings);
+        if (!contextMenu || !ploughRef.current) return;
+        ploughRef.current.deleteToken(contextMenu.tokenId);
+        triggerSave();
     };
 
     const handleImportMap = async () => {
+        // TODO: Implement Import via Plough API
+        // if (ploughRef.current) ploughRef.current.importImage(...);
         try {
             const filePath = await window.electron.tapestry.pickImage();
             if (!filePath) return;
 
-            // Create a token for the map
-            // We don't know dimensions yet, so we set a default and let the user resize
-            // Or we could try to load it to get dimensions, but for now 1000x1000 is a safe start for a map?
             // Ensure protocol (media:// for custom Electron handler)
             // Normalize path separators to forward slashes for consistency
             const normalizedPath = filePath.replace(/\\/g, '/');
-
-            // For Windows paths (C:/...), we want media:///C:/...
-            // For Unix paths (/home/...), we want media:///home/...
-            // Basically we need 3 slashes if it doesn't have them.
 
             let src = normalizedPath;
             if (!src.startsWith('media://')) {
@@ -198,28 +190,29 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
                 }
             }
 
-            const newToken: any = { // TODO: Import MapToken type properly
-                id: crypto.randomUUID(),
-                x: 0,
-                y: 0,
-                src: src, // Using media protocol
-                type: 'token',
-                zLevel: 5, // BASE Layer (0-9)
-                width: 500, // Default map size, user can resize
-                height: 500,
-                rotation: 0
-            };
-
-            const newTokens = [...tokens, newToken];
-            setTokens(newTokens);
-            triggerSave(lines, fogLines, newTokens, gridSettings);
+            if (ploughRef.current) {
+                ploughRef.current.addToken({
+                    id: crypto.randomUUID(),
+                    x: 0,
+                    y: 0,
+                    rotation: 0,
+                    src: src,
+                    type: 'token',
+                    // layerId is optional for addToken, Engine assigns active
+                    properties: {
+                        width: 500,
+                        height: 500
+                    }
+                });
+                triggerSave();
+            }
 
         } catch (err) {
-            // console.error('Failed to import map:', err);
+            console.error('Failed to import map:', err);
         }
     };
 
-    const handleOpenEntry = useCallback((id: string, newTab?: boolean) => {
+    const handleOpenEntry = useCallback((id: string, _newTab?: boolean) => {
         // Resolve ID to Path
         const stitchStore = useStitchStore.getState();
         const title = stitchStore.idToTitle[id];
@@ -256,20 +249,19 @@ export function MapEditor({ panelId, filePath }: MapEditorProps) {
                     >
                         <Settings className="w-4 h-4" />
                     </button>
+                    {/* Explicit Save for Debug */}
+                    <button onClick={saveMap} className="text-xs bg-blue-600 px-2 py-1 rounded text-white">Save</button>
                 </div>
             </div>
 
             {/* Main Canvas Area */}
             <div className="flex-1 relative">
                 <LeftToolbar />
-                <MapCanvas
-                    lines={lines}
-                    fogLines={fogLines}
-                    tokens={tokens}
-                    gridSettings={gridSettings}
-                    onLinesChange={handleLinesChange}
-                    onFogChange={handleFogChange}
-                    onTokensChange={handleTokensChange}
+
+                <PloughCanvas
+                    ref={ploughRef}
+                    initialData={mapData}
+                    onDataChange={handleDataChange}
                     onDebugUpdate={handleDebugUpdate}
                     onOpenEntry={handleOpenEntry}
                     onTokenContextMenu={handleTokenContextMenu}

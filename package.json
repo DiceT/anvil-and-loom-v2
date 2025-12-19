@@ -30,6 +30,8 @@
 		"gray-matter": "^4.0.3",
 		"konva": "^10.0.12",
 		"lucide-react": "^0.554.0",
+		"pixi.js": "^8.14.3",
+		"plough-map-engine": "file:../plough-map-engine",
 		"prosemirror-gapcursor": "^1.4.0",
 		"rc-dock": "4.0.0-alpha.2",
 		"react": "^19.2.0",

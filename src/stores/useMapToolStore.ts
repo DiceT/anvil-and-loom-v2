@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { DEFAULT_DRAWING_Z } from '../components/map/MapConstants';
 
-export type MapToolType = 'select' | 'pan' | 'measure' | 'brush' | 'erase' | 'room' | 'fog-reveal' | 'fog-shroud' | 'stamp';
+export type MapToolType = 'select' | 'pan' | 'measure' | 'brush' | 'erase' | 'room' | 'fog-reveal' | 'fog-shroud' | 'stamp' | 'wall' | 'polygon';
 
 export type StampType = 'door' | 'stairs' | 'column' | 'trap' | 'statue' | 'chest' | 'secret-door';
 
