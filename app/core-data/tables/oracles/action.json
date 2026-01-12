@@ -1,521 +1,344 @@
+# Random Table Generator – Design Document
+Version: 0.1  
+Author: T  
+Target: Antigravity (implementation plan + task list)
+
+---
+
+## 1. Overview
+
+This project is a **stand-alone, deterministic Random Table Generator engine** with a **React-based test UI**.  
+It is designed as a **pure library first**, with a **web front end used only for testing, editing, and authoring**.
+
+Primary goals:
+- Deterministic table rolling with RNG seeds
+- Flexible table schemas and result types
+- Strong authoring ergonomics (smart numbering, weights, validation warnings)
+- AI-assisted table review and generation
+- Easy embedding into other projects via a clean API
+
+This tool is intended for **local, personal use first**, but is architected to scale.
+
+---
+
+## 2. Technology Stack
+
+- Language: TypeScript
+- Runtime: Node.js
+- UI (test harness): React
+- State management (UI): Zustand
+- Storage: Local filesystem
+- Tables directory: `data/tables/`
+- AI: Vendor-agnostic, OpenAI-compatible HTTP interface
+
+---
+
+## 3. Core Concepts
+
+### 3.1 Tables
+- Tables are JSON files stored on disk
+- Tables are loaded into memory on initialization
+- Tables may be incomplete and still editable
+- Incomplete tables are **not rollable**
+
+### 3.2 Determinism
+- Every roll generates its own RNG seed
+- Given the same seed and table state, results are identical
+- External dice engines may provide a roll value directly
+  - If provided, RNG is bypassed
+
+---
+
+## 4. Table Schema
+
+```ts
+Table {
+  id: string; // UUIDv4
+  schemaVersion: number;
+  sourcePath: string; // filesystem path
+  tableType?: string; // optional semantic grouping
+  category?: string; // optional, UI-only
+  name: string;
+  tags: string[];
+  description: string; // used by AI
+  maxRoll: number; // numeric domain
+  headers: string[]; // default ["ROLL", "RESULT"]
+  tableData: TableRow[];
+}
+ts
+Copy code
+TableRow {
+  floor: number;
+  ceiling: number;
+  weight?: number; // QoL only, editor-facing
+  resultType: "text" | "table" | "object";
+  result: string | TableReference | ObjectResult;
+}
+Notes:
+
+weight never overrides floor/ceiling
+
+weight exists solely to speed authoring and auto-row creation
+
+floor/ceiling are authoritative
+
+5. Result Types
+5.1 Text
+Plain text
+
+May contain token references
+
+5.2 Table Reference
+ts
+Copy code
+TableReference {
+  tag: string; // selects a random table with this tag
+}
+Table names are irrelevant
+
+Tags are the only resolution mechanism
+
+5.3 Object Result
+Arbitrary JSON
+
+Must conform to a user-defined schema
+
+Schemas are editable via a dedicated Object Editor
+
+Token resolution applies recursively to all string fields
+
+6. Token Resolution
+Syntax
+lua
+Copy code
 [
-  {
-    "sourcePath": "core-data/tables/oracles/action.json",
-    "category": "Oracle",
-    "name": "Action",
-    "tags": [
-      "oracle",
-      "action"
-    ],
-    "description": "This table generates single-word action prompts that describe what is being done or should be done. Each result must be exactly one word, written as a clear verb (for example: Strike, Conceal, Endure). These results are designed to pair with the Theme table to form Action + Theme combinations (for example: Endure + Isolation). Each word should stand alone as a versatile action while also working cleanly when read together with a Theme word.",
-    "headers": [
-      "d100",
-      "Result"
-    ],
-    "tableData": [
-      {
-        "floor": 1,
-        "ceiling": 1,
-        "result": "Strike"
-      },
-      {
-        "floor": 2,
-        "ceiling": 2,
-        "result": "Conceal"
-      },
-      {
-        "floor": 3,
-        "ceiling": 3,
-        "result": "Endure"
-      },
-      {
-        "floor": 4,
-        "ceiling": 4,
-        "result": "Explore"
-      },
-      {
-        "floor": 5,
-        "ceiling": 5,
-        "result": "Defend"
-      },
-      {
-        "floor": 6,
-        "ceiling": 6,
-        "result": "Attack"
-      },
-      {
-        "floor": 7,
-        "ceiling": 7,
-        "result": "Heal"
-      },
-      {
-        "floor": 8,
-        "ceiling": 8,
-        "result": "Discover"
-      },
-      {
-        "floor": 9,
-        "ceiling": 9,
-        "result": "Betray"
-      },
-      {
-        "floor": 10,
-        "ceiling": 10,
-        "result": "Sacrifice"
-      },
-      {
-        "floor": 11,
-        "ceiling": 11,
-        "result": "Bind"
-      },
-      {
-        "floor": 12,
-        "ceiling": 12,
-        "result": "Unravel"
-      },
-      {
-        "floor": 13,
-        "ceiling": 13,
-        "result": "Whisper"
-      },
-      {
-        "floor": 14,
-        "ceiling": 14,
-        "result": "Slay"
-      },
-      {
-        "floor": 15,
-        "ceiling": 15,
-        "result": "Forge"
-      },
-      {
-        "floor": 16,
-        "ceiling": 16,
-        "result": "Resist"
-      },
-      {
-        "floor": 17,
-        "ceiling": 17,
-        "result": "Pursue"
-      },
-      {
-        "floor": 18,
-        "ceiling": 18,
-        "result": "Evade"
-      },
-      {
-        "floor": 19,
-        "ceiling": 19,
-        "result": "Reveal"
-      },
-      {
-        "floor": 20,
-        "ceiling": 20,
-        "result": "Summon"
-      },
-      {
-        "floor": 21,
-        "ceiling": 21,
-        "result": "Destroy"
-      },
-      {
-        "floor": 22,
-        "ceiling": 22,
-        "result": "Protect"
-      },
-      {
-        "floor": 23,
-        "ceiling": 23,
-        "result": "Infiltrate"
-      },
-      {
-        "floor": 24,
-        "ceiling": 24,
-        "result": "Negotiate"
-      },
-      {
-        "floor": 25,
-        "ceiling": 25,
-        "result": "Escape"
-      },
-      {
-        "floor": 26,
-        "ceiling": 26,
-        "result": "Command"
-      },
-      {
-        "floor": 27,
-        "ceiling": 27,
-        "result": "Deceive"
-      },
-      {
-        "floor": 28,
-        "ceiling": 28,
-        "result": "End"
-      },
-      {
-        "floor": 29,
-        "ceiling": 29,
-        "result": "Begin"
-      },
-      {
-        "floor": 30,
-        "ceiling": 30,
-        "result": "Transform"
-      },
-      {
-        "floor": 31,
-        "ceiling": 31,
-        "result": "Hunt"
-      },
-      {
-        "floor": 32,
-        "ceiling": 32,
-        "result": "Gather"
-      },
-      {
-        "floor": 33,
-        "ceiling": 33,
-        "result": "Build"
-      },
-      {
-        "floor": 34,
-        "ceiling": 34,
-        "result": "Ruin"
-      },
-      {
-        "floor": 35,
-        "ceiling": 35,
-        "result": "Ascend"
-      },
-      {
-        "floor": 36,
-        "ceiling": 36,
-        "result": "Descend"
-      },
-      {
-        "floor": 37,
-        "ceiling": 37,
-        "result": "Unite"
-      },
-      {
-        "floor": 38,
-        "ceiling": 38,
-        "result": "Divide"
-      },
-      {
-        "floor": 39,
-        "ceiling": 39,
-        "result": "Steal"
-      },
-      {
-        "floor": 40,
-        "ceiling": 40,
-        "result": "Give"
-      },
-      {
-        "floor": 41,
-        "ceiling": 41,
-        "result": "Question"
-      },
-      {
-        "floor": 42,
-        "ceiling": 42,
-        "result": "Answer"
-      },
-      {
-        "floor": 43,
-        "ceiling": 43,
-        "result": "Follow"
-      },
-      {
-        "floor": 44,
-        "ceiling": 44,
-        "result": "Lead"
-      },
-      {
-        "floor": 45,
-        "ceiling": 45,
-        "result": "Hide"
-      },
-      {
-        "floor": 46,
-        "ceiling": 46,
-        "result": "Seek"
-      },
-      {
-        "floor": 47,
-        "ceiling": 47,
-        "result": "Fight"
-      },
-      {
-        "floor": 48,
-        "ceiling": 48,
-        "result": "Flee"
-      },
-      {
-        "floor": 49,
-        "ceiling": 49,
-        "result": "Create"
-      },
-      {
-        "floor": 50,
-        "ceiling": 50,
-        "result": "Consume"
-      },
-      {
-        "floor": 51,
-        "ceiling": 51,
-        "result": "Adapt"
-      },
-      {
-        "floor": 52,
-        "ceiling": 52,
-        "result": "Challenge"
-      },
-      {
-        "floor": 53,
-        "ceiling": 53,
-        "result": "Support"
-      },
-      {
-        "floor": 54,
-        "ceiling": 54,
-        "result": "Undermine"
-      },
-      {
-        "floor": 55,
-        "ceiling": 55,
-        "result": "Observe"
-      },
-      {
-        "floor": 56,
-        "ceiling": 56,
-        "result": "Act"
-      },
-      {
-        "floor": 57,
-        "ceiling": 57,
-        "result": "Wait"
-      },
-      {
-        "floor": 58,
-        "ceiling": 58,
-        "result": "Rush"
-      },
-      {
-        "floor": 59,
-        "ceiling": 59,
-        "result": "Plan"
-      },
-      {
-        "floor": 60,
-        "ceiling": 60,
-        "result": "Improvise"
-      },
-      {
-        "floor": 61,
-        "ceiling": 61,
-        "result": "Learn"
-      },
-      {
-        "floor": 62,
-        "ceiling": 62,
-        "result": "Teach"
-      },
-      {
-        "floor": 63,
-        "ceiling": 63,
-        "result": "Survive"
-      },
-      {
-        "floor": 64,
-        "ceiling": 64,
-        "result": "Thrive"
-      },
-      {
-        "floor": 65,
-        "ceiling": 65,
-        "result": "Corrupt"
-      },
-      {
-        "floor": 66,
-        "ceiling": 66,
-        "result": "Purify"
-      },
-      {
-        "floor": 67,
-        "ceiling": 67,
-        "result": "Invoke"
-      },
-      {
-        "floor": 68,
-        "ceiling": 68,
-        "result": "Banish"
-      },
-      {
-        "floor": 69,
-        "ceiling": 69,
-        "result": "Trap"
-      },
-      {
-        "floor": 70,
-        "ceiling": 70,
-        "result": "Release"
-      },
-      {
-        "floor": 71,
-        "ceiling": 71,
-        "result": "Dominate"
-      },
-      {
-        "floor": 72,
-        "ceiling": 72,
-        "result": "Submit"
-      },
-      {
-        "floor": 73,
-        "ceiling": 73,
-        "result": "Trade"
-      },
-      {
-        "floor": 74,
-        "ceiling": 74,
-        "result": "Craft"
-      },
-      {
-        "floor": 75,
-        "ceiling": 75,
-        "result": "Harvest"
-      },
-      {
-        "floor": 76,
-        "ceiling": 76,
-        "result": "Plant"
-      },
-      {
-        "floor": 77,
-        "ceiling": 77,
-        "result": "Ignite"
-      },
-      {
-        "floor": 78,
-        "ceiling": 78,
-        "result": "Extinguish"
-      },
-      {
-        "floor": 79,
-        "ceiling": 79,
-        "result": "Travel"
-      },
-      {
-        "floor": 80,
-        "ceiling": 80,
-        "result": "Arrive"
-      },
-      {
-        "floor": 81,
-        "ceiling": 81,
-        "result": "Depart"
-      },
-      {
-        "floor": 82,
-        "ceiling": 82,
-        "result": "Remember"
-      },
-      {
-        "floor": 83,
-        "ceiling": 83,
-        "result": "Forget"
-      },
-      {
-        "floor": 84,
-        "ceiling": 84,
-        "result": "Dream"
-      },
-      {
-        "floor": 85,
-        "ceiling": 85,
-        "result": "Awaken"
-      },
-      {
-        "floor": 86,
-        "ceiling": 86,
-        "result": "Curse"
-      },
-      {
-        "floor": 87,
-        "ceiling": 87,
-        "result": "Bless"
-      },
-      {
-        "floor": 88,
-        "ceiling": 88,
-        "result": "Enchant"
-      },
-      {
-        "floor": 89,
-        "ceiling": 89,
-        "result": "Disenchant"
-      },
-      {
-        "floor": 90,
-        "ceiling": 90,
-        "result": "Spy"
-      },
-      {
-        "floor": 91,
-        "ceiling": 91,
-        "result": "Ally"
-      },
-      {
-        "floor": 92,
-        "ceiling": 92,
-        "result": "Betray"
-      },
-      {
-        "floor": 93,
-        "ceiling": 93,
-        "result": "Redeem"
-      },
-      {
-        "floor": 94,
-        "ceiling": 94,
-        "result": "Corrode"
-      },
-      {
-        "floor": 95,
-        "ceiling": 95,
-        "result": "Restore"
-      },
-      {
-        "floor": 96,
-        "ceiling": 96,
-        "result": "Innovate"
-      },
-      {
-        "floor": 97,
-        "ceiling": 97,
-        "result": "Tradition"
-      },
-      {
-        "floor": 98,
-        "ceiling": 98,
-        "result": "Rebel"
-      },
-      {
-        "floor": 99,
-        "ceiling": 99,
-        "result": "Conform"
-      },
-      {
-        "floor": 100,
-        "ceiling": 100,
-        "result": "Investigate"
-      }
-    ],
-    "maxRoll": 100,
-    "oracle_type": "Action",
-    "summary": "Action"
-  }
+  [ TAG_NAME
+  ]
 ]
+Behavior
+Resolver scans all string values
+
+Each token:
+
+Selects a random table with the matching tag
+
+Rolls that table
+
+Tokens may appear in text or object results
+
+Limits
+Maximum resolution depth: 10
+
+Cycle detection enabled
+
+On overflow or cycle:
+
+Token replaced with [UNRESOLVED:TAG
+]
+
+Error emitted via onError
+
+7. Rolling Rules
+7.1 Standard Rolling
+Roll value compared against floor/ceiling
+
+Gaps are allowed
+
+First matching row normally selected
+
+7.2 Duplicate Matches
+If multiple rows match a roll:
+
+One is selected randomly
+
+Warning logged to console
+
+Resolution chain records: duplicate results
+
+7.3 d66 / d88 Modes
+Treated as numeric domains
+
+UI toggle: Normal | d66 | d88
+
+Smart numbering and validation respect the domain
+
+Roll resolution uses numeric comparison only
+
+8. Validation & Warnings
+Validation runs on save
+
+Saving is never blocked
+
+Issues generate warnings:
+
+Gaps
+
+Overlaps
+
+Incomplete coverage
+
+Missing tags
+
+Invalid references
+
+Non-rollable tables:
+
+Appear in UI
+
+Name text is dimmed
+
+Roll actions disabled
+
+9. Editor Behavior
+Table Editor
+Spreadsheet-style grid
+
+Tab on last row creates a new row
+
+New row auto-fills next weight
+
+Manual add button inserts row after last
+
+Trash icon deletes row
+
+No bulk or multi-select
+
+Smart Numbering
+Performed on save attempt
+
+Uses weights as guidance
+
+Never auto-applies silently
+
+User is notified of suggested corrections
+
+10. Object Schema Editor
+Users may define JSON schemas
+
+Schemas are reusable
+
+Object results must conform to schema
+
+Validation warnings emitted for violations
+
+11. AI Integration
+Configuration
+User-provided:
+
+API base URL
+
+Model name
+
+API key
+
+Capabilities
+Review:
+
+Tone
+
+Style consistency
+
+Duplicate detection
+
+Generate:
+
+Full table if empty
+
+Fill remaining rows if partial
+
+Optional rewrite mode
+
+Writing Style
+Preset DM styles
+
+Optional freeform override text
+
+Settings applied globally
+
+12. UI Layout (Test Front End)
+Left column: Folder tree (filesystem-based)
+
+Center: Table Viewer / Editor / Creator
+
+Right column: Persistent Result Log
+
+Result Log
+Each entry includes:
+
+Header: Table name + Copy icon (copies entire entry)
+
+Body:
+
+Roll chain
+
+Rolled values
+
+Warnings (inline)
+
+Result line:
+
+Final resolved output
+
+Copy icon (copies result only)
+
+13. API Surface
+ts
+Copy code
+initializeTables(): void
+loadTables(): void
+
+roll(
+  tableIdOrTag: string,
+  options?: {
+    seed?: string;
+    rollValue?: number;
+}
+): RollResult
+
+onRoll(callback)
+onResolveToken(callback)
+onError(callback)
+RollResult
+ts
+Copy code
+RollResult {
+  seed: string;
+  tableChain: string[];
+  rolls: number[];
+  warnings: string[];
+  result: string | object;
+}
+14. Versioning & Manifest
+data/tables/_manifest.json
+
+Tracks:
+
+Default tables
+
+Versions
+
+Additions / removals
+
+Supports future migration tooling
+
+15. Non-Goals (for v1)
+Network sync
+
+Multi-user collaboration
+
+Cloud storage
+
+Bulk editing
+
+Permission systems
+
+16. Design Principles
+Determinism over cleverness
+
+Warnings over hard errors
+
+Author control over automation
+
+Library-first, UI-second
+
+Never silently mutate user data
