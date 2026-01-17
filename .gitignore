@@ -30,3 +30,9 @@ pnpm-debug.log*
 
 # OS
 Thumbs.db
+
+_BACKUP
+_DEVELOPMENT
+.claude
+.continue
+chat-archives
