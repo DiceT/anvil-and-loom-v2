@@ -3,12 +3,9 @@ import { UNIVERSAL_GM_INSTRUCTIONS } from './personaDefaults';
 import { EffectivePersona } from '../../types/ai';
 
 /**
- * Build prompt messages for First Look interpretation
+ * Build prompt messages for thread interpretation
  */
-export function buildFirstLookPrompt(
-    placeName: string,
-    aspects: string[],
-    domains: string[],
+export function buildInterpretationPrompt(
     threadContent: string,
     threadSummary: string,
     persona: EffectivePersona
@@ -28,16 +25,11 @@ export function buildFirstLookPrompt(
     });
 
     // 3. Task-specific request (user)
-    const taskPrompt = `# First Look Interpretation
+    const taskPrompt = `# Thread Interpretation
 
-You are interpreting a "First Look" at a Place in the game world.
+You are interpreting a Thread result from the game world.
 
-**Place Name:** ${placeName}
-
-**Aspects:** ${aspects.join(', ')}
-**Domains:** ${domains.join(', ')}
-
-**Oracle Results (Raw):**
+**Thread Summary:**
 ${threadSummary}
 
 **Roll Details:**
@@ -46,11 +38,10 @@ ${threadContent}
 ---
 
 Your task:
-Interpret these oracle results into an evocative, in-world scene description.
+Interpret this thread result into an evocative, in-world scene description.
 
-- Weave together the Location, Manifestation, Atmosphere, and Discovery elements into a coherent narrative.
-- Follow your persona's style and the universal GM instructions.
-- Provide your interpretation in the standard two-section format:
+- Follow your persona's style and universal GM instructions.
+- Provide your interpretation in standard two-section format:
   - **Content:** Your exploratory first pass
   - **Result:** Your final, refined interpretation
 

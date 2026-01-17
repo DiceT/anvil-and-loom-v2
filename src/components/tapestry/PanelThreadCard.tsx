@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Table } from 'lucide-react';
 import { ThreadModel } from '../../types/tapestry';
 import { useAiStore } from '../../stores/useAiStore';
 import { resolveThreadColor } from '../../constants/theme';
@@ -49,6 +49,7 @@ export function PanelThreadCard({ card, defaultExpanded = false, onInterpretWith
                 >
                     <span className="text-sm font-bold flex items-center gap-2" style={{ color: '#eeffff' }}>
                         {card.type === 'ai' && <Sparkles className="w-3 h-3" />}
+                        {card.source === 'weave' && <Table className="w-3 h-3" />}
                         {card.source}
                     </span>
                     <span
@@ -88,7 +89,7 @@ export function PanelThreadCard({ card, defaultExpanded = false, onInterpretWith
                         <div className="text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">First Pass Content</div>
                     )}
 
-                    {/* Display content if available (for table rolls, oracles, etc) */}
+                    {/* Display content if available */}
                     {card.content && (
                         <div>{card.content}</div>
                     )}

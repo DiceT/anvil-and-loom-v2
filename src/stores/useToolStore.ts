@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type RightPaneMode = 'dice' | 'environments' | 'oracles' | 'results' | 'weave' | 'stitchboard';
+export type RightPaneMode = 'dice' | 'results' | 'stitchboard' | 'weave';
 
 interface ToolStore {
   activeTool: string | null;

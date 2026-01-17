@@ -9,6 +9,9 @@ export default defineConfig({
             lib: {
                 entry: 'electron/main.ts',
                 formats: ['cjs']
+            },
+            rollupOptions: {
+                external: ['seedrandom', 'uuid']
             }
         }
     },
@@ -18,6 +21,9 @@ export default defineConfig({
             lib: {
                 entry: 'electron/preload.ts',
                 formats: ['cjs']
+            },
+            rollupOptions: {
+                external: ['seedrandom', 'uuid']
             }
         }
     },
@@ -31,7 +37,8 @@ export default defineConfig({
         build: {
             outDir: 'out/renderer',
             rollupOptions: {
-                input: resolve(__dirname, 'index.html')
+                input: resolve(__dirname, 'index.html'),
+                external: ['seedrandom', 'uuid']
             }
         },
         plugins: [react()]

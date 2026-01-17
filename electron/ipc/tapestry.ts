@@ -21,6 +21,11 @@ function getRegistryFilePath(): string {
     return path.join(app.getPath('userData'), REGISTRY_FILE);
 }
 
+// Helper function to get base path for tapestries
+function getTapestriesBasePath(): string {
+    return path.join(app.getPath('documents'), 'Anvil and Loom', 'Tapestries');
+}
+
 async function readJsonFile<T>(filePath: string, defaultValue: T): Promise<T> {
     try {
         const data = await fs.readFile(filePath, 'utf-8');
@@ -176,6 +181,7 @@ async function buildFolderTree(folderPath: string): Promise<TapestryNode[]> {
 
     for (const dirent of dirents) {
         if (dirent.name === '.loom') continue;
+        if (dirent.name === '.weave') continue;
 
         const fullPath = path.join(folderPath, dirent.name);
 
@@ -252,8 +258,7 @@ export function registerTapestryHandlers() {
 
         const id = uuidv4();
         const slug = slugify(data.name);
-        const basePath =
-            data.basePath || path.join(app.getPath('documents'), 'Anvil and Loom', 'Tapestries');
+        const basePath = data.basePath || getTapestriesBasePath();
         const root = path.join(basePath, slug);
 
         const { loomDir, entriesDir } = getTapestryPaths(root);
@@ -565,6 +570,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
 
             for (const dirent of dirents) {
                 if (dirent.name === '.loom') continue;
+                if (dirent.name === '.weave') continue;
                 const fullPath = path.join(dir, dirent.name);
 
                 if (dirent.isDirectory()) {
@@ -595,7 +601,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
     // Image picker for tapestry artwork
     ipcMain.handle('tapestry:pickImage', async (_event, defaultPath?: string) => {
         // If no path provided, use the Tapestries root folder
-        const pickerPath = defaultPath || path.join(app.getPath('documents'), 'Anvil and Loom', 'Tapestries');
+        const pickerPath = defaultPath || getTapestriesBasePath();
 
         const result = await dialog.showOpenDialog({
             title: 'Select Tapestry Image',

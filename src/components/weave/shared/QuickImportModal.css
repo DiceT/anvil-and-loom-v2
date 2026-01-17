@@ -1,0 +1,89 @@
+/**
+ * QuickImportModal Styles
+ */
+
+.quick-import-modal {
+    width: 90%;
+    max-width: 560px;
+    background: var(--color-bg-secondary, #151519);
+    border: 1px solid var(--color-border, #2a2a33);
+    border-radius: var(--radius-xl, 12px);
+    box-shadow: var(--shadow-lg, 0 10px 20px rgba(0, 0, 0, 0.5));
+    animation: slideUp 0.2s ease;
+}
+
+.import-instructions {
+    margin: 0 0 var(--space-3, 0.75rem);
+    font-size: var(--text-sm, 0.875rem);
+    color: var(--color-text-muted, #6a6a7a);
+}
+
+.import-textarea {
+    width: 100%;
+    padding: var(--space-3, 0.75rem);
+    font-family: var(--font-mono, monospace);
+    font-size: var(--text-sm, 0.875rem);
+    line-height: 1.6;
+    background: var(--color-bg-primary, #0a0a0c);
+    border: 1px solid var(--color-border, #2a2a33);
+    border-radius: var(--radius-md, 6px);
+    color: var(--color-text-primary, #f0f0f5);
+    resize: vertical;
+}
+
+.import-textarea:focus {
+    outline: none;
+    border-color: var(--color-border-focus, #7c6aef);
+    box-shadow: 0 0 0 3px var(--color-accent-glow, rgba(124, 106, 239, 0.2));
+}
+
+.import-textarea::placeholder {
+    color: var(--color-text-muted, #6a6a7a);
+}
+
+.import-preview {
+    margin-top: var(--space-4, 1rem);
+    padding: var(--space-3, 0.75rem);
+    background: var(--color-bg-tertiary, #1e1e24);
+    border-radius: var(--radius-md, 6px);
+    border: 1px solid var(--color-border-subtle, #1e1e24);
+}
+
+.import-preview h4 {
+    margin: 0 0 var(--space-2, 0.5rem);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted, #6a6a7a);
+}
+
+.import-preview ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.import-preview li {
+    padding: var(--space-1, 0.25rem) 0;
+    font-size: var(--text-sm, 0.875rem);
+    color: var(--color-text-secondary, #a0a0b0);
+    border-bottom: 1px solid var(--color-border-subtle, #1e1e24);
+}
+
+.import-preview li:last-child {
+    border-bottom: none;
+}
+
+.preview-num {
+    display: inline-block;
+    width: 24px;
+    color: var(--color-accent-secondary, #a78bfa);
+    font-family: var(--font-mono, monospace);
+    font-size: var(--text-xs, 0.75rem);
+}
+
+.preview-more {
+    font-style: italic;
+    color: var(--color-text-muted, #6a6a7a);
+}

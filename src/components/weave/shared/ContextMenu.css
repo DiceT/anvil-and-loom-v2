@@ -1,0 +1,63 @@
+/**
+ * ContextMenu Styles
+ */
+
+.context-menu {
+    position: fixed;
+    min-width: 150px;
+    padding: var(--space-1, 0.25rem);
+    background: var(--color-bg-secondary, #151519);
+    border: 1px solid var(--color-border, #2a2a33);
+    border-radius: var(--radius-lg, 8px);
+    box-shadow: var(--shadow-lg, 0 10px 20px rgba(0, 0, 0, 0.5));
+    z-index: 3000;
+    animation: fadeSlideIn 0.1s ease;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2, 0.5rem);
+    width: 100%;
+    padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+    font-size: var(--text-sm, 0.875rem);
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md, 6px);
+    color: var(--color-text-primary, #f0f0f5);
+    cursor: pointer;
+    transition: all var(--transition-fast, 150ms ease);
+}
+
+.context-menu-item:hover {
+    background: var(--color-bg-hover, #2a2a33);
+}
+
+.context-menu-item.danger {
+    color: var(--color-error, #f87171);
+}
+
+.context-menu-item.danger:hover {
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}

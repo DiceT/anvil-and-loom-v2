@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 
-export type TabType = 'entry' | 'weave' | 'tableforge' | 'map';
+export type TabType = 'entry' | 'weave';
 
 export interface Tab {
   id: string;
   type: TabType;
   title: string;
-  data?: unknown; // Type-specific data (e.g., weaveId, entryPath)
+  path?: string;
+  data?: unknown; // Type-specific data (e.g., entryPath)
+  weaveTableId?: string; // For weave tabs
 }
 
 interface TabStore {

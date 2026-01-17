@@ -1,0 +1,167 @@
+/**
+ * WeaveMacroSlot - Individual macro slot in the MacroBar
+ *
+ * Displays a single macro slot with table count, roll button, and clear button.
+ * Shows tooltip on hover with table details.
+ * Supports drag-and-drop to add tables to the slot.
+ */
+
+import React, { useState, useRef, useEffect } from 'react';
+import { Dices, X, Plus } from 'lucide-react';
+import { useDroppable } from '@dnd-kit/core';
+import { WeaveMacroTooltip } from './WeaveMacroTooltip';
+import type { Table } from '../../types/weave';
+
+interface WeaveMacroSlotProps {
+  slot: { tables: string[] };
+  slotIndex: number;
+  tables: Table[]; // All available tables to resolve IDs
+  onRoll: (slotIndex: number) => void;
+  onClear: (slotIndex: number) => void;
+  onDrop: (slotIndex: number, tableId: string) => void;
+}
+
+export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDrop }: WeaveMacroSlotProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const slotRef = useRef<HTMLDivElement>(null);
+
+  // Get actual table objects for this slot
+  const slotTables = React.useMemo(() => {
+    return slot.tables
+      .map(tableId => tables.find(t => t.id === tableId))
+      .filter((t): t is Table => t !== undefined);
+  }, [slot.tables, tables]);
+
+  // Drop zone for dragging tables to this slot
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `macro-slot-${slotIndex}`,
+    data: {
+      type: 'macro-slot',
+      slotIndex,
+      onDrop: (tableId: string) => onDrop(slotIndex, tableId),
+    },
+    disabled: slotTables.length >= 4, // Disable drop if slot is full
+  });
+
+  // Combine refs
+  const setNodeRef = (node: HTMLDivElement | null) => {
+    slotRef.current = node;
+    setDroppableRef(node);
+  };
+
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    if (slotTables.length === 0) return;
+
+    const rect = slotRef.current?.getBoundingClientRect();
+    if (rect) {
+      setTooltipPosition({
+        x: rect.right + 8,
+        y: rect.top,
+      });
+      setShowTooltip(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setShowTooltip(false);
+  };
+
+  const handleRoll = () => {
+    onRoll(slotIndex);
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClear(slotIndex);
+  };
+
+  const getDieTypeText = (maxRoll: number) => {
+    if (maxRoll === 66) return 'd66';
+    if (maxRoll === 88) return 'd88';
+    return `d${maxRoll}`;
+  };
+
+  return (
+    <div className="relative">
+      <div
+        ref={setNodeRef}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={`
+          relative h-16 rounded-lg border-2 transition-all
+          ${slotTables.length > 0
+            ? 'bg-purple-900/20 border-purple-700 hover:border-purple-500 hover:bg-purple-900/30 cursor-pointer'
+            : 'bg-slate-800/30 border-slate-700 hover:border-slate-600'
+          }
+          ${isOver && slotTables.length < 4 ? 'border-purple-500 bg-purple-900/30' : ''}
+        `}
+        onClick={handleRoll}
+        role="button"
+        tabIndex={0}
+        aria-label={`Macro slot ${slotIndex + 1}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleRoll();
+          }
+        }}
+      >
+        {/* Slot Content */}
+        <div className="flex flex-col items-center justify-center h-full px-2">
+          {slotTables.length > 0 ? (
+            <>
+              {/* Table Count */}
+              <div className="text-lg font-bold text-purple-300">
+                {slotTables.length}/4
+              </div>
+
+              {/* Die Types */}
+              <div className="flex items-center gap-1 text-xs text-slate-400 mt-1">
+                {slotTables.slice(0, 3).map((table, idx) => (
+                  <span key={table.id}>
+                    {getDieTypeText(table.maxRoll)}
+                    {idx < Math.min(slotTables.length, 3) - 1 && '·'}
+                  </span>
+                ))}
+                {slotTables.length > 3 && <span>...</span>}
+              </div>
+
+              {/* Roll Icon (visible on hover) */}
+              <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Dices className="w-3 h-3 text-purple-400" />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Empty State */}
+              <Plus className="w-5 h-5 text-slate-600 mb-1" />
+              <div className="text-xs text-slate-600">Empty</div>
+            </>
+          )}
+        </div>
+
+        {/* Clear Button */}
+        {slotTables.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors shadow-lg"
+            aria-label="Clear macro slot"
+          >
+            <X className="w-3 h-3 text-white" />
+          </button>
+        )}
+      </div>
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <WeaveMacroTooltip
+          tables={slotTables}
+          visible={showTooltip}
+          position={tooltipPosition}
+          onClose={() => setShowTooltip(false)}
+        />
+      )}
+    </div>
+  );
+}

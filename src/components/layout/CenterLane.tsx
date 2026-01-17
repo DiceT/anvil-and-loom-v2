@@ -1,11 +1,10 @@
+import React from 'react';
 import { X } from 'lucide-react';
 import { useTabStore } from '../../stores/useTabStore';
 import { useEditorStore } from '../../stores/useEditorStore';
-import { WeaveEditor } from '../weave/WeaveEditor';
 import { TapestryEditor } from '../tapestry/TapestryEditor';
-import { TableForgePanel } from '../tableforge/TableForgePanel';
-import { MapEditor } from '../map/MapEditor';
 import { SessionInput } from '../session/SessionInput';
+import { WeaveTableEditor } from '../weave/WeaveTableEditor';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
@@ -23,14 +22,10 @@ export function CenterLane() {
     }
 
     switch (activeTab.type) {
-      case 'weave':
-        return <WeaveEditor weaveId={activeTab.id} />;
       case 'entry':
         return <TapestryEditor />;
-      case 'tableforge':
-        return <TableForgePanel />;
-      case 'map':
-        return <MapEditor key={activeTab.id} panelId={activeTab.id} filePath={activeTab.data?.path} />;
+      case 'weave':
+        return activeTab.weaveTableId ? <WeaveTableEditor tableId={activeTab.weaveTableId} /> : null;
       default:
         return null;
     }

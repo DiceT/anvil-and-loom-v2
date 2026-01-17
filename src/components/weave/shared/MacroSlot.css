@@ -1,0 +1,71 @@
+.macro-slot {
+    width: 64px;
+    height: 64px;
+    border: 2px solid var(--border-color, #333);
+    border-radius: 8px;
+    background-color: var(--surface-color, #1a1a1a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    user-select: none;
+    padding: 12px;
+    z-index: 10;
+}
+
+.macro-slot::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.macro-slot:hover::before {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.macro-slot:hover {
+    border-color: var(--accent-color, #4a9eff);
+    transform: scale(1.05);
+}
+
+.macro-slot.has-tables {
+    background-color: var(--accent-color, #4a9eff);
+    border-color: var(--accent-color, #4a9eff);
+}
+
+.macro-slot.has-tables .slot-number {
+    color: var(--surface-color, #1a1a1a);
+}
+
+.macro-slot.drag-over {
+    border-color: var(--success-color, #4caf50);
+    background-color: rgba(76, 175, 80, 0.2);
+    box-shadow: 0 0 8px 4px rgba(76, 175, 80, 0.3);
+}
+
+.slot-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-muted, #888);
+}
+
+.table-count {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: var(--surface-color, #1a1a1a);
+    color: var(--text-color, #fff);
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.macro-slot.has-tables .table-count {
+    background-color: var(--surface-color, #1a1a1a);
+}

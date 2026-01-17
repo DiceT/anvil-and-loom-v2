@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import type {
     TapestryRegistry,
-    TapestryRegistryEntry,
     TapestryConfig,
     TapestryNode,
     CreateTapestryData,
@@ -87,6 +86,10 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
                 throw new Error('Tapestry not found');
             }
 
+            // Get tapestry path from registry
+            const registry = await window.electron.tapestry.loadRegistry();
+            const tapestryEntry = registry.tapestries.find(t => t.id === id);
+
             set({
                 activeTapestryId: id,
                 activeTapestryConfig: config,
@@ -95,6 +98,16 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
 
             // Load tree
             await get().loadTree();
+
+            // Load Weave tables for this tapestry
+            if (tapestryEntry) {
+                const { WeaveService } = await import('../core/weave/WeaveService');
+                await WeaveService.setTapestryPath(tapestryEntry.path);
+                
+                // Load tables into Weave store
+                const { useWeaveStore } = await import('./useWeaveStore');
+                await useWeaveStore.getState().loadTables();
+            }
         } catch (error) {
             set({
                 error: error instanceof Error ? error.message : 'Failed to open tapestry',

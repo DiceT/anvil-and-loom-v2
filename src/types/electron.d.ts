@@ -1,4 +1,3 @@
-import type { Weave } from '../core/weave/weaveTypes';
 import type {
   TapestryRegistry,
   TapestryConfig,
@@ -7,6 +6,16 @@ import type {
   CreateTapestryData,
   UpdateTapestryData,
 } from './tapestry';
+import type {
+  Table,
+  RollResult,
+  WeaveTableListResponse,
+  WeaveTableResponse,
+  WeaveSaveTableResponse,
+  WeaveDeleteTableResponse,
+  WeaveRollResponse,
+  WeaveSetTapestryPathResponse,
+} from './weave';
 
 export interface ElectronAPI {
   tapestry: {
@@ -25,8 +34,6 @@ export interface ElectronAPI {
     loadEntry: (path: string) => Promise<EntryDoc | null>;
     saveEntry: (entry: EntryDoc) => Promise<void>;
     createEntry: (parentPath: string, title: string, category: string) => Promise<{ id: string; path: string }>;
-
-    // File operations
     createFolder: (parentPath: string, name: string) => Promise<void>;
     rename: (oldPath: string, newName: string) => Promise<string>;
     deleteNode: (path: string) => Promise<void>;
@@ -35,34 +42,21 @@ export interface ElectronAPI {
     pickImage: (defaultPath?: string) => Promise<string | null>;
     getAllPanels: (tapestryId: string) => Promise<Array<{ id: string; title: string; content: string; path: string }>>;
   };
-  tables: {
-    loadAll: () => Promise<{
-      success: boolean;
-      data?: {
-        aspects: {
-          core: Array<{ filename: string; data: unknown }>;
-          user: Array<{ filename: string; data: unknown }>;
-        };
-        domains: {
-          core: Array<{ filename: string; data: unknown }>;
-          user: Array<{ filename: string; data: unknown }>;
-        };
-        oracles: {
-          core: Array<{ filename: string; data: unknown }>;
-          coreMore: Array<{ filename: string; data: unknown }>;
-          user: Array<{ filename: string; data: unknown }>;
-          userMore: Array<{ filename: string; data: unknown }>;
-        };
-      };
-      error?: string;
-    }>;
-    getUserDir: () => Promise<string>;
-    saveForgeFile: (category: string, filename: string, data: any) => Promise<{ success: boolean; path?: string; error?: string }>;
+  weave: {
+    // Tapestry path management
+    setTapestryPath: (path: string) => Promise<WeaveSetTapestryPathResponse>;
+    
+    // Table management
+    getTables: () => Promise<WeaveTableListResponse>;
+    getTable: (tableId: string) => Promise<WeaveTableResponse>;
+    saveTable: (table: Table) => Promise<WeaveSaveTableResponse>;
+    deleteTable: (tableId: string) => Promise<WeaveDeleteTableResponse>;
+    
+    // Rolling
+    rollTable: (tableId: string, seed?: string) => Promise<WeaveRollResponse>;
   };
-  weaves: {
-    loadAll: () => Promise<{ success: boolean; data?: Weave[]; error?: string }>;
-    save: (weave: Weave) => Promise<{ success: boolean; error?: string }>;
-    delete: (id: string) => Promise<{ success: boolean; error?: string }>;
+  ipcRenderer: {
+    invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
   };
   settings: {
     saveLayout: (layout: any) => Promise<{ success: boolean; error?: string }>;

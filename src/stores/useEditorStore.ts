@@ -29,11 +29,6 @@ interface EditorState {
     handleRename: (oldPath: string, newPath: string, newTitle: string) => void;
 
     // Place Panel management
-    setWeaveRef: (entryId: string, weaveId: string | null) => void;
-    addAspect: (entryId: string, aspectId: string) => void;
-    removeAspect: (entryId: string, aspectId: string) => void;
-    addDomain: (entryId: string, domainId: string) => void;
-    removeDomain: (entryId: string, domainId: string) => void;
     setFirstLookDone: (entryId: string, done: boolean) => void;
     updateEntryFrontmatter: (entryId: string, updates: Partial<EntryDoc['frontmatter']>) => void;
 
@@ -317,58 +312,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 return entry;
             })
         }));
-    },
-
-    // Place Panel Actions
-    setWeaveRef: (entryId: string, weaveId: string | null) => {
-        const entry = get().openEntries.find(e => e.id === entryId);
-        if (!entry) return;
-
-        entry.frontmatter.weaveRef = weaveId || undefined;
-        entry.isDirty = true;
-        set({ openEntries: [...get().openEntries] });
-    },
-
-    addAspect: (entryId: string, aspectId: string) => {
-        const entry = get().openEntries.find(e => e.id === entryId);
-        if (!entry) return;
-
-        const aspects = entry.frontmatter.aspects || [];
-        if (!aspects.includes(aspectId)) {
-            entry.frontmatter.aspects = [...aspects, aspectId];
-            entry.isDirty = true;
-            set({ openEntries: [...get().openEntries] });
-        }
-    },
-
-    removeAspect: (entryId: string, aspectId: string) => {
-        const entry = get().openEntries.find(e => e.id === entryId);
-        if (!entry) return;
-
-        entry.frontmatter.aspects = (entry.frontmatter.aspects || []).filter(id => id !== aspectId);
-        entry.isDirty = true;
-        set({ openEntries: [...get().openEntries] });
-    },
-
-    addDomain: (entryId: string, domainId: string) => {
-        const entry = get().openEntries.find(e => e.id === entryId);
-        if (!entry) return;
-
-        const domains = entry.frontmatter.domains || [];
-        if (!domains.includes(domainId)) {
-            entry.frontmatter.domains = [...domains, domainId];
-            entry.isDirty = true;
-            set({ openEntries: [...get().openEntries] });
-        }
-    },
-
-    removeDomain: (entryId: string, domainId: string) => {
-        const entry = get().openEntries.find(e => e.id === entryId);
-        if (!entry) return;
-
-        entry.frontmatter.domains = (entry.frontmatter.domains || []).filter(id => id !== domainId);
-        entry.isDirty = true;
-        set({ openEntries: [...get().openEntries] });
     },
 
     setFirstLookDone: (entryId: string, done: boolean) => {

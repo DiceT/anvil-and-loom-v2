@@ -1,15 +1,11 @@
 export const ThreadColors: Record<string, string> = {
     dice: '#222244',        // Deep Blue
-    aspect: '#224433',      // Forest Green
-    domain: '#224433',      // Forest Green
-    table: '#224422',       // Dark Green
-    oracle: '#332244',      // Deep Purple
     interpretation: '#442244', // Magenta-ish
     ai: '#442244',          // Magenta-ish
-    weave: '#685431',       // Gold/Brown
-    user: '#0f52ba',        // Sapphire Blue (Distinct from Dice/Oracle)
+    user: '#0f52ba',        // Sapphire Blue (Distinct from Dice)
     chat: '#0f52ba',        // Legacy alias for user
     system: '#1e293b',      // Slate
+    weave: '#064e3b',       // Emerald Green (Forest Green)
     other: '#1e293b',       // Slate
 };
 

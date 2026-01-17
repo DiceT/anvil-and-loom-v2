@@ -43,15 +43,11 @@ export function logThread(input: LogThreadInput): void {
     // Convert Thread to embedded Panel Thread model
     const typeMap: Record<ResultSource, ThreadType> = {
       dice: 'dice',
-      aspect: 'aspect',
-      domain: 'domain',
-      oracle: 'oracle',
-      weave: 'weave',
-      table: 'table',
-      interpretation: 'oracle',
-      system: 'oracle',
+      interpretation: 'ai',
+      system: 'ai',
       user: 'user',
-      other: 'table',
+      weave: 'user', // Weave rolls are user-generated content
+      other: 'ai',
     };
 
     const panelThread = createThread(

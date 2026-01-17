@@ -1,0 +1,24 @@
+.macro-bar {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color, #333);
+    background-color: var(--background-color, #0d0d0d);
+}
+
+.macro-bar-header {
+    margin-bottom: 8px;
+}
+
+.macro-bar-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted, #888);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.macro-slots {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 4px 0;
+}

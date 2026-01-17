@@ -1,4 +1,4 @@
-import { FolderTree, Tag, Bookmark, Dices, TentTree, Eclipse, List, Infinity } from 'lucide-react';
+import { FolderTree, Tag, Bookmark, Dices, List, Infinity } from 'lucide-react';
 import { useLeftPaneStore, type LeftPaneMode } from '../../stores/useLeftPaneStore';
 import { useToolStore, type RightPaneMode } from '../../stores/useToolStore';
 import { IconButton } from '../ui/IconButton';
@@ -15,11 +15,9 @@ export function TopToolbar() {
 
   const rightModes: { mode: RightPaneMode; icon: typeof Dices; label: string }[] = [
     { mode: 'dice', icon: Dices, label: 'Dice' },
-    { mode: 'environments', icon: TentTree, label: 'Environments' },
-    { mode: 'oracles', icon: Eclipse, label: 'Oracles' },
     { mode: 'stitchboard', icon: List, label: 'Stitchboard' },
-    { mode: 'weave', icon: Infinity, label: 'The Weave' },
     { mode: 'results', icon: List, label: 'Results' },
+    { mode: 'weave', icon: Infinity, label: 'Weave' },
   ];
 
   return (

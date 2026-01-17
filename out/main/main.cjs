@@ -1,32 +1,11 @@
 "use strict";
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 const electron = require("electron");
 const path = require("path");
 const url = require("url");
 const fs = require("fs/promises");
 const matter = require("gray-matter");
 const uuid = require("uuid");
+const seedrandom = require("seedrandom");
 function _interopNamespaceDefault(e) {
   const n = Object.create(null, { [Symbol.toStringTag]: { value: "Module" } });
   if (e) {
@@ -108,225 +87,16 @@ function setupStorageHandlers() {
     return resultsCache;
   });
 }
-const CORE_TABLES_DIR = path.join(process.cwd(), "app", "core-data", "tables");
-function getUserDataDir() {
-  return path.join(electron.app.getPath("userData"), "AnvilAndLoom", "assets", "tables");
+function getUserDataPath() {
+  return electron.app.getPath("userData");
 }
-async function loadJsonFilesFromDirectory(dirPath) {
-  try {
-    await fs.access(dirPath);
-  } catch {
-    return [];
-  }
-  try {
-    const files = await fs.readdir(dirPath);
-    const jsonFiles = files.filter((f) => f.endsWith(".json"));
-    const results = await Promise.all(
-      jsonFiles.map(async (file) => {
-        try {
-          const filePath = path.join(dirPath, file);
-          const content = await fs.readFile(filePath, "utf-8");
-          const data = JSON.parse(content);
-          const filename = path.basename(file, ".json");
-          return { filename, data };
-        } catch (error) {
-          console.error(`Failed to load ${file}:`, error);
-          return null;
-        }
-      })
-    );
-    return results.filter((r) => r !== null);
-  } catch (error) {
-    console.error(`Failed to read directory ${dirPath}:`, error);
-    return [];
-  }
+function getLayoutFilePath() {
+  return path.join(getUserDataPath(), "layout.json");
 }
-async function loadAllTables() {
-  const [
-    coreAspects,
-    coreDomains,
-    coreOracles,
-    coreOraclesMore,
-    userAspects,
-    userDomains,
-    userOracles,
-    userOraclesMore
-  ] = await Promise.all([
-    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "aspects")),
-    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "domains")),
-    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "oracles")),
-    loadJsonFilesFromDirectory(path.join(CORE_TABLES_DIR, "oracles", "more")),
-    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "aspects")),
-    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "domains")),
-    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "oracles")),
-    loadJsonFilesFromDirectory(path.join(getUserDataDir(), "oracles", "more"))
-  ]);
-  return {
-    aspects: {
-      core: coreAspects,
-      user: userAspects
-    },
-    domains: {
-      core: coreDomains,
-      user: userDomains
-    },
-    oracles: {
-      core: coreOracles,
-      coreMore: coreOraclesMore,
-      user: userOracles,
-      userMore: userOraclesMore
-    }
-  };
-}
-function setupTableHandlers() {
-  electron.ipcMain.handle("tables:loadAll", async () => {
-    try {
-      const tables = await loadAllTables();
-      return {
-        success: true,
-        data: tables
-      };
-    } catch (error) {
-      console.error("Failed to load tables:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error"
-      };
-    }
-  });
-  electron.ipcMain.handle("tables:getUserDir", async () => {
-    return getUserDataDir();
-  });
-  electron.ipcMain.handle("tables:saveForgeFile", async (event, { category, filename, data }) => {
-    try {
-      const { dialog, BrowserWindow } = await import("electron");
-      const win = BrowserWindow.fromWebContents(event.sender);
-      if (!win) {
-        return { success: false, error: "Window not found" };
-      }
-      const result = await dialog.showSaveDialog(win, {
-        title: "Save Table Forge File",
-        defaultPath: `${filename}.json`,
-        filters: [
-          { name: "JSON Files", extensions: ["json"] },
-          { name: "All Files", extensions: ["*"] }
-        ]
-      });
-      if (result.canceled || !result.filePath) {
-        return { success: false, error: "Save cancelled" };
-      }
-      await fs.writeFile(result.filePath, JSON.stringify(data, null, 2), "utf-8");
-      return { success: true, path: result.filePath };
-    } catch (error) {
-      console.error("Failed to save forge file:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error"
-      };
-    }
-  });
-}
-const CORE_WEAVES_DIR = path.join(process.cwd(), "app", "core-data", "weaves");
-function getUserWeavesDir() {
-  return path.join(electron.app.getPath("userData"), "AnvilAndLoom", "assets", "weaves");
-}
-async function loadWeavesFromDirectory(dirPath) {
-  try {
-    await fs.access(dirPath);
-  } catch {
-    return [];
-  }
-  try {
-    const files = await fs.readdir(dirPath);
-    const jsonFiles = files.filter((f) => f.endsWith(".json"));
-    const results = await Promise.all(
-      jsonFiles.map(async (file) => {
-        try {
-          const filePath = path.join(dirPath, file);
-          const content = await fs.readFile(filePath, "utf-8");
-          const data = JSON.parse(content);
-          return data;
-        } catch (error) {
-          console.error(`Failed to load ${file}:`, error);
-          return null;
-        }
-      })
-    );
-    return results.filter((r) => r !== null);
-  } catch (error) {
-    console.error(`Failed to read directory ${dirPath}:`, error);
-    return [];
-  }
-}
-async function loadAllWeaves() {
-  const [coreWeaves, userWeaves] = await Promise.all([
-    loadWeavesFromDirectory(CORE_WEAVES_DIR),
-    loadWeavesFromDirectory(getUserWeavesDir())
-  ]);
-  const weaveMap = /* @__PURE__ */ new Map();
-  coreWeaves.forEach((weave) => {
-    weaveMap.set(weave.id, weave);
-  });
-  userWeaves.forEach((weave) => {
-    weaveMap.set(weave.id, weave);
-  });
-  return Array.from(weaveMap.values());
-}
-function setupWeaveHandlers() {
-  electron.ipcMain.handle("weaves:loadAll", async () => {
-    try {
-      const weaves = await loadAllWeaves();
-      return {
-        success: true,
-        data: weaves
-      };
-    } catch (error) {
-      console.error("Failed to load weaves:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error"
-      };
-    }
-  });
-  electron.ipcMain.handle("weaves:save", async (_event, weave) => {
-    try {
-      await fs.mkdir(getUserWeavesDir(), { recursive: true });
-      const filePath = path.join(getUserWeavesDir(), `${weave.id}.json`);
-      const content = JSON.stringify(weave, null, 2);
-      await fs.writeFile(filePath, content, "utf-8");
-      return {
-        success: true
-      };
-    } catch (error) {
-      console.error("Failed to save weave:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error"
-      };
-    }
-  });
-  electron.ipcMain.handle("weaves:delete", async (_event, id) => {
-    try {
-      const filePath = path.join(getUserWeavesDir(), `${id}.json`);
-      await fs.unlink(filePath);
-      return {
-        success: true
-      };
-    } catch (error) {
-      console.error("Failed to delete weave:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error"
-      };
-    }
-  });
-}
-const USER_DATA_PATH = electron.app.getPath("userData");
-const LAYOUT_FILE = path.join(USER_DATA_PATH, "layout.json");
 function setupSettingsHandlers() {
   electron.ipcMain.handle("settings:saveLayout", async (_, layout) => {
     try {
-      await fs.writeFile(LAYOUT_FILE, JSON.stringify(layout, null, 2));
+      await fs.writeFile(getLayoutFilePath(), JSON.stringify(layout, null, 2));
       return { success: true };
     } catch (error) {
       console.error("Failed to save layout:", error);
@@ -335,7 +105,7 @@ function setupSettingsHandlers() {
   });
   electron.ipcMain.handle("settings:loadLayout", async () => {
     try {
-      const data = await fs.readFile(LAYOUT_FILE, "utf-8");
+      const data = await fs.readFile(getLayoutFilePath(), "utf-8");
       return JSON.parse(data);
     } catch (error) {
       return null;
@@ -343,7 +113,7 @@ function setupSettingsHandlers() {
   });
   electron.ipcMain.handle("settings:resetLayout", async () => {
     try {
-      await fs.unlink(LAYOUT_FILE);
+      await fs.unlink(getLayoutFilePath());
       return { success: true };
     } catch (error) {
       return { success: false };
@@ -353,6 +123,9 @@ function setupSettingsHandlers() {
 const REGISTRY_FILE = "tapestries.json";
 function getRegistryFilePath() {
   return path__namespace.join(electron.app.getPath("userData"), REGISTRY_FILE);
+}
+function getTapestriesBasePath() {
+  return path__namespace.join(electron.app.getPath("documents"), "Anvil and Loom", "Tapestries");
 }
 async function readJsonFile(filePath, defaultValue) {
   try {
@@ -486,6 +259,7 @@ async function buildFolderTree(folderPath) {
   const nodes = [];
   for (const dirent of dirents) {
     if (dirent.name === ".loom") continue;
+    if (dirent.name === ".weave") continue;
     const fullPath = path__namespace.join(folderPath, dirent.name);
     if (dirent.isDirectory()) {
       const children = await buildFolderTree(fullPath);
@@ -552,7 +326,7 @@ function registerTapestryHandlers() {
     const registry = await readRegistry();
     const id = uuid.v4();
     const slug = slugify(data.name);
-    const basePath = data.basePath || path__namespace.join(electron.app.getPath("documents"), "Anvil and Loom", "Tapestries");
+    const basePath = data.basePath || getTapestriesBasePath();
     const root = path__namespace.join(basePath, slug);
     const { loomDir, entriesDir } = getTapestryPaths(root);
     await ensureDir(loomDir);
@@ -785,6 +559,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
       const files = [];
       for (const dirent of dirents) {
         if (dirent.name === ".loom") continue;
+        if (dirent.name === ".weave") continue;
         const fullPath = path__namespace.join(dir, dirent.name);
         if (dirent.isDirectory()) {
           files.push(...await getMarkdownFiles(fullPath));
@@ -810,7 +585,7 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
     }
   });
   electron.ipcMain.handle("tapestry:pickImage", async (_event, defaultPath) => {
-    const pickerPath = defaultPath || path__namespace.join(electron.app.getPath("documents"), "Anvil and Loom", "Tapestries");
+    const pickerPath = defaultPath || getTapestriesBasePath();
     const result = await electron.dialog.showOpenDialog({
       title: "Select Tapestry Image",
       defaultPath: pickerPath,
@@ -824,6 +599,422 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
       return null;
     }
     return result.filePaths[0];
+  });
+}
+class SeededRNG {
+  rng;
+  seed;
+  constructor(seed) {
+    this.seed = seed ?? uuid.v4();
+    this.rng = seedrandom(this.seed);
+  }
+  /** Returns a random float between 0 (inclusive) and 1 (exclusive) */
+  random() {
+    return this.rng();
+  }
+  /** Returns a random integer between min and max (inclusive) */
+  int(min, max) {
+    return Math.floor(this.random() * (max - min + 1)) + min;
+  }
+  /** 
+   * Rolls a d66 (two d6 combined as tens and ones).
+   * Valid range: 11-16, 21-26, 31-36, 41-46, 51-56, 61-66
+   */
+  d66() {
+    const tens = this.int(1, 6);
+    const ones = this.int(1, 6);
+    return tens * 10 + ones;
+  }
+  /**
+   * Rolls a d88 (two d8 combined as tens and ones).
+   * Valid range: 11-18, 21-28, ..., 81-88
+   */
+  d88() {
+    const tens = this.int(1, 8);
+    const ones = this.int(1, 8);
+    return tens * 10 + ones;
+  }
+}
+function getRollMode(table) {
+  const tags = table.tags || [];
+  const diceTag = tags.find((t) => /^(d66|d88|2d\d+)$/i.test(t));
+  if (diceTag) {
+    const lowerTag = diceTag.toLowerCase();
+    if (lowerTag === "d66") return "d66";
+    if (lowerTag === "d88") return "d88";
+    if (/^2d(6|8|10|12|20)$/.test(lowerTag)) return lowerTag;
+  }
+  if (table.maxRoll === 66) return "d66";
+  if (table.maxRoll === 88) return "d88";
+  return "standard";
+}
+class RandomTableEngine {
+  /**
+   * Rolls on a table and returns the result.
+   * Does NOT resolve tokens - that's a separate layer.
+   */
+  roll(table, options = {}) {
+    const rng = new SeededRNG(options.seed);
+    const warnings = [];
+    const rollValue = options.rollValue ?? this.generateRollValue(rng, table);
+    const matches = this.findMatchingRows(table.tableData, rollValue);
+    let selectedRow = null;
+    if (matches.length === 0) {
+      warnings.push(`No match found for roll ${rollValue} on table "${table.name}"`);
+    } else if (matches.length === 1) {
+      selectedRow = matches[0];
+    } else {
+      warnings.push(`Multiple matches (${matches.length}) for roll ${rollValue} on table "${table.name}"`);
+      const index = rng.int(0, matches.length - 1);
+      selectedRow = matches[index];
+    }
+    return {
+      seed: rng.seed,
+      tableChain: [table.name],
+      rolls: [rollValue],
+      warnings,
+      result: selectedRow?.result ?? "[NO MATCH]"
+    };
+  }
+  generateRollValue(rng, table) {
+    const mode = getRollMode(table);
+    switch (mode) {
+      case "d66":
+        return rng.d66();
+      case "d88":
+        return rng.d88();
+      case "2d6":
+        return rng.int(1, 6) + rng.int(1, 6);
+      case "2d8":
+        return rng.int(1, 8) + rng.int(1, 8);
+      case "2d10":
+        return rng.int(1, 10) + rng.int(1, 10);
+      case "2d12":
+        return rng.int(1, 12) + rng.int(1, 12);
+      case "2d20":
+        return rng.int(1, 20) + rng.int(1, 20);
+      default:
+        return rng.int(1, table.maxRoll);
+    }
+  }
+  findMatchingRows(tableData, rollValue) {
+    return tableData.filter(
+      (row) => rollValue >= row.floor && rollValue <= row.ceiling
+    );
+  }
+}
+const TOKEN_REGEX = /\[\[\s*([a-zA-Z0-9_\-\s]+?)\s*\]\]/g;
+const MAX_DEPTH = 10;
+class TokenResolver {
+  onError;
+  constructor(onError) {
+    this.onError = onError;
+  }
+  /**
+   * Resolves all tokens in a result value.
+   * Returns: fully resolved value and merged context info.
+   */
+  resolve(value, rollByTag, context) {
+    const ctx = {
+      depth: context?.depth ?? 0,
+      visitedTags: context?.visitedTags ?? /* @__PURE__ */ new Set(),
+      tableChain: context?.tableChain ?? [],
+      rolls: context?.rolls ?? [],
+      warnings: context?.warnings ?? []
+    };
+    if (typeof value === "string") {
+      const resolved = this.resolveString(value, rollByTag, ctx);
+      return { resolved, context: ctx };
+    } else {
+      const resolved = this.resolveObject(value, rollByTag, ctx);
+      return { resolved, context: ctx };
+    }
+  }
+  resolveString(text, rollByTag, ctx) {
+    return text.replace(TOKEN_REGEX, (_match, tag) => {
+      const cleanTag = tag.trim();
+      return this.resolveToken(cleanTag, rollByTag, ctx);
+    });
+  }
+  resolveObject(obj, rollByTag, ctx) {
+    const resolved = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === "string") {
+        resolved[key] = this.resolveString(value, rollByTag, ctx);
+      } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+        resolved[key] = this.resolveObject(value, rollByTag, ctx);
+      } else {
+        resolved[key] = value;
+      }
+    }
+    return resolved;
+  }
+  resolveToken(tag, rollByTag, ctx) {
+    if (ctx.depth >= MAX_DEPTH) {
+      const msg = `Max resolution depth (${MAX_DEPTH}) exceeded for tag "${tag}"`;
+      ctx.warnings.push(msg);
+      this.onError?.(msg, { tag, depth: ctx.depth });
+      return `[UNRESOLVED:${tag}]`;
+    }
+    if (ctx.visitedTags.has(tag)) {
+      const msg = `Cycle detected: tag "${tag}" already in resolution chain`;
+      ctx.warnings.push(msg);
+      this.onError?.(msg, { tag, chain: Array.from(ctx.visitedTags) });
+      return `[CYCLE:${tag}]`;
+    }
+    const result = rollByTag(tag);
+    if (!result) {
+      const msg = `No table found for tag "${tag}"`;
+      ctx.warnings.push(msg);
+      this.onError?.(msg, { tag });
+      return `[UNRESOLVED:${tag}]`;
+    }
+    if (result.rolls.length > 0) {
+      ctx.rolls.push(...result.rolls);
+    }
+    ctx.visitedTags.add(tag);
+    ctx.tableChain.push(...result.tableChain);
+    ctx.warnings.push(...result.warnings);
+    const childCtx = {
+      depth: ctx.depth + 1,
+      visitedTags: new Set(ctx.visitedTags),
+      tableChain: ctx.tableChain,
+      rolls: ctx.rolls,
+      warnings: ctx.warnings
+    };
+    if (typeof result.result === "string") {
+      return this.resolveString(result.result, rollByTag, childCtx);
+    } else if (typeof result.result === "object" && result.result !== null && !("tag" in result.result)) {
+      const resolved = this.resolveObject(result.result, rollByTag, childCtx);
+      return JSON.stringify(resolved);
+    } else {
+      return `[${result.result.tag}]`;
+    }
+  }
+}
+let currentTapestryPath = null;
+const tableCache = /* @__PURE__ */ new Map();
+function getWeaveDirPath() {
+  if (!currentTapestryPath) {
+    throw new Error("No Tapestry path set. Call weave:setTapestryPath first.");
+  }
+  return path__namespace.join(currentTapestryPath, ".weave");
+}
+async function ensureWeaveDir() {
+  const weaveDir = getWeaveDirPath();
+  await fs__namespace.mkdir(weaveDir, { recursive: true });
+  return weaveDir;
+}
+async function readTableFiles() {
+  try {
+    const weaveDir = getWeaveDirPath();
+    const entries = await fs__namespace.readdir(weaveDir, { withFileTypes: true });
+    const tables = [];
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith(".json")) {
+        const filePath = path__namespace.join(weaveDir, entry.name);
+        try {
+          const data = await fs__namespace.readFile(filePath, "utf-8");
+          const table = JSON.parse(data);
+          table.sourcePath = filePath;
+          tableCache.set(table.id, table);
+          tables.push(table);
+        } catch (error) {
+          console.error(`Failed to read table file ${entry.name}:`, error);
+        }
+      }
+    }
+    return tables;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+}
+async function writeTableFile(table) {
+  const weaveDir = await ensureWeaveDir();
+  const fileName = `${table.id}.json`;
+  const filePath = path__namespace.join(weaveDir, fileName);
+  table.sourcePath = filePath;
+  await fs__namespace.writeFile(filePath, JSON.stringify(table, null, 2), "utf-8");
+  tableCache.set(table.id, table);
+}
+async function deleteTableFile(tableId) {
+  const table = tableCache.get(tableId);
+  if (table && table.sourcePath) {
+    try {
+      await fs__namespace.unlink(table.sourcePath);
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+  }
+  tableCache.delete(tableId);
+}
+function findTableById(tableId) {
+  return tableCache.get(tableId) ?? null;
+}
+function findTableByTag(tag) {
+  for (const table of tableCache.values()) {
+    if (table.tags.includes(tag)) {
+      return table;
+    }
+  }
+  return null;
+}
+function rollTable(table, resolveTokens = true) {
+  const engine = new RandomTableEngine();
+  const result = engine.roll(table);
+  if (resolveTokens) {
+    const resolver = new TokenResolver();
+    const resolved = resolver.resolve(result.result, (tag) => {
+      const refTable = findTableByTag(tag);
+      if (refTable) {
+        return rollTable(refTable, true, result.rolls);
+      }
+      return null;
+    });
+    const allRolls = [...result.rolls, ...resolved.context.rolls];
+    return {
+      seed: result.seed,
+      tableChain: [table.name, ...resolved.context.tableChain],
+      rolls: allRolls,
+      warnings: [...result.warnings, ...resolved.context.warnings],
+      result: resolved.resolved
+    };
+  }
+  return result;
+}
+function registerWeaveHandlers() {
+  electron.ipcMain.handle("weave:setTapestryPath", async (_event, tapestryPath) => {
+    try {
+      await fs__namespace.access(tapestryPath);
+      tableCache.clear();
+      currentTapestryPath = tapestryPath;
+      await ensureWeaveDir();
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.message ?? "Failed to set Tapestry path"
+      };
+    }
+  });
+  electron.ipcMain.handle("weave:getTables", async () => {
+    try {
+      if (!currentTapestryPath) {
+        return {
+          tables: [],
+          error: "No Tapestry path set. Call weave:setTapestryPath first."
+        };
+      }
+      const tables = await readTableFiles();
+      return { tables };
+    } catch (error) {
+      return {
+        tables: [],
+        error: error?.message ?? "Failed to load tables"
+      };
+    }
+  });
+  electron.ipcMain.handle("weave:getTable", async (_event, tableId) => {
+    try {
+      let table = findTableById(tableId);
+      if (!table) {
+        const weaveDir = getWeaveDirPath();
+        const filePath = path__namespace.join(weaveDir, `${tableId}.json`);
+        try {
+          const data = await fs__namespace.readFile(filePath, "utf-8");
+          table = JSON.parse(data);
+          table.sourcePath = filePath;
+          tableCache.set(tableId, table);
+        } catch (error) {
+          if (error.code === "ENOENT") {
+            return {
+              table: null,
+              error: `Table with ID ${tableId} not found`
+            };
+          }
+          throw error;
+        }
+      }
+      return { table };
+    } catch (error) {
+      return {
+        table: null,
+        error: error?.message ?? "Failed to load table"
+      };
+    }
+  });
+  electron.ipcMain.handle("weave:saveTable", async (_event, table) => {
+    try {
+      if (!currentTapestryPath) {
+        return {
+          success: false,
+          error: "No Tapestry path set. Call weave:setTapestryPath first."
+        };
+      }
+      if (!table.id) {
+        table.id = uuid.v4();
+      }
+      if (!table.schemaVersion) {
+        table.schemaVersion = 1;
+      }
+      await writeTableFile(table);
+      return { success: true, table };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.message ?? "Failed to save table"
+      };
+    }
+  });
+  electron.ipcMain.handle("weave:deleteTable", async (_event, tableId) => {
+    try {
+      if (!currentTapestryPath) {
+        return {
+          success: false,
+          error: "No Tapestry path set. Call weave:setTapestryPath first."
+        };
+      }
+      await deleteTableFile(tableId);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.message ?? "Failed to delete table"
+      };
+    }
+  });
+  electron.ipcMain.handle("weave:rollTable", async (_event, tableId, seed) => {
+    try {
+      if (!currentTapestryPath) {
+        return {
+          result: null,
+          error: "No Tapestry path set. Call weave:setTapestryPath first."
+        };
+      }
+      const table = findTableById(tableId);
+      if (!table) {
+        return {
+          result: null,
+          error: `Table with ID ${tableId} not found`
+        };
+      }
+      const options = {};
+      if (seed) {
+        options.seed = seed;
+      }
+      const result = rollTable(table, true);
+      return { result };
+    } catch (error) {
+      return {
+        result: null,
+        error: error?.message ?? "Failed to roll table"
+      };
+    }
   });
 }
 const __filename$1 = url.fileURLToPath(require("url").pathToFileURL(__filename).href);
@@ -852,44 +1043,9 @@ function createWindow() {
 electron.app.whenReady().then(() => {
   setupFileSystemHandlers();
   setupStorageHandlers();
-  setupTableHandlers();
-  setupWeaveHandlers();
   setupSettingsHandlers();
   registerTapestryHandlers();
-  electron.session.defaultSession.protocol.handle("media", async (request) => {
-    let filePath = request.url.replace("media://", "");
-    if (filePath.startsWith("/") && filePath.length > 2 && filePath[2] === ":") {
-      filePath = filePath.substring(1);
-    }
-    try {
-      filePath = decodeURIComponent(filePath);
-    } catch (e) {
-      console.error("[media protocol] Failed to decode path:", filePath, e);
-    }
-    if (filePath.endsWith("/")) {
-      filePath = filePath.slice(0, -1);
-    }
-    console.log("[media protocol] Attempting to load:", filePath);
-    try {
-      const data = await fs.readFile(filePath);
-      const ext = path.extname(filePath).toLowerCase();
-      const mimeTypes = {
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".gif": "image/gif",
-        ".webp": "image/webp"
-      };
-      const contentType = mimeTypes[ext] || "application/octet-stream";
-      console.log("[media protocol] Successfully loaded:", filePath);
-      return new Response(data, {
-        headers: { "Content-Type": contentType }
-      });
-    } catch (error) {
-      console.error("[media protocol] Failed to read file:", filePath, error);
-      return new Response("Not Found", { status: 404 });
-    }
-  });
+  registerWeaveHandlers();
   createWindow();
   electron.app.on("activate", () => {
     if (electron.BrowserWindow.getAllWindows().length === 0) {

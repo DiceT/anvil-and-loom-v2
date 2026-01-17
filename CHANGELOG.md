@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+### Removed - **BREAKING CHANGE: Legacy System Removal (2026-01-12)**
+- **Table System Removal:**
+  - Removed all Aspects, Domains, Oracles, and The Weave systems
+  - Removed Table Forge feature (AI-powered oracle/table generator)
+  - Removed all table-related UI components, stores, and IPC handlers
+  - Removed core data directories (tables, weaves)
+  - Removed table-related dependencies and integrations
+- **Map System Removal:**
+  - Removed canvas-based map editor
+  - Removed map-related UI components and stores
+  - Removed map data management
+  - Removed map-related dependencies (konva, pixi.js, plough-map-engine, react-konva)
+- **Cleaned Up Integration Points:**
+  - Updated all references to removed features throughout the codebase
+  - Fixed compilation errors from removals
+  - Updated UI to reflect current feature set
+- **Data Preservation:**
+  - All removed data backed up to `_BACKUP/2026-01-12_11-56-15/` directory
+  - Backup includes tables (aspects, domains, oracles), weaves, and map data
+  - Rollback procedures available in `_DEVELOPMENT/rollback-plan.md`
+
+### Breaking Changes
+- **Table/Oracle System:** All table and oracle functionality has been removed. Users who relied on Aspects, Domains, Oracles, or The Weave will need to adapt their workflows.
+- **Map System:** The canvas-based map editor has been removed. Users who used maps will need to use external tools or wait for future map implementations.
+- **Data Migration:** No automatic migration is provided. Users can access their old data in the `_BACKUP/` directory if needed.
+- **Rollback:** A rollback procedure is available in `_DEVELOPMENT/rollback-plan.md` for users who need to restore the previous version.
+
+### Migration Notes
+- All legacy data has been preserved in `_BACKUP/2026-01-12_11-56-15/` directory
+- See `_DEVELOPMENT/migration-guide.md` for detailed migration information
+- Rollback instructions available in `_DEVELOPMENT/rollback-plan.md`
+- Current features remain fully functional: Dice Rolling, Tapestry Management, Thread System, AI Integration, Session Management, Tag System, Bookmark System, Markdown Editor
+
 ### Added
 - **Raw Milkdown Editor Migration:** Replaced `@milkdown/crepe` with raw Milkdown for greater control over plugins and custom nodes.
 - **Source Mode:** Added "Source Mode" (Code icon) to the editor toolbar for viewing and editing raw Markdown/JSON.
@@ -30,26 +63,8 @@
   - AI client service with centralized error handling and response parsing
   - "Interpret with AI" button on thread cards for contextual interpretations
   - AI interpretations displayed as separate purple-themed thread cards
-- **Table Forge:** AI-powered oracle/table generator for solo RPG play
-  - Support for Aspect, Domain, and Oracle table types
-  - Empty table template generation (6 tables for Aspects/Domains, 1 for Oracles)
-  - Sophisticated AI content generation with persona integration
-  - Custom tags input (merged with default category tags)
-  - Individual table filling or batch generation
-  - Save to JSON file (exports to user tables directory)
-  - Table viewer modal with Floor/Ceiling/Result columns
-  - Macro preservation (ACTION+THEME, DESCRIPTOR+FOCUS, ROLL TWICE, CONNECTION WEB)
-  - Comprehensive prompt engineering for quality oracle outputs:
-    - Weirdness level detection (Mundane/Mixed/Bizarre)
-    - Oracle shape & structure guidance (Action/Theme/Descriptor/Focus)
-    - Context-aware content with diversity and quality filtering
-- **First Look Feature:** AI-powered place introduction system
-  - Generates Atmosphere and Discovery results for new places
-  - Leverages active aspects, domains, and weave context
-  - Creates formatted thread cards with structured output
 - Themed confirmation dialogs using global `useDialogStore` (replaced native browser confirm dialogs)
-- "Change Badge" context menu option for panels (right-click to change category)  
-- "Rebuild Index" button in Stitchboard for manual index rebuilding
+- "Change Badge" context menu option for panels (right-click to change category)
 - Support for escaped wiki link brackets (`\[\[...\]\]`) in stitch parser
 - **Tagging System:** Comprehensive tag management for panels
   - Tags stored in frontmatter with add/remove UI in panel headers
@@ -69,36 +84,31 @@
   - Vertical sidebars on left and right with focused toolbar sections
 - **Toolbar Reorganization:**
   - Left pane mode switchers (Tapestry/Tags/Bookmarks) now in top horizontal toolbar
-  - Right pane mode switchers (Dice/Environments/Oracles/Stitchboard/Weave/Results) in top toolbar
+  - Right pane mode switchers (Dice/Results) in top toolbar
   - Collapse buttons positioned in top-left and top-right of toolbar
-  - Table Forge button (Wand icon) added to top-right toolbar
 - **Tapestry Tree Toolbar:**
   - New Folder button (FolderTree icon) now creates folders when clicked
   - New Panel button (Plus icon) creates panels when clicked
   - Both icons positioned together in tree header toolbar
 - **Dice Tray Access:** Fixed Dice icon in top toolbar to properly open dice tray in right pane
-- Thread card styling: AI interpretations use distinct purple theme to differentiate from oracle results
-- Renamed "Outgoing" to "Stitches" in Stitchboard
+- Thread card styling: AI interpretations use distinct purple theme
+- Renamed "Outgoing" to "Stitches"
 - All confirmation dialogs now use consistent slate-800/900 theme
 
 ### Fixed
-- Panel tab switching now correctly syncs with editor and Stitchboard
+- Panel tab switching now correctly syncs with editor
 - Wiki link navigation now opens/activates corresponding tabs
-- Stitchboard now populates correctly with stitches and backstitches
 - Wiki link protocol (`wiki:`) no longer stripped by react-markdown
 - Tab system and editor state now stay synchronized
 - Panel header titles now update immediately when renamed (no app restart needed)
 - New panels now automatically open and focus in the editor
 - Persona loading fixed for browser environment using `import.meta.glob`
-- First Look oracle combo resolution (Descriptor+Focus) now correctly parses macro results
 - Tag search bar position fixed in left pane
 
 ### Technical Improvements
 - Centralized AI client with OpenAI-compatible API support
 - Prompt builder system with universal GM instructions
 - Response parser for structured AI outputs
-- Table Forge engine with empty table generation and AI filling
-- IPC handlers for saving forged tables to user directory
 - Comprehensive type definitions for AI settings and personas
 
 ## 0.2.0 - 2025-11-28
@@ -106,12 +116,10 @@
 ### Added
 - Tapestry system for managing worlds/campaigns as on-disk folders with a registry, metadata, and entry tree.
 - Milkdown/Crepe-based editor for Panels (entries) with edit/view modes and auto-save.
-- Thread system (Result Cards) for logging dice, oracle, table, and Weave outcomes, with Latest Thread and Thread History views.
+- Thread system (Result Cards) for logging dice and outcomes, with Latest Thread and Thread History views.
 - Logging Threads into Panels, embedding them as fenced `result-card` blocks that can be expanded in the viewer.
 - Dice tool with expression parsing, rolling, and Thread generation.
-- Tables and Oracles engine with macro support (e.g., Action+Theme, Descriptor+Focus) and Thread generation.
-- Weave engine and editor for building and rolling combined Aspect/Domain tables, with environment/oracle follow-up actions.
-- Right-pane tools layout (Dice, Environments, Oracles, Weave, Results) using `rc-dock`.
+- Right-pane tools layout (Dice, Results) using `rc-dock`.
 - Tapestry tree manager with folders, Panels, move/rename/delete, and context menus.
 - Settings system for dice visuals and editor behavior (themes, GFM, history, etc.).
 

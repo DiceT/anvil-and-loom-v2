@@ -1,22 +1,20 @@
 # Anvil & Loom: Feature Backlog & Inspiration
 
-_Last updated: 2025-11-21_
+_Last updated: 2026-01-12_
 
 ## Purpose
 
 Working list of features inspired by Obsidian, LegendKeeper, World Anvil, Kanka, Foundry VTT, and similar tools, evaluated as potential additions to **Anvil & Loom**.
 
-We’ll expand and revise this file as we go.
+We'll expand and revise this file as we go.
 
 ---
 
 ## Architecture & Intent
 
-Anvil & Loom treats a Tapestry as a world or campaign container, with structure and settings managed in Electron rather than as a bare folder on disk. Within a Tapestry, Entries are the primary surface for play and lore: Dice outcomes already log into Entries as collapsible Result Cards, and the same pattern will power future Table/Oracle results so play artifacts accumulate in-session.
+Anvil & Loom treats a Tapestry as a world or campaign container, with structure and settings managed in Electron rather than as a bare folder on disk. Within a Tapestry, Panels are the primary surface for play and lore: Dice outcomes already log into Panels as collapsible Result Cards, and the same pattern will power future features so play artifacts accumulate in-session.
 
-The right tools pane (Dice today, Tables soon) and the tabbed center pane lay the groundwork for a Play Mode where a designated Session Entry stays active while Dice and Table tools stream Result Cards into it in real time. Aspects/Domains and Tables/Oracles (e.g., Haunted, Overgrown, Cemetery, Forest) are the engine for “discover what happens next,” and the existing tables directory plus table_creator tooling foreshadow those generators being wired into the UI like Dice is now.
-
-The Dice pipeline (DiceExpression parser, DiceRoller, DiceBox adapter, rollHighlights, and the Result Card format in DiceTray) serves as a reference implementation for Tables: parse/generate, annotate, and render a standard Result Card with header, summary, and expandable meta. App.tsx’s state model (active Tapestry, open tabs, right-pane tools, IPC-backed persistence) already supports this event-log flow and will evolve by formalizing a “current Session Entry” and composing shared Result Card components for Dice and Tables, turning Entries into living play logs where dice, oracles, and world aspects drive emergent gameplay.
+The right tools pane (Dice today) and the tabbed center pane lay the groundwork for a Play Mode where a designated Session Panel stays active while Dice tools stream Result Cards into it in real time. The Dice pipeline (DiceExpression parser, DiceRoller, DiceBox adapter, rollHighlights, and the Result Card format in DiceTray) serves as a reference implementation for future features: parse/generate, annotate, and render a standard Result Card with header, summary, and expandable meta. App.tsx's state model (active Tapestry, open tabs, right-pane tools, IPC-backed persistence) already supports this event-log flow and will evolve by formalizing a "current Session Panel" and composing shared Result Card components, turning Panels into living play logs where dice and narrative drive emergent gameplay.
 
 
 ## Priority Legend
@@ -24,7 +22,7 @@ The Dice pipeline (DiceExpression parser, DiceRoller, DiceBox adapter, rollHighl
 - **P0 – Core**: Must-have for the first public release.
 - **P1 – High**: Strongly desired soon after core is stable.
 - **P2 – Nice**: Quality-of-life or depth once the base is solid.
-- **P3 – Future**: Experimental, stretch, or “only if it still feels right later”.
+- **P3 – Future**: Experimental, stretch, or "only if it still feels right later".
 
 _Source tags used below:_
 - `#obsidian`, `#legendkeeper`, `#worldanvil`, `#kanka`, `#notion`, `#vtt`, `#foundry`, `#ai`, `#original`
@@ -53,7 +51,7 @@ _Source tags used below:_
 | P0       | **Tagging system**                            | Obsidian, WA, Kanka     | #obsidian #worldanvil #kanka           | Simple tags for arbitrary grouping. |
 | P1       | Saved graph filters / views               | Obsidian                | #obsidian                              | Saved searches / filters for graph subsets. |
 | P1       | Hierarchical folders / notebooks          | Obsidian, LK, WA        | #obsidian #legendkeeper #worldanvil    | Optional structure on top of links. |
-| P2       | Second-order link discovery               | Obsidian plugins        | #obsidian                              | Suggestions for “you might connect X and Y”. |
+| P2       | Second-order link discovery               | Obsidian plugins        | #obsidian                              | Suggestions for "you might connect X and Y". |
 
 ---
 
@@ -61,8 +59,7 @@ _Source tags used below:_
 
 | Priority | Feature                                   | Source(s)                                      | Tags                                               | Notes |
 |---------:|-------------------------------------------|------------------------------------------------|----------------------------------------------------|-------|
-| P0       | **Interactive maps with pins & hotspots**     | LegendKeeper, WA, Kanka, DnD Campaign Planner, Augur | #legendkeeper #worldanvil #kanka #dndplanner #augur | Clickable pins/hotspots that open entries; core pattern for region, city, and dungeon maps. |
-| P1       | **Map-triggered oracle / Weave integration**  | Augur, Anvil & Loom                             | #augur #original                                   | Clicking a pin can roll The Weave or a table and append Result Cards into the linked Entry/Session. |
+| P1       | **Interactive maps with pins & hotspots**     | LegendKeeper, WA, Kanka, DnD Campaign Planner, Augur | #legendkeeper #worldanvil #kanka #dndplanner #augur | Clickable pins/hotspots that open entries; core pattern for region, city, and dungeon maps. |
 | P1       | **Multiple maps per tapestry**                | LegendKeeper, WA                                | #legendkeeper #worldanvil                          | Regions, cities, dungeons, etc. |
 | P1       | Layers & toggleable overlays              | LegendKeeper                                    | #legendkeeper                                      | E.g. political vs geographic vs travel routes. |
 | P1       | **Fog-of-war / player reveal controls**       | LegendKeeper, VTT patterns                      | #legendkeeper #vtt                                 | Separate GM vs player visibility. |
@@ -80,7 +77,7 @@ _Source tags used below:_
 | P1       | Custom calendars (fantasy dates)          | Kanka, WA                  | #worldanvil #kanka                     | Months, weekdays, leap rules, etc. |
 | P1       | Per-entity life timeline (character arc)  | WA, Kanka                  | #worldanvil #kanka                     | Autogenerated from events tagged with that entity. |
 | P1       | Reverberation / Echo queue & timers       | Anvil & Loom, Chronica     | #original #chronica                    | Track narrative timers and future events (Echoes/Reverberations); surface them on timelines & in Play Mode. |
-| P2       | Multiple parallel timelines               | LegendKeeper timelines     | #legendkeeper                          | E.g. “mythic age” vs “current campaign”. |
+| P2       | Multiple parallel timelines               | LegendKeeper timelines     | #legendkeeper                          | E.g. "mythic age" vs "current campaign". |
 | P2       | Time-aware map/timeline sync              | Mixed                      | #legendkeeper #original                | Click timeline, highlight map or canvas changes tied to that moment. |
 
 ---
@@ -90,9 +87,9 @@ _Source tags used below:_
 | Priority | Feature                                   | Source(s)                     | Tags                                   | Notes |
 |---------:|-------------------------------------------|-------------------------------|----------------------------------------|-------|
 | P0       | Typed Panels (character, place, item…)   | Kanka, WA, LK                | #kanka #worldanvil #legendkeeper       | Each type can have its own template. |
-| P0       | **Place Panels (First Look)**   | Anvil & Loom  | #kanka #worldanvil #legendkeeper       | Each type can have its own template. |
-| P0       | Custom fields per type                    | Kanka, WA                    | #kanka #worldanvil                     | E.g. “CR”, “alignment”, “population”. |
-| P1       | Entity relationships / links graph        | Kanka, WA                    | #kanka #worldanvil                     | Families, factions, “reports to”, “lives in”. |
+| P0       | **Place Panels**   | Anvil & Loom  | #kanka #worldanvil #legendkeeper       | Each type can have its own template. |
+| P0       | Custom fields per type                    | Kanka, WA                    | #kanka #worldanvil                     | E.g. "CR", "alignment", "population". |
+| P1       | Entity relationships / links graph        | Kanka, WA                    | #kanka #worldanvil                     | Families, factions, "reports to", "lives in". |
 | P1       | Inline statblocks / system-agnostic sheets| WA                           | #worldanvil                            | System-neutral first; later system presets. |
 | P2       | Relationship views (family tree, org chart)| Kanka, WA                   | #kanka #worldanvil                     | Visualizations of relationships. |
 | P2       | Derived fields / formulas                  | Notion-style                 | #notion #original                      | Calculated values from fields. |
@@ -105,20 +102,19 @@ _Source tags used below:_
 |---------:|-------------------------------------------------|--------------------------------|----------------------------------------|-------|
 | P0       | **Dice expression parser & roller**   | Anvil & Loom     | #original  | Core dice engine for all rolls; powers Result Cards and feeds plugins/views (2D/3D). |
 | P0       | First-run Tapestry & Welcome Panel auto-creation | Anvil & Loom                 | #original                              | On first launch, create a starter Tapestry with a Welcome Panel and open it immediately. |
-| P0       | Onboarding Story Seed oracle                   | Anvil & Loom                   | #original                              | Roll once on a small Story Seed table and insert the result as an Oracle Result Card in the Welcome Panel. |
-| P0       | Guided “your turn” prompt in Welcome Panel     | Anvil & Loom                   | #original                              | Short, actionable text under the seed card that invites the user to write or roll again. |
+| P0       | Guided "your turn" prompt in Welcome Panel     | Anvil & Loom                   | #original                              | Short, actionable text that invites the user to write or roll again. |
 | P0       | **Play Mode / Current Session Panel**              | WA, Obsidian, Anvil & Loom     | #worldanvil #obsidian #original        | Focused layout for real-time play; one active Session Panel per session. |
-| P0       | **Auto-logging Dice & Table results to Session**   | Anvil & Loom                   | #original                              | Rolls from Dice/Oracles append structured cards into the active Session Panel. |
+| P0       | **Auto-logging Dice results to Session**   | Anvil & Loom                   | #original                              | Rolls from Dice append structured cards into the active Session Panel. |
 | P0       | Basic progress / track support                 | Anvil & Loom, RPG systems      | #original                              | Generic clocks/vows/fronts that can be ticked in Play Mode and logged. |
 | P0       | Quick-create Panels from play                | Anvil & Loom                   | #original                              | Highlight text in a Session Panel to create a new linked Panel (NPC, place, etc.). |
 | P1       | **3D dice roller**               | Anvil & Loom     | #original                  |  |
 | P1       | GM/Play dashboard (solo-focused)               | WA campaign manager            | #worldanvil #original                  | Pin current location, key NPCs, active tracks, and upcoming Reverberations for quick reference during play. |
-| P1       | Session recap tools (manual; AI optional later)| Anvil & Loom                   | #original #ai                          | Summarize a session’s key events, rolls, and loose threads; AI can expand into prose. |
-| P1       | Connection Web view (named elements & threads) | Kanka, DnD Campaign Planner, Anvil & Loom | #kanka #dndplanner #original | Visual graph of named oracle results, locations, NPCs, and other nodes with labeled relationships; feeds Echo/Reverberation and Weave decisions. |
+| P1       | Session recap tools (manual; AI optional later)| Anvil & Loom                   | #original #ai                          | Summarize a session's key events, rolls, and loose threads; AI can expand into prose. |
+| P1       | Connection Web view (named elements & threads) | Kanka, DnD Campaign Planner, Anvil & Loom | #kanka #dndplanner #original | Visual graph of named results, locations, NPCs, and other nodes with labeled relationships; feeds Echo/Reverberation. |
 | P1       | Reverberation / Echo management panel          | Anvil & Loom                   | #original                              | UI to surface the Reverberation/Echo queue during play and prompt the GM/solo player when past results should resurface. |
 | P1       | Initiative / turn tracker (optional)           | VTT-inspired                   | #vtt                                   | Lightweight tracker; avoid full combat simulator. |
 | P2       | Player journals linked to campaign             | WA, Kanka                      | #worldanvil #kanka                     | Player-facing notes with permissions (later, if multi-user). |
-| P3       | Simple encounter builder                       | WA, others                     | #worldanvil #original                  | More “planning aide” than combat simulator. |
+| P3       | Simple encounter builder                       | WA, others                     | #worldanvil #original                  | More "planning aide" than combat simulator. |
 
 ---
 
@@ -148,10 +144,10 @@ _Source tags used below:_
 
 | Priority | Feature                                   | Source(s)              | Tags                                   | Notes |
 |---------:|-------------------------------------------|------------------------|----------------------------------------|-------|
-| P1       | Macro / scriptable actions                | Obsidian plugins       | #obsidian                              | Run workflows on entries, dice, tables. |
+| P1       | Macro / scriptable actions                | Obsidian plugins       | #obsidian                              | Run workflows on entries, dice. |
 | P1       | Plugin API for third-party extensions     | Obsidian, WA ecosystem | #obsidian #worldanvil                  | Long-term but should be architected for. |
 | P2       | Custom views (boards, kanban, etc.)       | LK boards, Notion      | #legendkeeper #notion                  | Visual organization for quests, arcs, etc. |
-| P2       | Saved searches / smart collections        | Obsidian search        | #obsidian                              | Auto-updating lists of entries (e.g. “unresolved quests”). |
+| P2       | Saved searches / smart collections        | Obsidian search        | #obsidian                              | Auto-updating lists of entries (e.g. "unresolved quests"). |
 | P3       | External integrations (VTTs, VCS, etc.)   | Various                | #vtt #original                         | Foundry, Roll20, Git, etc. TBD. |
 
 ---
@@ -161,25 +157,22 @@ _Source tags used below:_
 A running list of things we want to argue about later:
 
 - How deep should collaboration go in v1 vs focusing solely on solo GMs and authors?
-- Where does Anvil & Loom stop being a “campaign manager” and start stepping on VTT territory?
+- Where does Anvil & Loom stop being a "campaign manager" and start stepping on VTT territory?
 - How opinionated should entity types be vs fully user-defined schemas?
-- How tightly intertwined should maps, timelines, and oracles be in the first implementation?
+- How tightly intertwined should maps, timelines, and narrative tools be in the first implementation?
 
 ---
 
-## 11. AI & Oracles
+## 11. AI & Narrative Tools
 
 | Priority | Feature                                            | Source(s)                          | Tags                       | Notes |
 |---------:|----------------------------------------------------|------------------------------------|----------------------------|-------|
-| P0       | **Local oracle & table roller**                      | Anvil & Loom                       | #original                  | Core engine for d100 tables, Aspects/Domains, etc. |
-| P0       | **Weave table support**             | Anvil & Loom   | #original | Core support for The Weave: build and resolve combined Aspect/Domain tables (Atmosphere, Locations, Accoutrements, Banes, Boons) using macros like ACTION+ASPECT, DESCRIPTOR+FOCUS, CONNECTION WEB, and ROLL TWICE. The Weave must run locally alongside standard tables. |
-| P0       | **AI-assisted oracle interpretation (optional API)**   | Anvil & Loom + LLM integration     | #ai #original              | Take raw rolls and suggest narrative meaning in context. |
+| P0       | **AI-assisted interpretation (optional API)**   | Anvil & Loom + LLM integration     | #ai #original              | Take raw dice results and suggest narrative meaning in context. |
 | P1       | AI-powered tagging & link suggestions              | Obsidian-style + AI                | #ai #obsidian #original    | Suggest tags, backlinks, and related entries while writing. |
-| P1       | AI prompts from table results (“expand this”)      | Oracles + AI                       | #ai #original              | Click a result to generate 2–3 variations or elaborations. |
+| P1       | AI prompts from results ("expand this")      | Results + AI                       | #ai #original              | Click a result to generate 2–3 variations or elaborations. |
 | P1       | AI-assisted session summaries & recap generation   | Journals + AI                      | #ai #original              | Turn raw session logs into summaries, NPC lists, loose threads. |
 | P2       | AI-driven Reverberation / Echo suggestions         | Connection Web + AI                | #ai #original              | Propose when & how past threads resurface based on new notes. |
-| P2       | AI persona presets (Sage, Trickster, Archivist)    | Anvil & Loom                       | #ai #original              | Curated prompt styles for different creative “voices”. |
-| P3       | AI-assisted map dressing (non-positional prompts)  | Foundry-inspired + AI              | #ai #foundry #original     | Suggest landmarks, hazards, and atmosphere for a selected region. |
+| P2       | AI persona presets (Sage, Trickster, Archivist)    | Anvil & Loom                       | #ai #original              | Curated prompt styles for different creative "voices". |
 | P3       | AI-powered system-conversion helper                | General                            | #ai #original              | Translate NPCs/items between supported RPG systems. |
 | P2       | **Native / Offline Speech-to-Text**                | OpenAI Whisper / Vosk              | #ai #original              | Embed a local model for voice input without Google/Cloud dependencies. |
 
@@ -190,7 +183,6 @@ A running list of things we want to argue about later:
 | Priority | Feature                                   | Source(s)                          | Tags                            | Notes |
 |---------:|-------------------------------------------|------------------------------------|---------------------------------|-------|
 | P1       | Canvas Mode (layout + pins)              | Anvil & Loom, LegendKeeper, Augur | #original #legendkeeper #augur  | Unified canvas for maps AND crawls; grid or node-based, supports tiles plus tags/links/pins to Entries. |
-| P2       | Environment-specific tile sets           | Anvil & Loom                       | #original                       | Tiles/themes per Aspect/Domain (dungeon rooms, forest clearings, city blocks, caverns, etc.). |
+| P2       | Environment-specific tile sets           | Anvil & Loom                       | #original                       | Tiles/themes per environment type (dungeon rooms, forest clearings, city blocks, caverns, etc.). |
 | P2       | Tile ↔ Entry linking                     | Anvil & Loom                       | #original                       | Click a tile/region to open or create a linked Entry for that location, keeping crawls tied to Tapestries. |
-| P3       | Procedural hex / point-crawl generation  | Augur, Anvil & Loom                | #augur #original                | Use Aspects/Domains and tables to auto-generate crawl nodes (hexes/rooms) and pre-seed Entries or Connection Web nodes. |
-
+| P3       | Procedural hex / point-crawl generation  | Augur, Anvil & Loom                | #augur #original                | Use narrative tools to auto-generate crawl nodes (hexes/rooms) and pre-seed Entries or Connection Web nodes. |

@@ -24,15 +24,19 @@ electron.contextBridge.exposeInMainWorld("electron", {
     pickImage: (defaultPath) => electron.ipcRenderer.invoke("tapestry:pickImage", defaultPath),
     getAllPanels: (tapestryId) => electron.ipcRenderer.invoke("tapestry:getAllPanels", tapestryId)
   },
-  tables: {
-    loadAll: () => electron.ipcRenderer.invoke("tables:loadAll"),
-    getUserDir: () => electron.ipcRenderer.invoke("tables:getUserDir"),
-    saveForgeFile: (category, filename, data) => electron.ipcRenderer.invoke("tables:saveForgeFile", { category, filename, data })
+  weave: {
+    // Tapestry path management
+    setTapestryPath: (path) => electron.ipcRenderer.invoke("weave:setTapestryPath", path),
+    // Table management
+    getTables: () => electron.ipcRenderer.invoke("weave:getTables"),
+    getTable: (tableId) => electron.ipcRenderer.invoke("weave:getTable", tableId),
+    saveTable: (table) => electron.ipcRenderer.invoke("weave:saveTable", table),
+    deleteTable: (tableId) => electron.ipcRenderer.invoke("weave:deleteTable", tableId),
+    // Rolling
+    rollTable: (tableId, seed) => electron.ipcRenderer.invoke("weave:rollTable", tableId, seed)
   },
-  weaves: {
-    loadAll: () => electron.ipcRenderer.invoke("weaves:loadAll"),
-    save: (weave) => electron.ipcRenderer.invoke("weaves:save", weave),
-    delete: (id) => electron.ipcRenderer.invoke("weaves:delete", id)
+  ipcRenderer: {
+    invoke: (channel, ...args) => electron.ipcRenderer.invoke(channel, ...args)
   },
   settings: {
     saveLayout: (layout) => electron.ipcRenderer.invoke("settings:saveLayout", layout),

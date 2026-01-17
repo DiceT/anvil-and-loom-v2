@@ -20,7 +20,6 @@ export type EntryCategory =
     | 'npc'
     | 'lore'
     | 'mechanics'
-    | 'map'
     | 'other';
 
 export interface TapestryConfig {
@@ -39,10 +38,6 @@ export interface PanelFrontmatter {
     title: string;
     category: EntryCategory;
     tags?: string[];
-    // Place-specific fields
-    weaveRef?: string;       // ID of the selected Weave
-    aspects?: string[];      // IDs of selected Aspect packs
-    domains?: string[];      // IDs of selected Domain packs
     firstLookDone?: boolean; // Whether First Look has been run
 }
 
@@ -90,14 +85,14 @@ export interface EditorState {
  *
  * Embedded Threads stored inside Panels (historically called ResultCardModel).
  */
-export type ThreadType = 'dice' | 'oracle' | 'weave' | 'aspect' | 'domain' | 'table' | 'ai' | 'user';
+export type ThreadType = 'dice' | 'ai' | 'interpretation' | 'user';
 
 import { ThreadAiInterpretation } from './ai';
 
 export interface PanelThreadModel {
     id: string;          // uuid
     type: ThreadType;
-    source: string;      // e.g. "Weave: Haunted Forest / Atmosphere"
+    source: string;      // e.g. "Dice: 2d6+3"
     expression?: string; // dice expression, if any
     summary: string;     // short headline prompt
     content?: string;    // detailed content (roll info, etc)

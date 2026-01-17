@@ -1,148 +1,339 @@
-import { ipcMain, app } from 'electron';
-import path from 'path';
-import fs from 'fs/promises';
-import type { Weave } from '../../src/core/weave/weaveTypes';
+/**
+ * Weave IPC Handlers
+ * 
+ * Handles all Weave-related IPC operations for table management and rolling.
+ * Tables are stored in the .weave folder within each Tapestry.
+ */
 
-// ============================================================================
-// Directory Paths
-// ============================================================================
+import { ipcMain } from 'electron';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import type {
+    Table,
+    WeaveTableListResponse,
+    WeaveTableResponse,
+    WeaveSaveTableResponse,
+    WeaveDeleteTableResponse,
+    WeaveRollResponse,
+    WeaveSetTapestryPathResponse,
+} from '../../src/types/weave';
+import { RandomTableEngine } from '../../src/core/weave/RandomTableEngine';
+import { TokenResolver } from '../../src/core/weave/TokenResolver';
 
-const CORE_WEAVES_DIR = path.join(process.cwd(), 'app', 'core-data', 'weaves');
+// Store the current Tapestry path for Weave operations
+let currentTapestryPath: string | null = null;
 
-// Lazy getter for USER_WEAVES_DIR to avoid calling app.getPath() before app is ready
-function getUserWeavesDir(): string {
-  return path.join(app.getPath('userData'), 'AnvilAndLoom', 'assets', 'weaves');
-}
-
-// ============================================================================
-// Weave Loading
-// ============================================================================
+// Cache for tables to avoid repeated file reads
+const tableCache = new Map<string, Table>();
 
 /**
- * Load all JSON files from a directory as Weaves
+ * Get the .weave directory path for the current Tapestry
  */
-async function loadWeavesFromDirectory(dirPath: string): Promise<Weave[]> {
-  try {
-    await fs.access(dirPath);
-  } catch {
-    // Directory doesn't exist
-    return [];
-  }
+function getWeaveDirPath(): string {
+    if (!currentTapestryPath) {
+        throw new Error('No Tapestry path set. Call weave:setTapestryPath first.');
+    }
+    return path.join(currentTapestryPath, '.weave');
+}
 
-  try {
-    const files = await fs.readdir(dirPath);
-    const jsonFiles = files.filter((f) => f.endsWith('.json'));
+/**
+ * Ensure the .weave directory exists
+ */
+async function ensureWeaveDir(): Promise<string> {
+    const weaveDir = getWeaveDirPath();
+    await fs.mkdir(weaveDir, { recursive: true });
+    return weaveDir;
+}
 
-    const results = await Promise.all(
-      jsonFiles.map(async (file) => {
-        try {
-          const filePath = path.join(dirPath, file);
-          const content = await fs.readFile(filePath, 'utf-8');
-          const data = JSON.parse(content) as Weave;
-          return data;
-        } catch (error) {
-          console.error(`Failed to load ${file}:`, error);
-          return null;
+/**
+ * Read all table files from the .weave directory
+ */
+async function readTableFiles(): Promise<Table[]> {
+    try {
+        const weaveDir = getWeaveDirPath();
+        const entries = await fs.readdir(weaveDir, { withFileTypes: true });
+        const tables: Table[] = [];
+
+        for (const entry of entries) {
+            if (entry.isFile() && entry.name.endsWith('.json')) {
+                const filePath = path.join(weaveDir, entry.name);
+                try {
+                    const data = await fs.readFile(filePath, 'utf-8');
+                    const table = JSON.parse(data) as Table;
+
+                    // Update sourcePath to current location
+                    table.sourcePath = filePath;
+
+                    // Cache the table
+                    tableCache.set(table.id, table);
+                    tables.push(table);
+                } catch (error) {
+                    console.error(`Failed to read table file ${entry.name}:`, error);
+                }
+            }
         }
-      })
-    );
 
-    return results.filter((r): r is Weave => r !== null);
-  } catch (error) {
-    console.error(`Failed to read directory ${dirPath}:`, error);
-    return [];
-  }
+        return tables;
+    } catch (error: any) {
+        if (error.code === 'ENOENT') {
+            // .weave directory doesn't exist yet
+            return [];
+        }
+        throw error;
+    }
 }
 
 /**
- * Load all Weaves from core and user directories
- * User Weaves override core Weaves with the same ID
+ * Write a table to its file
  */
-async function loadAllWeaves(): Promise<Weave[]> {
-  const [coreWeaves, userWeaves] = await Promise.all([
-    loadWeavesFromDirectory(CORE_WEAVES_DIR),
-    loadWeavesFromDirectory(getUserWeavesDir()),
-  ]);
+async function writeTableFile(table: Table): Promise<void> {
+    const weaveDir = await ensureWeaveDir();
+    const fileName = `${table.id}.json`;
+    const filePath = path.join(weaveDir, fileName);
 
-  // Build a map with core first, then override with user
-  const weaveMap = new Map<string, Weave>();
+    table.sourcePath = filePath;
+    await fs.writeFile(filePath, JSON.stringify(table, null, 2), 'utf-8');
 
-  coreWeaves.forEach((weave) => {
-    weaveMap.set(weave.id, weave);
-  });
-
-  userWeaves.forEach((weave) => {
-    weaveMap.set(weave.id, weave);
-  });
-
-  return Array.from(weaveMap.values());
+    // Update cache
+    tableCache.set(table.id, table);
 }
 
-// ============================================================================
-// IPC Handlers
-// ============================================================================
-
-export function setupWeaveHandlers() {
-  /**
-   * Load all Weaves from core and user directories
-   */
-  ipcMain.handle('weaves:loadAll', async () => {
-    try {
-      const weaves = await loadAllWeaves();
-      return {
-        success: true,
-        data: weaves,
-      };
-    } catch (error) {
-      console.error('Failed to load weaves:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+/**
+ * Delete a table file
+ */
+async function deleteTableFile(tableId: string): Promise<void> {
+    const table = tableCache.get(tableId);
+    if (table && table.sourcePath) {
+        try {
+            await fs.unlink(table.sourcePath);
+        } catch (error: any) {
+            if (error.code !== 'ENOENT') {
+                throw error;
+            }
+        }
     }
-  });
+    tableCache.delete(tableId);
+}
 
-  /**
-   * Save a Weave to user directory
-   */
-  ipcMain.handle('weaves:save', async (_event, weave: Weave) => {
-    try {
-      // Ensure user directory exists
-      await fs.mkdir(getUserWeavesDir(), { recursive: true });
+/**
+ * Find a table by ID
+ */
+function findTableById(tableId: string): Table | null {
+    return tableCache.get(tableId) ?? null;
+}
 
-      const filePath = path.join(getUserWeavesDir(), `${weave.id}.json`);
-      const content = JSON.stringify(weave, null, 2);
-      await fs.writeFile(filePath, content, 'utf-8');
-
-      return {
-        success: true,
-      };
-    } catch (error) {
-      console.error('Failed to save weave:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+/**
+ * Find a table by tag
+ */
+function findTableByTag(tag: string): Table | null {
+    for (const table of tableCache.values()) {
+        if (table.tags.includes(tag)) {
+            return table;
+        }
     }
-  });
+    return null;
+}
 
-  /**
-   * Delete a Weave from user directory
-   */
-  ipcMain.handle('weaves:delete', async (_event, id: string) => {
-    try {
-      const filePath = path.join(getUserWeavesDir(), `${id}.json`);
-      await fs.unlink(filePath);
+/**
+ * Roll on a table with optional token resolution
+ */
+function rollTable(table: Table, resolveTokens: boolean = true): any {
+    const engine = new RandomTableEngine();
+    const result = engine.roll(table);
 
-      return {
-        success: true,
-      };
-    } catch (error) {
-      console.error('Failed to delete weave:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+    if (resolveTokens) {
+        const resolver = new TokenResolver();
+        const resolved = resolver.resolve(result.result, (tag) => {
+            const refTable = findTableByTag(tag);
+            if (refTable) {
+                // Pass the initial roll value when resolving tokens recursively
+                return rollTable(refTable, true, result.rolls);
+            }
+            return null;
+        });
+
+        // Combine initial roll with any additional rolls from token resolution
+        const allRolls = [...result.rolls, ...resolved.context.rolls];
+
+        return {
+            seed: result.seed,
+            tableChain: [table.name, ...resolved.context.tableChain],
+            rolls: allRolls,
+            warnings: [...result.warnings, ...resolved.context.warnings],
+            result: resolved.resolved,
+        };
     }
-  });
+
+    return result;
+}
+
+/**
+ * Register all Weave IPC handlers
+ */
+export function registerWeaveHandlers() {
+    // Set the current Tapestry path for Weave operations
+    ipcMain.handle('weave:setTapestryPath', async (_event, tapestryPath: string): Promise<WeaveSetTapestryPathResponse> => {
+        try {
+            // Verify the path exists
+            await fs.access(tapestryPath);
+
+            // Clear cache when switching tapestries
+            tableCache.clear();
+            currentTapestryPath = tapestryPath;
+
+            // Ensure .weave directory exists
+            await ensureWeaveDir();
+
+            return { success: true };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error?.message ?? 'Failed to set Tapestry path',
+            };
+        }
+    });
+
+    // Get all tables from the current Tapestry's .weave folder
+    ipcMain.handle('weave:getTables', async (): Promise<WeaveTableListResponse> => {
+        try {
+            if (!currentTapestryPath) {
+                return {
+                    tables: [],
+                    error: 'No Tapestry path set. Call weave:setTapestryPath first.',
+                };
+            }
+
+            const tables = await readTableFiles();
+            return { tables };
+        } catch (error: any) {
+            return {
+                tables: [],
+                error: error?.message ?? 'Failed to load tables',
+            };
+        }
+    });
+
+    // Get a specific table by ID
+    ipcMain.handle('weave:getTable', async (_event, tableId: string): Promise<WeaveTableResponse> => {
+        try {
+            // Try cache first
+            let table = findTableById(tableId);
+
+            // If not in cache, try loading from disk
+            if (!table) {
+                const weaveDir = getWeaveDirPath();
+                const filePath = path.join(weaveDir, `${tableId}.json`);
+
+                try {
+                    const data = await fs.readFile(filePath, 'utf-8');
+                    table = JSON.parse(data) as Table;
+                    table.sourcePath = filePath;
+                    tableCache.set(tableId, table);
+                } catch (error: any) {
+                    if (error.code === 'ENOENT') {
+                        return {
+                            table: null,
+                            error: `Table with ID ${tableId} not found`,
+                        };
+                    }
+                    throw error;
+                }
+            }
+
+            return { table };
+        } catch (error: any) {
+            return {
+                table: null,
+                error: error?.message ?? 'Failed to load table',
+            };
+        }
+    });
+
+    // Save a table (create or update)
+    ipcMain.handle('weave:saveTable', async (_event, table: Table): Promise<WeaveSaveTableResponse> => {
+        try {
+            if (!currentTapestryPath) {
+                return {
+                    success: false,
+                    error: 'No Tapestry path set. Call weave:setTapestryPath first.',
+                };
+            }
+
+            // Ensure table has an ID
+            if (!table.id) {
+                table.id = uuidv4();
+            }
+
+            // Ensure table has schema version
+            if (!table.schemaVersion) {
+                table.schemaVersion = 1;
+            }
+
+            // Save to disk
+            await writeTableFile(table);
+
+            return { success: true, table };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error?.message ?? 'Failed to save table',
+            };
+        }
+    });
+
+    // Delete a table
+    ipcMain.handle('weave:deleteTable', async (_event, tableId: string): Promise<WeaveDeleteTableResponse> => {
+        try {
+            if (!currentTapestryPath) {
+                return {
+                    success: false,
+                    error: 'No Tapestry path set. Call weave:setTapestryPath first.',
+                };
+            }
+
+            await deleteTableFile(tableId);
+
+            return { success: true };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error?.message ?? 'Failed to delete table',
+            };
+        }
+    });
+
+    // Roll on a table and return result
+    ipcMain.handle('weave:rollTable', async (_event, tableId: string, seed?: string): Promise<WeaveRollResponse> => {
+        try {
+            if (!currentTapestryPath) {
+                return {
+                    result: null,
+                    error: 'No Tapestry path set. Call weave:setTapestryPath first.',
+                };
+            }
+
+            const table = findTableById(tableId);
+            if (!table) {
+                return {
+                    result: null,
+                    error: `Table with ID ${tableId} not found`,
+                };
+            }
+
+            const options: any = {};
+            if (seed) {
+                options.seed = seed;
+            }
+
+            const result = rollTable(table, true);
+
+            return { result };
+        } catch (error: any) {
+            return {
+                result: null,
+                error: error?.message ?? 'Failed to roll table',
+            };
+        }
+    });
 }

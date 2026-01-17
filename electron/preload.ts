@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Weave } from '../src/core/weave/weaveTypes';
 
 // Expose protected methods that allow the renderer process to use ipcRenderer
 contextBridge.exposeInMainWorld('electron', {
@@ -34,16 +33,21 @@ contextBridge.exposeInMainWorld('electron', {
     pickImage: (defaultPath?: string) => ipcRenderer.invoke('tapestry:pickImage', defaultPath),
     getAllPanels: (tapestryId: string) => ipcRenderer.invoke('tapestry:getAllPanels', tapestryId),
   },
-  tables: {
-    loadAll: () => ipcRenderer.invoke('tables:loadAll'),
-    getUserDir: () => ipcRenderer.invoke('tables:getUserDir'),
-    saveForgeFile: (category: string, filename: string, data: any) =>
-      ipcRenderer.invoke('tables:saveForgeFile', { category, filename, data }),
+  weave: {
+    // Tapestry path management
+    setTapestryPath: (path: string) => ipcRenderer.invoke('weave:setTapestryPath', path),
+    
+    // Table management
+    getTables: () => ipcRenderer.invoke('weave:getTables'),
+    getTable: (tableId: string) => ipcRenderer.invoke('weave:getTable', tableId),
+    saveTable: (table: any) => ipcRenderer.invoke('weave:saveTable', table),
+    deleteTable: (tableId: string) => ipcRenderer.invoke('weave:deleteTable', tableId),
+    
+    // Rolling
+    rollTable: (tableId: string, seed?: string) => ipcRenderer.invoke('weave:rollTable', tableId, seed),
   },
-  weaves: {
-    loadAll: () => ipcRenderer.invoke('weaves:loadAll') as Promise<{ success: boolean; data?: Weave[]; error?: string }>,
-    save: (weave: Weave) => ipcRenderer.invoke('weaves:save', weave) as Promise<{ success: boolean; error?: string }>,
-    delete: (id: string) => ipcRenderer.invoke('weaves:delete', id) as Promise<{ success: boolean; error?: string }>,
+  ipcRenderer: {
+    invoke: (channel: string, ...args: unknown[]) => ipcRenderer.invoke(channel, ...args),
   },
   settings: {
     saveLayout: (layout: any) => ipcRenderer.invoke('settings:saveLayout', layout),

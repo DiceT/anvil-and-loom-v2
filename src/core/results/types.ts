@@ -1,13 +1,9 @@
 export type ResultSource =
   | 'dice'
-  | 'aspect'
-  | 'domain'
-  | 'table'
-  | 'oracle'
   | 'interpretation'
   | 'system'
-  | 'weave'
   | 'user'
+  | 'weave'
   | 'other';
 
 /**

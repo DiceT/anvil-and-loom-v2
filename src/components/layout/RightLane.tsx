@@ -1,8 +1,5 @@
 import { ToolPanel } from '../tools/ToolPanel';
 import { ThreadsFullPane } from '../results/ThreadsFullPane';
-import { EnvironmentsPane } from '../environments/EnvironmentsPane';
-import { OraclesPane } from '../oracles/OraclesPane';
-import { WeaveTool } from '../tools/weave/WeaveTool';
 import { GlobalLastThread } from '../results/GlobalLastThread';
 import { Stitchboard } from '../stitches/Stitchboard';
 import { useToolStore } from '../../stores/useToolStore';
@@ -15,17 +12,8 @@ export function RightLane() {
       case 'dice':
         return <ToolPanel />;
 
-      case 'environments':
-        return <EnvironmentsPane />;
-
-      case 'oracles':
-        return <OraclesPane />;
-
       case 'results':
         return <ThreadsFullPane />;
-
-      case 'weave':
-        return <WeaveTool />;
 
       case 'stitchboard':
         return <Stitchboard />;
