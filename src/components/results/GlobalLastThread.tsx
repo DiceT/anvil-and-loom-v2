@@ -8,6 +8,8 @@ import { IconButton } from '../ui/IconButton';
 import { diceEngine } from '../../integrations/anvil-dice-app';
 import { logThread } from '../../core/results/threadEngine';
 
+import { useDifficultyStore } from '../../stores/useDifficultyStore';
+
 export function GlobalLastThread() {
   const threads = useThreadsStore((state) => state.threads);
   const clearCards = useThreadsStore((state) => state.clearCards);
@@ -27,12 +29,35 @@ export function GlobalLastThread() {
         return;
       }
 
+      // Check for Target Difficulty
+      const { isEnabled, targetNumber } = useDifficultyStore.getState();
+      let headerText = `DICE: ${result.expression || 'Roll'}`;
+      let resultText = `${result.total}`;
+      let contentText = `Expression: ${result.expression || ''}\nRolls: ${rollsText}`;
+
+      if (isEnabled) {
+        const isSuccess = result.total >= targetNumber;
+        const status = isSuccess ? 'SUCCESS' : 'FAILURE';
+        const icon = isSuccess ? '✅' : '❌';
+
+        headerText += ` | DC ${targetNumber} ${icon}`;
+        resultText = `${result.total} vs ${targetNumber}`; // Show comparison
+        contentText += `\n\n**Result:** ${status} (Rolled ${result.total} vs DC ${targetNumber})`;
+
+        // Auto-disable DC after resolve
+        useDifficultyStore.getState().setIsEnabled(false);
+      }
+
       logThread({
-        header: `DICE: ${result.expression || 'Roll'}`,
-        result: `${result.total}`,
-        content: `Expression: ${result.expression || ''}\nRolls: ${rollsText}`,
+        header: headerText,
+        result: resultText,
+        content: contentText,
         source: 'dice',
-        meta: result
+        meta: {
+          ...result,
+          dc: isEnabled ? targetNumber : undefined,
+          success: isEnabled ? (result.total >= targetNumber) : undefined
+        }
       });
     };
 

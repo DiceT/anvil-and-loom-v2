@@ -1,38 +1,50 @@
 import { useState } from 'react';
-import { Plus, Settings, BookImage } from 'lucide-react';
+import { Plus, Settings, LogOut } from 'lucide-react';
 import { useTapestryStore } from '../../stores/useTapestryStore';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { useTabStore } from '../../stores/useTabStore';
 import { IconButton } from '../ui/IconButton';
 import { Dialog } from '../ui/Dialog';
 import { SettingsModal } from '../settings/SettingsModal';
+import { TEMPLATES, PanelTemplate } from '../../data/templates';
 
 export function LeftSidebar() {
-  const { tree, loadTree } = useTapestryStore();
+  const { tree, loadTree, closeTapestry } = useTapestryStore();
   const { openEntry } = useEditorStore();
   const { openTab } = useTabStore();
 
-  const [showNewPlaceDialog, setShowNewPlaceDialog] = useState(false);
-  const [newPlaceName, setNewPlaceName] = useState('');
+  const [showDialog, setShowDialog] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<PanelTemplate | null>(null);
+  const [newName, setNewName] = useState('');
   const [showSettings, setShowSettings] = useState(false);
 
-  const handleNewPlace = () => {
-    setNewPlaceName('New Place');
-    setShowNewPlaceDialog(true);
+  const handleNewEntryClick = (template: PanelTemplate) => {
+    setSelectedTemplate(template);
+    setNewName(template.defaultTitle);
+    setShowDialog(true);
   };
 
-  const confirmNewPlace = async () => {
-    if (!newPlaceName.trim() || !tree) return;
+  const confirmNewEntry = async () => {
+    if (!newName.trim() || !tree || !selectedTemplate) return;
 
     try {
-      const result = await window.electron.tapestry.createEntry(tree.path, newPlaceName.trim(), 'place');
+      // Create generic entry
+      const result = await window.electron.tapestry.createEntry(
+        tree.path,
+        newName.trim(),
+        selectedTemplate.type // usually 'entry'
+      );
+
       await loadTree();
-      setShowNewPlaceDialog(false);
+      setShowDialog(false);
 
       if (result?.path) {
-        // Load entry to get ID for tab
+        // Load entry to get properties
         const entry = await window.electron.tapestry.loadEntry(result.path);
         if (entry) {
+          // TODO: Update frontmatter/tags based on selectedTemplate.subtype here
+          // For now, just opening it.
+
           openTab({
             id: entry.id,
             type: 'entry',
@@ -43,7 +55,7 @@ export function LeftSidebar() {
         }
       }
     } catch (err) {
-      console.error('Failed to create place:', err);
+      console.error('Failed to create entry:', err);
     }
   };
 
@@ -54,17 +66,22 @@ export function LeftSidebar() {
         <IconButton
           icon={Plus}
           size="m"
-          tooltip="New Tool/Panel"
+          tooltip="New Blank Panel"
           onClick={() => {
-            // New tool/panel creation will be handled here
+            // Default blank (optional)
           }}
         />
-        <IconButton
-          icon={BookImage}
-          size="m"
-          tooltip="New Place"
-          onClick={handleNewPlace}
-        />
+        <div className="h-px w-8 bg-slate-800 my-1" /> {/* Divider */}
+
+        {TEMPLATES.map(template => (
+          <IconButton
+            key={template.id}
+            icon={template.icon}
+            size="m"
+            tooltip={template.label}
+            onClick={() => handleNewEntryClick(template)}
+          />
+        ))}
       </div>
 
       {/* Bottom Toolbar */}
@@ -75,34 +92,47 @@ export function LeftSidebar() {
           tooltip="Settings"
           onClick={() => setShowSettings(true)}
         />
+        <IconButton
+          icon={LogOut}
+          size="m"
+          tooltip="Exit Tapestry"
+          onClick={() => {
+            if (confirm('Are you sure you want to exit to the main menu?')) {
+              closeTapestry();
+            }
+          }}
+        />
       </div>
 
-      {/* New Place Dialog */}
-      {showNewPlaceDialog && (
+      {/* New Entry Dialog */}
+      {showDialog && selectedTemplate && (
         <Dialog
-          title="New Place"
-          onClose={() => setShowNewPlaceDialog(false)}
-          onConfirm={confirmNewPlace}
+          title={selectedTemplate.label}
+          onClose={() => setShowDialog(false)}
+          onConfirm={confirmNewEntry}
           confirmText="Create"
-          confirmDisabled={!newPlaceName.trim()}
+          confirmDisabled={!newName.trim()}
         >
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Place Name <span className="text-red-400">*</span>
+              Name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
-              value={newPlaceName}
-              onChange={(e) => setNewPlaceName(e.target.value)}
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
               className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Place name..."
+              placeholder={`${selectedTemplate.subtype} name...`}
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && newPlaceName.trim()) {
-                  confirmNewPlace();
+                if (e.key === 'Enter' && newName.trim()) {
+                  confirmNewEntry();
                 }
               }}
             />
+            <p className="mt-2 text-xs text-slate-500">
+              {selectedTemplate.description}
+            </p>
           </div>
         </Dialog>
       )}

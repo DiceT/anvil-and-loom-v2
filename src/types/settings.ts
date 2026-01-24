@@ -93,13 +93,26 @@ export const defaultEditorSettings: EditorSettings = {
 
 };
 
+// Mechanics Settings
+export type ResolutionMethod = 'dc-2' | 'dc-3' | 'action-roll';
+
+export interface MechanicsSettings {
+    resolutionMethod: ResolutionMethod;
+}
+
+export const defaultMechanicsSettings: MechanicsSettings = {
+    resolutionMethod: 'dc-2',
+};
+
 // Global Settings
 export interface GlobalSettings {
     dice: DiceSettings;
     editor: EditorSettings;
+    mechanics: MechanicsSettings;
 }
 
 export const defaultGlobalSettings: GlobalSettings = {
     dice: defaultDiceSettings,
     editor: defaultEditorSettings,
+    mechanics: defaultMechanicsSettings,
 };

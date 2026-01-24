@@ -20,6 +20,10 @@ interface AiStore {
     updatePersonaName: (personaId: GmPersonaId, name: string) => void;
     updatePersonaInstructions: (personaId: GmPersonaId, instructions: string) => void;
 
+    // Art Style
+    updateArtStyleName: (name: string) => void;
+    updateArtStyleInstructions: (instructions: string) => void;
+
     // Get effective persona (with overrides applied)
     getEffectivePersona: (personaId: GmPersonaId) => EffectivePersona;
 
@@ -74,6 +78,28 @@ export const useAiStore = create<AiStore>()(
                                 ...state.settings.personaState[personaId],
                                 instructionsOverride: instructions,
                             },
+                        },
+                    },
+                })),
+
+            updateArtStyleName: (name) =>
+                set((state) => ({
+                    settings: {
+                        ...state.settings,
+                        artStyle: {
+                            ...state.settings.artStyle,
+                            name,
+                        },
+                    },
+                })),
+
+            updateArtStyleInstructions: (instructions) =>
+                set((state) => ({
+                    settings: {
+                        ...state.settings,
+                        artStyle: {
+                            ...state.settings.artStyle,
+                            instructions,
                         },
                     },
                 })),

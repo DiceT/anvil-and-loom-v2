@@ -85,7 +85,7 @@ export interface EditorState {
  *
  * Embedded Threads stored inside Panels (historically called ResultCardModel).
  */
-export type ThreadType = 'dice' | 'ai' | 'interpretation' | 'user';
+export type ThreadType = 'dice' | 'ai' | 'interpretation' | 'user' | 'oracle';
 
 import { ThreadAiInterpretation } from './ai';
 
@@ -119,4 +119,5 @@ export interface UpdateTapestryData {
     name?: string;
     description?: string;
     imagePath?: string;
+    path?: string;
 }

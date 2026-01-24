@@ -59,8 +59,7 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
 
   // Handle AI-generated table
   const handleTableGenerated = (generatedTable: Table) => {
-    console.log('Generated table:', generatedTable);
-    alert('Table generated! Check console for details. (Full integration coming later)');
+    handleTableUpdate(generatedTable);
   };
 
   // Handle AI-updated table

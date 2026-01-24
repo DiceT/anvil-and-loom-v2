@@ -107,7 +107,10 @@ Generate the entries now:`;
       content: prompt,
     };
 
-    const response = await callAi(uri, apiKey, model, [systemMessage, userMessage]);
+    const response = await callAi(uri, apiKey, model, [systemMessage, userMessage], {
+      do_sample: true,
+      temperature: 0.9,
+    });
     return this.parseListResponse(response.content);
   }
 
@@ -174,7 +177,10 @@ Return as a simple numbered list starting at ${existingRows.length + 1}:`;
       content: prompt,
     };
 
-    const response = await callAi(uri, apiKey, model, [systemMessage, userMessage]);
+    const response = await callAi(uri, apiKey, model, [systemMessage, userMessage], {
+      do_sample: true,
+      temperature: 0.9,
+    });
     return this.parseListResponse(response.content, existingRows.length);
   }
 
@@ -214,7 +220,10 @@ Respond with a brief analysis listing any issues found and suggestions for impro
       content: prompt,
     };
 
-    const response = await callAi(uri, apiKey, model, [systemMessage, userMessage]);
+    const response = await callAi(uri, apiKey, model, [systemMessage, userMessage], {
+      do_sample: true,
+      temperature: 0.9,
+    });
 
     // Parse simple text response into structured result
     return {

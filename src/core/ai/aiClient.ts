@@ -18,7 +18,8 @@ export async function callAi(
     uri: string,
     apiKey: string,
     model: string,
-    messages: AiMessage[]
+    messages: AiMessage[],
+    params?: Record<string, any>
 ): Promise<AiResponse> {
     try {
         const response = await fetch(uri, {
@@ -31,7 +32,9 @@ export async function callAi(
                 model,
                 messages,
                 temperature: 0.7,
+                ...params,
             }),
+            signal: AbortSignal.timeout(600000),
         });
 
         if (!response.ok) {

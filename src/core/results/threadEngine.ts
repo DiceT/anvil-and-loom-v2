@@ -46,7 +46,7 @@ export function logThread(input: LogThreadInput): void {
       interpretation: 'ai',
       system: 'ai',
       user: 'user',
-      weave: 'user', // Weave rolls are user-generated content
+      weave: 'oracle', // Oracle/Weave now has its own type
       other: 'ai',
     };
 

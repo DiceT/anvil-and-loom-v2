@@ -213,6 +213,17 @@ export function TapestryTree() {
         }
     };
 
+    const handleDropNode = async (draggedPath: string, targetPath: string) => {
+        if (draggedPath === targetPath) return;
+        try {
+            const fileName = draggedPath.split(/[\\/]/).pop() || 'entry';
+            await window.electron.tapestry.move(draggedPath, targetPath, fileName);
+            await loadTree();
+        } catch (err) {
+            console.error('Failed to move node:', err);
+        }
+    };
+
     const handleChangeBadge = (path: string, currentCategory: string) => {
         setCurrentPath(path);
         setChangeBadgeCategory((currentCategory as EntryCategory) || 'other');
@@ -320,6 +331,7 @@ export function TapestryTree() {
                         onDelete={handleDelete}
                         onMove={handleMove}
                         onChangeBadge={handleChangeBadge}
+                        onDropNode={handleDropNode}
                     />
                 ))}
             </div>

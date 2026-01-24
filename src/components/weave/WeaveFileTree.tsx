@@ -5,6 +5,8 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { useDrag } from 'react-dnd';
+import { createTableMacro } from '../../types/macro';
 import {
   DndContext,
   closestCenter,
@@ -100,18 +102,34 @@ function DraggableTableItem({ table, onClick, onContextMenu, onQuickRoll, select
     setNodeRef,
     transform,
     transition,
-    isDragging,
+    isDragging: isSorting,
   } = useSortable({ id: table.id });
+
+  // React-DnD hook for Macro Bar dragging
+  // @ts-ignore
+  const [{ isDragging: isMacroDragging }, dragRef] = useDrag({
+    type: 'TABLE',
+    item: {
+      type: 'TABLE',
+      macroData: createTableMacro(0, table.id, table.name)
+    },
+    collect: (monitor: any) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isSorting || isMacroDragging ? 0.5 : 1,
   };
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        dragRef(node);
+      }}
       style={style}
       className={`table-item ${selectedTableId === table.id ? 'selected' : ''} draggable-table`}
       onClick={(e) => {
@@ -177,7 +195,7 @@ function CategoryHeaderDropZone({ category, children }: {
 }
 
 export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps) {
-  const { tables, selectedTableId, loadTables, saveTable, deleteTable, addTableToMacro, clearMacro, macros, rollMacroSlot, validateTable } = useWeaveStore();
+  const { tables, selectedTableId, loadTables, saveTable, deleteTable, addTableToMacro, clearMacro, macros, rollMacroSlot, validateTable, customCategories, createCategory, renameCategory, deleteCategory } = useWeaveStore();
   const { openTab } = useTabStore();
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -224,6 +242,16 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
         if (isCategoryDrop) {
           const newCategory = over.id as string;
           handleMoveToCategory(table.id, newCategory);
+        } else {
+          // Check if dropping onto another table (move to that table's category)
+          const targetTable = tables.find(t => t.id === over.id);
+          if (targetTable) {
+            const targetCategory = targetTable.category || 'Uncategorized';
+            const sourceCategory = table.category || 'Uncategorized';
+            if (targetCategory !== sourceCategory) {
+              handleMoveToCategory(table.id, targetCategory);
+            }
+          }
         }
       }
     }
@@ -266,6 +294,11 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
     acc[category].push(table);
     return acc;
   }, {} as Record<string, typeof tables>);
+
+  // Add custom categories (empty folders)
+  customCategories.forEach(cat => {
+    if (!grouped[cat]) grouped[cat] = [];
+  });
 
   // Ensure Uncategorized is always present
   if (!grouped['Uncategorized']) {
@@ -410,6 +443,11 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
     });
   };
 
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const handleCreateFolder = () => {
+    setIsCreatingFolder(true);
+  };
+
   const handleNewTable = () => {
     if (onNewTable) {
       onNewTable();
@@ -454,52 +492,91 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
     await clearMacro(slotIndex);
   };
 
-  const getTableMenuItems = () => [
-    {
-      label: 'Export Table',
-      icon: (
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-          <path d="M7 9V2M4 5l3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-          <path d="M2 9v3h10v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-        </svg>
-      ),
-      onClick: () => handleExportTable(menu.tableId, menu.tableName),
-    },
-    {
-      label: 'Delete Table',
-      variant: 'danger' as const,
-      icon: (
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-          <path d="M3 4h8v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4z" stroke="currentColor" fill="none" />
-          <path d="M5 2h4M2 4h10" stroke="currentColor" strokeLinecap="round" />
-        </svg>
-      ),
-      onClick: () => handleDeleteTableAction(menu.tableId, menu.tableName),
-    },
-  ];
+  const getMenuItems = () => {
+    if (menu.type === 'category') {
+      return [
+        {
+          label: 'Rename Folder',
+          icon: (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+              <path d="M2 10h10M2 7h10M2 4h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          ),
+          onClick: () => {
+            const newName = window.prompt("Rename Folder:", menu.category);
+            if (newName && newName.trim() && newName !== menu.category) {
+              renameCategory(menu.category, newName.trim());
+            }
+            closeMenu();
+          }
+        },
+        {
+          label: 'Delete Folder',
+          variant: 'danger' as const,
+          icon: (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+              <path d="M3 4h8v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4z" stroke="currentColor" fill="none" />
+              <path d="M5 2h4M2 4h10" stroke="currentColor" strokeLinecap="round" />
+            </svg>
+          ),
+          onClick: () => {
+            if (window.confirm(`Delete folder "${menu.category}"? Tables will be moved to Uncategorized.`)) {
+              deleteCategory(menu.category);
+            }
+            closeMenu();
+          }
+        }
+      ];
+    }
+
+    return [
+      {
+        label: 'Export Table',
+        // ... same as before
+        icon: (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+            <path d="M7 9V2M4 5l3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            <path d="M2 9v3h10v-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          </svg>
+        ),
+        onClick: () => handleExportTable(menu.tableId, menu.tableName),
+      },
+      {
+        label: 'Delete Table',
+        variant: 'danger' as const,
+        icon: (
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+            <path d="M3 4h8v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4z" stroke="currentColor" fill="none" />
+            <path d="M5 2h4M2 4h10" stroke="currentColor" strokeLinecap="round" />
+          </svg>
+        ),
+        onClick: () => handleDeleteTableAction(menu.tableId, menu.tableName),
+      },
+    ];
+  };
+
+  const handleCategoryContextMenu = (e: React.MouseEvent, category: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenu({
+      isOpen: true,
+      type: 'category',
+      x: e.clientX,
+      y: e.clientY,
+      tableId: '',
+      tableName: '',
+      category: category,
+    });
+  };
 
   return (
     <aside className="file-tree">
       <header className="file-tree-header">
         <div className="header-actions">
-          <button className="btn-icon" title="New d66 Table" onClick={() => handleCreatePresetTable('d66')}>
+          <button className="btn-icon" title="New Folder" onClick={handleCreateFolder}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <text x="0" y="14" fontSize="12" fontWeight="bold">66</text>
-            </svg>
-          </button>
-          <button className="btn-icon" title="New d88 Table" onClick={() => handleCreatePresetTable('d88')}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <text x="0" y="14" fontSize="12" fontWeight="bold">88</text>
-            </svg>
-          </button>
-          <button className="btn-icon" title="New 2d6 Table" onClick={() => handleCreatePresetTable('2d6')}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <text x="0" y="14" fontSize="10" fontWeight="bold">2d!</text>
-            </svg>
-          </button>
-          <button className="btn-icon" title="New 2d8 Table" onClick={() => handleCreatePresetTable('2d8')}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-              <text x="0" y="14" fontSize="10" fontWeight="bold">2d!</text>
+              <path d="M1 3h4l2 2h8v8H1V3z" stroke="currentColor" strokeWidth="1.5" fill="none" />
+              <path d="M8 7v4M6 9h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
           <button className="btn-icon" title="Import JSON" onClick={handleImportClick}>
@@ -549,6 +626,29 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
         )}
       </div>
 
+      {isCreatingFolder && (
+        <div className="px-2 py-2 bg-slate-900/50 border-b border-slate-700/50">
+          <input
+            autoFocus
+            type="text"
+            className="w-full px-2 py-1.5 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            placeholder="New Folder Name..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = e.currentTarget.value.trim();
+                if (val) {
+                  createCategory(val);
+                }
+                setIsCreatingFolder(false);
+              } else if (e.key === 'Escape') {
+                setIsCreatingFolder(false);
+              }
+            }}
+            onBlur={() => setIsCreatingFolder(false)}
+          />
+        </div>
+      )}
+
       <DndContext
         sensors={sensors}
         collisionDetection={customCollisionDetection}
@@ -569,12 +669,14 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
           onRoll={handleMacroSlotClick}
           onClear={handleClearMacro}
         />
-
         <div className="file-tree-content">
           {Object.entries(filteredGrouped).map(([category, categoryTables]) => (
             <div key={category} className="file-tree-category">
               <CategoryHeaderDropZone category={category}>
-                <div className="category-header">
+                <div
+                  className="category-header cursor-context-menu"
+                  onContextMenu={(e) => handleCategoryContextMenu(e, category)}
+                >
                   <svg className="category-icon" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
                     <path d="M1 2h4l1 1h5v7H1V2z" />
                   </svg>
@@ -607,34 +709,40 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
             </div>
           ))}
         </div>
-      </DndContext>
+      </DndContext >
 
-      {searchQuery && Object.keys(filteredGrouped).length === 0 && (
-        <div className="empty-state">
-          <p>No results found</p>
-          <p className="text-muted">Try a different search term</p>
-        </div>
-      )}
+      {
+        searchQuery && Object.keys(filteredGrouped).length === 0 && (
+          <div className="empty-state">
+            <p>No results found</p>
+            <p className="text-muted">Try a different search term</p>
+          </div>
+        )
+      }
 
-      {!searchQuery && tables.length === 0 && (
-        <div className="empty-state">
-          <p>No tables yet</p>
-          <p className="text-muted">Create or import a table to get started</p>
-        </div>
-      )}
+      {
+        !searchQuery && tables.length === 0 && (
+          <div className="empty-state">
+            <p>No tables yet</p>
+            <p className="text-muted">Create or import a table to get started</p>
+          </div>
+        )
+      }
 
       <div className="file-tree-footer">
         <p className="storage-hint">💾 Tables stored in Tapestry .weave folder</p>
       </div>
 
-      {menu.isOpen && (
-        <ContextMenu
-          x={menu.x}
-          y={menu.y}
-          onClose={closeMenu}
-          items={getTableMenuItems()}
-        />
-      )}
-    </aside>
+      {
+        menu.isOpen && (
+          <ContextMenu
+            x={menu.x}
+            y={menu.y}
+            onClose={closeMenu}
+            items={getMenuItems()}
+          />
+        )
+      }
+    </aside >
   );
 }

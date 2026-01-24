@@ -13,10 +13,12 @@ import { useLeftPaneStore, type LeftPaneMode } from '../../stores/useLeftPaneSto
 import { usePaneStore } from '../../stores/usePaneStore';
 import { useToolStore, type RightPaneMode } from '../../stores/useToolStore';
 import { GlobalDialogManager } from '../ui/GlobalDialogManager';
-import { createNewSession } from '../../utils/sessionActions';
 import { useSessionStore } from '../../stores/useSessionStore';
+import { useMacroShortcuts } from '../../hooks/useMacroShortcuts';
+import { DiceOverlay } from '../overlays/DiceOverlay';
 
 export function AppLayout() {
+  useMacroShortcuts();
   const activeTapestryId = useTapestryStore((state) => state.activeTapestryId);
   const { isLeftPaneCollapsed, leftPaneMode, setLeftPaneMode } = useLeftPaneStore();
   const { isRightPaneCollapsed, leftPaneWidth, setLeftPaneWidth, rightPaneWidth, setRightPaneWidth } = usePaneStore();
@@ -110,10 +112,8 @@ export function AppLayout() {
             ))}
           </div>
 
-          {/* Spacer / Session Controls */}
-          <div className="flex-1 flex items-center justify-center">
-            <SessionControl />
-          </div>
+          {/* Spacer - Session Control Removed */}
+          <div className="flex-1" />
 
           {/* Right Mode Switchers */}
           <div className="flex items-center gap-1 px-2 flex-shrink-0">
@@ -196,36 +196,8 @@ export function AppLayout() {
 
       {/* Global Dialogs */}
       <GlobalDialogManager />
+      <DiceOverlay />
     </div>
   );
 }
 
-function SessionControl() {
-  const { activeSessionId, endSession } = useSessionStore();
-
-  if (activeSessionId) {
-    return (
-      <div className="flex items-center gap-2 px-3 py-1 bg-purple-900/30 border border-purple-500/30 rounded-full">
-        <span className="text-xs text-purple-200 animate-pulse uppercase tracking-wider font-bold">Session Active</span>
-        <button
-          onClick={endSession}
-          className="p-1 hover:text-red-400 text-purple-300 transition-colors"
-          title="End Session"
-        >
-          <StopCircle size={16} />
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <button
-      onClick={() => createNewSession()}
-      className="flex items-center gap-2 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 hover:text-white transition-all group"
-      title="Start New Session"
-    >
-      <PlayCircle size={16} className="text-green-500 group-hover:text-green-400" />
-      <span className="text-xs font-medium">Start Session</span>
-    </button>
-  );
-}

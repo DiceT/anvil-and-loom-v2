@@ -57,7 +57,7 @@ export function TapestryManager() {
         }
     };
 
-    const handleSaveEdit = async (id: string, updates: { name?: string; description?: string; imagePath?: string }) => {
+    const handleSaveEdit = async (id: string, updates: { name?: string; description?: string; imagePath?: string; path?: string }) => {
         try {
             await updateTapestry(id, updates);
             setShowEditDialog(false);

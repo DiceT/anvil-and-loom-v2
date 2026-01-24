@@ -4,8 +4,10 @@ import {
     GlobalSettings,
     DiceSettings,
     EditorSettings,
+    MechanicsSettings,
     defaultDiceSettings,
-    defaultEditorSettings
+    defaultEditorSettings,
+    defaultMechanicsSettings,
 } from '../types/settings';
 
 interface SettingsStore {
@@ -14,8 +16,10 @@ interface SettingsStore {
     // Actions
     updateDiceSettings: (partial: Partial<DiceSettings>) => void;
     updateEditorSettings: (partial: Partial<EditorSettings>) => void;
+    updateMechanicsSettings: (partial: Partial<MechanicsSettings>) => void;
     resetDiceSettings: () => void;
     resetEditorSettings: () => void;
+    resetMechanicsSettings: () => void;
 }
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -24,6 +28,7 @@ export const useSettingsStore = create<SettingsStore>()(
             settings: {
                 dice: defaultDiceSettings,
                 editor: defaultEditorSettings,
+                mechanics: defaultMechanicsSettings,
             },
 
             updateDiceSettings: (partial) => set((state) => ({
@@ -40,6 +45,13 @@ export const useSettingsStore = create<SettingsStore>()(
                 }
             })),
 
+            updateMechanicsSettings: (partial) => set((state) => ({
+                settings: {
+                    ...state.settings,
+                    mechanics: { ...state.settings.mechanics, ...partial }
+                }
+            })),
+
             resetDiceSettings: () => set((state) => ({
                 settings: {
                     ...state.settings,
@@ -51,6 +63,13 @@ export const useSettingsStore = create<SettingsStore>()(
                 settings: {
                     ...state.settings,
                     editor: defaultEditorSettings
+                }
+            })),
+
+            resetMechanicsSettings: () => set((state) => ({
+                settings: {
+                    ...state.settings,
+                    mechanics: defaultMechanicsSettings
                 }
             })),
         }),

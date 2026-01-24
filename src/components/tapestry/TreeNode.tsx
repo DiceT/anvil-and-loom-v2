@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
 import { ChevronRight, ChevronDown, Folder, FileText, MapPin } from 'lucide-react';
 import { TapestryNode } from '../../types/tapestry';
 import { CategoryBadge } from './CategoryBadge';
 import { TreeContextMenu } from './TreeContextMenu';
+import { createPanelMacro } from '../../types/macro';
 
 interface TreeNodeProps {
     node: TapestryNode;
@@ -16,6 +18,7 @@ interface TreeNodeProps {
     onDelete: (path: string, name: string) => void;
     onMove: (path: string, name: string) => void;
     onChangeBadge?: (path: string, currentCategory: string) => void;
+    onDropNode?: (draggedPath: string, targetPath: string) => void;
 }
 
 export function TreeNode({
@@ -29,7 +32,8 @@ export function TreeNode({
     onRename,
     onDelete,
     onMove,
-    onChangeBadge
+    onChangeBadge,
+    onDropNode
 }: TreeNodeProps) {
     const [isExpanded, setIsExpanded] = useState(true);
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
@@ -37,6 +41,41 @@ export function TreeNode({
     const isFolder = node.type === 'folder';
     const isActive = !isFolder && activeEntryId === node.id;
     const paddingLeft = depth * 16;
+
+    // React-DnD hook for dragging panels
+    // @ts-ignore
+    const [{ isDragging }, dragRef] = useDrag({
+        type: 'PANEL',
+        item: {
+            type: 'PANEL',
+            macroData: createPanelMacro(0, node.id, node.path, node.name),
+        },
+        canDrag: !isFolder, // Only drag files for now? Or folders too? User said folders too maybe. Let's allowing dragging folders later if backend supports it. For now files.
+        collect: (monitor: any) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+
+    // React-DnD hook for dropping
+    // @ts-ignore
+    const [{ isOver }, dropRef] = useDrop({
+        accept: 'PANEL',
+        canDrop: (item: any) => {
+            // Don't drop on self
+            if (item.macroData.path === node.path) return false;
+            return true;
+        },
+        drop: (item: any, monitor) => {
+            if (monitor.didDrop()) return;
+            if (onDropNode) {
+                const target = isFolder ? node.path : parentPath;
+                onDropNode(item.macroData.panelPath, target);
+            }
+        },
+        collect: (monitor) => ({
+            isOver: monitor.isOver({ shallow: true }),
+        }),
+    });
 
     const handleClick = () => {
         if (isFolder) {
@@ -55,28 +94,19 @@ export function TreeNode({
     // For folders, new items go inside. For files, they go in the parent folder (siblings).
     const creationPath = isFolder ? node.path : parentPath;
 
-    const handleDragStart = (e: React.DragEvent) => {
-        e.dataTransfer.setData('application/tapestry-node', JSON.stringify({
-            id: node.id,
-            title: node.name, // using name as title
-            type: node.type,
-            category: node.category
-        }));
-        e.dataTransfer.effectAllowed = 'copy';
-    };
-
     return (
         <>
             <div
+                ref={(el) => { dragRef(el); dropRef(el); }}
                 className={`
                     group flex items-center gap-2 h-8 cursor-pointer transition-colors
                     ${isActive ? 'bg-slate-700 border-l-2 border-purple-500' : 'hover:bg-slate-800'}
+                    ${isDragging ? 'opacity-50' : ''}
+                    ${isOver ? 'bg-purple-900/50 ring-1 ring-purple-500' : ''}
                 `}
                 style={{ paddingLeft: `${paddingLeft}px` }}
                 onClick={handleClick}
                 onContextMenu={handleContextMenu}
-                draggable={!isFolder} // Only allow dragging files for now
-                onDragStart={!isFolder ? handleDragStart : undefined}
             >
                 {/* Icon */}
                 {isFolder ? (
@@ -123,6 +153,7 @@ export function TreeNode({
                             onDelete={onDelete}
                             onMove={onMove}
                             onChangeBadge={onChangeBadge}
+                            onDropNode={onDropNode}
                         />
                     ))}
                 </div>

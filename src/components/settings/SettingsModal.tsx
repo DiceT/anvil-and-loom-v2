@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { SettingsLayout } from './SettingsLayout';
-import { DiceSettingsPanel } from './DiceSettingsPanel';
 import { EditorSettingsPanel } from './EditorSettingsPanel';
-import { AiSettingsPanel } from './AiSettingsPanel';
+import { MechanicsSettingsPanel } from './MechanicsSettingsPanel';
+import { AiConnectionPanel } from './AiConnectionPanel';
+import { AiPersonaPanel } from './AiPersonaPanel';
+import { AiArtStylePanel } from './AiArtStylePanel';
+import { AccountSettingsPanel } from './AccountSettingsPanel';
 
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    initialCategory?: 'dice' | 'editor' | 'ai';
+    initialCategory?: string;
 }
 
 export function SettingsModal({ isOpen, onClose, initialCategory = 'editor' }: SettingsModalProps) {
-    const [activeCategory, setActiveCategory] = useState<'dice' | 'editor' | 'ai'>(initialCategory);
+    const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
 
     if (!isOpen) return null;
 
@@ -21,9 +24,12 @@ export function SettingsModal({ isOpen, onClose, initialCategory = 'editor' }: S
             onCategoryChange={setActiveCategory}
             onClose={onClose}
         >
-            {activeCategory === 'dice' && <DiceSettingsPanel />}
             {activeCategory === 'editor' && <EditorSettingsPanel />}
-            {activeCategory === 'ai' && <AiSettingsPanel />}
+            {activeCategory === 'mechanics' && <MechanicsSettingsPanel />}
+            {activeCategory === 'ai-connection' && <AiConnectionPanel />}
+            {activeCategory === 'ai-persona' && <AiPersonaPanel />}
+            {activeCategory === 'ai-art' && <AiArtStylePanel />}
+            {activeCategory === 'account' && <AccountSettingsPanel />}
         </SettingsLayout>
     );
 }

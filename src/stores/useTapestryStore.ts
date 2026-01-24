@@ -25,6 +25,7 @@ interface TapestryState {
     updateTapestry: (id: string, updates: UpdateTapestryData) => Promise<void>;
     removeTapestry: (id: string) => Promise<void>;
     deleteTapestry: (id: string) => Promise<void>;
+    closeTapestry: () => void;
     loadTree: () => Promise<void>;
     createEntry: (title: string, category?: string) => Promise<{ id: string; path: string }>;
     clearError: () => void;
@@ -103,7 +104,7 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
             if (tapestryEntry) {
                 const { WeaveService } = await import('../core/weave/WeaveService');
                 await WeaveService.setTapestryPath(tapestryEntry.path);
-                
+
                 // Load tables into Weave store
                 const { useWeaveStore } = await import('./useWeaveStore');
                 await useWeaveStore.getState().loadTables();
@@ -198,6 +199,15 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
             });
             throw error;
         }
+    },
+
+    // Close active tapestry
+    closeTapestry: () => {
+        set({
+            activeTapestryId: undefined,
+            activeTapestryConfig: undefined,
+            tree: undefined
+        });
     },
 
     // Load tree structure

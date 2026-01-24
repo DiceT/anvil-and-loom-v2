@@ -3,8 +3,8 @@ import { X } from 'lucide-react';
 import { useTabStore } from '../../stores/useTabStore';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { TapestryEditor } from '../tapestry/TapestryEditor';
-import { SessionInput } from '../session/SessionInput';
 import { WeaveTableEditor } from '../weave/WeaveTableEditor';
+import { SessionBar } from '../session-bar/SessionBar';
 
 export function CenterLane() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useTabStore();
@@ -70,8 +70,8 @@ export function CenterLane() {
         {renderTabContent()}
       </div>
 
-      {/* Session Input (Overlay or Bottom Bar) */}
-      <SessionInput />
+      {/* Session Bar - Always at bottom */}
+      <SessionBar />
     </div>
   );
 }

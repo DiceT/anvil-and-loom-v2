@@ -59,11 +59,11 @@ export class WeaveService {
     /**
      * Roll on a table and return result
      */
-    static async rollTable(tableId: string, seed?: string): Promise<WeaveRollResponse> {
+    static async rollTable(tableId: string, seed?: string, silent: boolean = false): Promise<WeaveRollResponse> {
         const response = await window.electron.weave.rollTable(tableId, seed);
-        
-        // Log to Thread Card engine if successful
-        if (!response.error && response.result) {
+
+        // Log to Thread Card engine if successful and not silent
+        if (!silent && !response.error && response.result) {
             try {
                 // Get the table to retrieve its name and metadata
                 const tableResponse = await this.getTable(tableId);
@@ -75,7 +75,7 @@ export class WeaveService {
                 // Don't throw - logging failures shouldn't break the roll
             }
         }
-        
+
         return response;
     }
 
@@ -104,8 +104,8 @@ export class WeaveService {
     /**
      * Helper method to roll and get the result directly
      */
-    static async roll(tableId: string, seed?: string): Promise<RollResult> {
-        const response = await this.rollTable(tableId, seed);
+    static async roll(tableId: string, seed?: string, silent: boolean = false): Promise<RollResult> {
+        const response = await this.rollTable(tableId, seed, silent);
         if (response.error || !response.result) {
             throw new Error(response.error || `Failed to roll on table ${tableId}`);
         }

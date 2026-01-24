@@ -39,6 +39,10 @@ export interface AiSettings {
     apiKey: string;
     activePersonaId: GmPersonaId;
     personaState: Record<GmPersonaId, GmPersonaUserState>;
+    artStyle: {
+        name: string;
+        instructions: string;
+    };
 }
 
 /**
@@ -58,6 +62,10 @@ export const defaultAiSettings: AiSettings = {
         hearth_keeper: {},
         dreadnought: {},
         muse: {},
+    },
+    artStyle: {
+        name: '',
+        instructions: '',
     },
 };
 

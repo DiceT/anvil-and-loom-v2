@@ -22,6 +22,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
     move: (sourcePath, destinationFolder, itemName) => electron.ipcRenderer.invoke("tapestry:move", sourcePath, destinationFolder, itemName),
     updateOrder: (folderPath, order) => electron.ipcRenderer.invoke("tapestry:updateOrder", folderPath, order),
     pickImage: (defaultPath) => electron.ipcRenderer.invoke("tapestry:pickImage", defaultPath),
+    pickFolder: (defaultPath) => electron.ipcRenderer.invoke("tapestry:pickFolder", defaultPath),
     getAllPanels: (tapestryId) => electron.ipcRenderer.invoke("tapestry:getAllPanels", tapestryId)
   },
   weave: {

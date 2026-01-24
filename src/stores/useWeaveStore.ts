@@ -138,12 +138,34 @@ const loadMacrosFromStorage = (): MacroSlot[] => {
   return [{ tables: [] }, { tables: [] }, { tables: [] }, { tables: [] }];
 };
 
-// Save macros to localStorage
 const saveMacrosToStorage = (macros: MacroSlot[]) => {
   try {
     localStorage.setItem(MACROS_STORAGE_KEY, JSON.stringify(macros));
   } catch (err) {
     console.error('Failed to save macros to localStorage:', err);
+  }
+};
+
+// LocalStorage key for custom categories
+const CATEGORIES_STORAGE_KEY = 'weave-categories';
+
+const loadCategoriesFromStorage = (): string[] => {
+  try {
+    const saved = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch (err) {
+    console.error('Failed to load categories from localStorage:', err);
+  }
+  return [];
+};
+
+const saveCategoriesToStorage = (categories: string[]) => {
+  try {
+    localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+  } catch (err) {
+    console.error('Failed to save categories to localStorage:', err);
   }
 };
 
@@ -166,10 +188,19 @@ interface WeaveStore {
   // Drag-and-drop state
   draggedTableId: string | null;
 
+  // Custom Categories (empty folders)
+  customCategories: string[];
+
   // Actions
   loadTables: () => Promise<void>;
   selectTable: (tableId: string) => void;
   setSearchQuery: (query: string) => void;
+
+  // Category operations
+  createCategory: (name: string) => void;
+  renameCategory: (oldName: string, newName: string) => Promise<void>;
+  deleteCategory: (name: string) => Promise<void>;
+  removeCustomCategory: (name: string) => void;
 
   // Table operations
   getTable: (tableId: string) => Promise<Table | null>;
@@ -180,8 +211,8 @@ interface WeaveStore {
   createPresetTable: (preset: 'd66' | 'd88' | '2d6' | '2d8') => Promise<Table>;
 
   // Roll operations
-  rollTable: (tableId: string, options?: RollOptions) => Promise<RollResult>;
-  rollMultiple: (tableIds: string[], options?: RollOptions) => Promise<RollResult[]>;
+  rollTable: (tableId: string, options?: RollOptions, silent?: boolean) => Promise<RollResult>;
+  rollMultiple: (tableIds: string[], options?: RollOptions, silent?: boolean) => Promise<RollResult[]>;
   rollMacroSlot: (slotIndex: number) => Promise<string>;
   addRollLogEntry: (result: RollResult) => void;
   clearRollLog: () => void;
@@ -247,9 +278,12 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
 
       // Update tables in store
       const { tables } = get();
-      const updatedTables = tables.map(t =>
-        t.id === table.id ? table : t
-      );
+      const exists = tables.some(t => t.id === table.id);
+
+      const updatedTables = exists
+        ? tables.map(t => t.id === table.id ? table : t)
+        : [...tables, table];
+
       set({ tables: updatedTables, isLoading: false });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to save table';
@@ -419,9 +453,9 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
     return response.table;
   },
 
-  rollTable: async (tableId: string, options?: RollOptions) => {
+  rollTable: async (tableId: string, options?: RollOptions, silent?: boolean) => {
     try {
-      const result = await WeaveService.roll(tableId, options?.seed);
+      const result = await WeaveService.roll(tableId, options?.seed, silent);
       get().addRollLogEntry(result);
       return result;
     } catch (err) {
@@ -431,14 +465,14 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
     }
   },
 
-  rollMultiple: async (tableIds: string[], options?: RollOptions) => {
+  rollMultiple: async (tableIds: string[], options?: RollOptions, silent?: boolean) => {
     set({ isLoading: true, error: null });
     try {
       const results: RollResult[] = [];
 
       for (const tableId of tableIds) {
         try {
-          const result = await WeaveService.roll(tableId, options?.seed);
+          const result = await WeaveService.roll(tableId, options?.seed, silent);
           results.push(result);
           get().addRollLogEntry(result);
         } catch (err) {
@@ -638,12 +672,71 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
 
     set({ tables: updatedTables });
 
+    // Remove from custom categories if applied (it becomes real now)
+    get().removeCustomCategory(newCategory);
+
     // Save the updated table to file system
     try {
       await WeaveService.saveTable(updatedTable);
     } catch (err) {
       console.error('Failed to save table category change:', err);
       throw err;
+    }
+  },
+
+  // Custom Category Implementation
+  customCategories: loadCategoriesFromStorage(),
+
+  createCategory: (name: string) => {
+    const { customCategories, tables } = get();
+    if (customCategories.includes(name) || tables.some(t => (t.category || 'Uncategorized') === name)) {
+      return;
+    }
+    set({ customCategories: [...customCategories, name].sort() });
+    saveCategoriesToStorage([...customCategories, name].sort());
+  },
+
+  removeCustomCategory: (name: string) => {
+    const { customCategories } = get();
+    if (customCategories.includes(name)) {
+      const newCats = customCategories.filter(c => c !== name);
+      set({ customCategories: newCats });
+      saveCategoriesToStorage(newCats);
+    }
+  },
+
+  renameCategory: async (oldName: string, newName: string) => {
+    const { tables, customCategories } = get();
+
+    if (customCategories.includes(oldName)) {
+      const newCats = customCategories.map(c => c === oldName ? newName : c).sort();
+      set({ customCategories: newCats });
+      saveCategoriesToStorage(newCats);
+    }
+
+    const tablesInCat = tables.filter(t => (t.category || 'Uncategorized') === oldName);
+    for (const table of tablesInCat) {
+      await get().moveTableToCategory(table.id, newName);
+    }
+
+    // Create new custom category if empty rename (edge case)
+    if (tablesInCat.length === 0 && !customCategories.includes(newName)) {
+      get().createCategory(newName);
+    }
+    get().removeCustomCategory(oldName);
+  },
+
+  deleteCategory: async (name: string) => {
+    const { tables, customCategories } = get();
+    if (customCategories.includes(name)) {
+      const newCats = customCategories.filter(c => c !== name);
+      set({ customCategories: newCats });
+      saveCategoriesToStorage(newCats);
+    }
+
+    const tablesInCat = tables.filter(t => (t.category || 'Uncategorized') === name);
+    for (const table of tablesInCat) {
+      await get().moveTableToCategory(table.id, 'Uncategorized');
     }
   },
 

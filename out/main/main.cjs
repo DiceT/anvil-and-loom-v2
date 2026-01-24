@@ -331,7 +331,7 @@ function registerTapestryHandlers() {
     const { loomDir, entriesDir } = getTapestryPaths(root);
     await ensureDir(loomDir);
     await ensureDir(entriesDir);
-    const defaultFolders = ["Sessions", "Places", "People", "Lore", "World", "Mechanics", "Maps"];
+    const defaultFolders = ["Sessions", "Places", "Dungeons", "NPCs", "Factions", "Relics", "Lore", "Maps", "Others"];
     for (const folder of defaultFolders) {
       await ensureDir(path__namespace.join(entriesDir, folder));
     }
@@ -594,6 +594,18 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
         { name: "Images", extensions: ["png", "jpg", "jpeg", "gif", "webp"] },
         { name: "All Files", extensions: ["*"] }
       ]
+    });
+    if (result.canceled || !result.filePaths?.length) {
+      return null;
+    }
+    return result.filePaths[0];
+  });
+  electron.ipcMain.handle("tapestry:pickFolder", async (_event, defaultPath) => {
+    const pickerPath = defaultPath || getTapestriesBasePath();
+    const result = await electron.dialog.showOpenDialog({
+      title: "Select Tapestry Folder",
+      defaultPath: pickerPath,
+      properties: ["openDirectory", "createDirectory"]
     });
     if (result.canceled || !result.filePaths?.length) {
       return null;

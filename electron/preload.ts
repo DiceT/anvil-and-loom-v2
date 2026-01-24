@@ -31,18 +31,19 @@ contextBridge.exposeInMainWorld('electron', {
     updateOrder: (folderPath: string, order: string[]) =>
       ipcRenderer.invoke('tapestry:updateOrder', folderPath, order),
     pickImage: (defaultPath?: string) => ipcRenderer.invoke('tapestry:pickImage', defaultPath),
+    pickFolder: (defaultPath?: string) => ipcRenderer.invoke('tapestry:pickFolder', defaultPath),
     getAllPanels: (tapestryId: string) => ipcRenderer.invoke('tapestry:getAllPanels', tapestryId),
   },
   weave: {
     // Tapestry path management
     setTapestryPath: (path: string) => ipcRenderer.invoke('weave:setTapestryPath', path),
-    
+
     // Table management
     getTables: () => ipcRenderer.invoke('weave:getTables'),
     getTable: (tableId: string) => ipcRenderer.invoke('weave:getTable', tableId),
     saveTable: (table: any) => ipcRenderer.invoke('weave:saveTable', table),
     deleteTable: (tableId: string) => ipcRenderer.invoke('weave:deleteTable', tableId),
-    
+
     // Rolling
     rollTable: (tableId: string, seed?: string) => ipcRenderer.invoke('weave:rollTable', tableId, seed),
   },

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useDrag } from 'react-dnd';
+import { createDiceMacro } from '../../../types/macro';
 import {
   Triangle,
   Square,
@@ -33,6 +35,20 @@ export function DiceTool() {
   const [boundsWidth, setBoundsWidth] = useState(44);
   const [boundsDepth, setBoundsDepth] = useState(28);
   const [isAutoFit, setIsAutoFit] = useState(true);
+  // React-DnD hook for dragging dice expression
+  // @ts-ignore
+  const [{ isDragging }, dragRef] = useDrag({
+    type: 'DICE',
+    item: {
+      type: 'DICE',
+      macroData: createDiceMacro(0, expression)
+    },
+    canDrag: !!expression.trim(),
+    collect: (monitor: any) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
   // Initialize Dice Engine
   useEffect(() => {
     // Dice Engine initialized in global overlay
@@ -208,7 +224,11 @@ export function DiceTool() {
         </div>
 
         {/* Dice Expression Label */}
-        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        <div
+          ref={dragRef}
+          className={`text-xs font-semibold text-slate-400 uppercase tracking-wide ${expression.trim() ? 'cursor-grab hover:text-slate-300' : 'cursor-default'}`}
+          title="Drag to Macro Bar"
+        >
           Dice Expression
         </div>
 

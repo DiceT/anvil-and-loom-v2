@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { X, Edit3, Image as ImageIcon } from 'lucide-react';
+import { X, Edit3, Image as ImageIcon, Folder } from 'lucide-react';
 import { TapestryRegistryEntry } from '../../types/tapestry';
 
 interface EditTapestryDialogProps {
     isOpen: boolean;
     tapestry: TapestryRegistryEntry | null;
     onClose: () => void;
-    onSave: (id: string, updates: { name?: string; description?: string; imagePath?: string }) => void;
+    onSave: (id: string, updates: { name?: string; description?: string; imagePath?: string; path?: string }) => void;
 }
 
 export function EditTapestryDialog({ isOpen, tapestry, onClose, onSave }: EditTapestryDialogProps) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [imagePath, setImagePath] = useState('');
+    const [path, setPath] = useState('');
 
     useEffect(() => {
         if (tapestry) {
             setName(tapestry.name);
             setDescription(tapestry.description || '');
             setImagePath(tapestry.imagePath || '');
+            setPath(tapestry.path);
         }
     }, [tapestry]);
 
@@ -32,6 +34,7 @@ export function EditTapestryDialog({ isOpen, tapestry, onClose, onSave }: EditTa
             name: name.trim(),
             description: description.trim() || undefined,
             imagePath: imagePath.trim() || undefined,
+            path: path.trim() !== tapestry.path ? path.trim() : undefined,
         });
 
         onClose();
@@ -43,8 +46,21 @@ export function EditTapestryDialog({ isOpen, tapestry, onClose, onSave }: EditTa
             setName(tapestry.name);
             setDescription(tapestry.description || '');
             setImagePath(tapestry.imagePath || '');
+            setPath(tapestry.path);
         }
         onClose();
+    };
+
+    const handlePickFolder = async () => {
+        try {
+            // @ts-ignore
+            const newPath = await window.electron.tapestry.pickFolder();
+            if (newPath) {
+                setPath(newPath);
+            }
+        } catch (error) {
+            console.error('Failed to pick folder:', error);
+        }
     };
 
     const handlePickImage = async () => {
@@ -102,6 +118,41 @@ export function EditTapestryDialog({ isOpen, tapestry, onClose, onSave }: EditTa
                             autoFocus
                             required
                         />
+                    </div>
+
+                    {/* Location */}
+                    <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-2">
+                            Location
+                        </label>
+                        <div className="relative">
+                            <Folder className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                            <input
+                                type="text"
+                                value={path}
+                                onChange={(e) => setPath(e.target.value)}
+                                className="w-full pl-10 pr-24 py-2 bg-slate-900 border border-slate-700 rounded-md text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono text-xs"
+                                placeholder="Select folder..."
+                            />
+                            <button
+                                type="button"
+                                onClick={handlePickFolder}
+                                className="absolute right-1 top-1 bottom-1 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition-colors border border-slate-600"
+                            >
+                                Browse...
+                            </button>
+                        </div>
+                        <p className="text-xs text-yellow-500/80 mt-1">
+                            Warning: Changing this will point the Tapestry to a new location. Files are not moved.
+                        </p>
+                        {path !== tapestry.path && (
+                            <div className="mt-2 text-xs">
+                                <span className="text-slate-500">Currently pointing to:</span>
+                                <div className="text-slate-400 font-mono break-all bg-slate-900/30 p-1.5 rounded border border-slate-800 mt-0.5">
+                                    {tapestry.path}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Description */}
