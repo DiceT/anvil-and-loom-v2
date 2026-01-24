@@ -75,7 +75,7 @@ export function AppLayout() {
 
   return (
     <div
-      className="h-screen flex flex-col overflow-hidden bg-slate-950"
+      className="h-screen flex flex-col overflow-hidden bg-canvas"
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
@@ -86,7 +86,7 @@ export function AppLayout() {
       {/* Main Content Area with Sidebars and Panes */}
       <div className="flex-1 min-h-0 relative flex flex-col">
         {/* Top Toolbar Row - Collapse Buttons and Mode Switchers */}
-        <div className="h-10 bg-slate-900 border-b border-slate-800 flex items-center relative flex-shrink-0 px-0">
+        <div className="h-10 bg-canvas-panel border-b border-border flex items-center relative flex-shrink-0 px-0">
           {/* Left Collapse Button */}
           <div className="w-12 flex items-center justify-end px-2 flex-shrink-0">
             <IconButton

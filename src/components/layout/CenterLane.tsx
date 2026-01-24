@@ -16,7 +16,7 @@ export function CenterLane() {
     if (!activeTab) {
       return (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-slate-400">No tabs open</div>
+          <div className="text-type-secondary">No tabs open</div>
         </div>
       );
     }
@@ -32,16 +32,16 @@ export function CenterLane() {
   };
 
   return (
-    <div className="bg-slate-950 h-full flex flex-col">
+    <div className="bg-canvas h-full flex flex-col">
       {/* Tab Bar - Always show if tabs exist */}
       {tabs.length > 0 && (
-        <div className="flex items-center gap-0 bg-slate-950 border-b border-slate-800 px-2 overflow-x-auto">
+        <div className="flex items-center gap-0 bg-canvas-panel border-b border-border px-2 overflow-x-auto">
           {tabs.map((tab) => (
             <div
               key={tab.id}
               className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors border-b-2 ${activeTabId === tab.id
-                ? 'border-b-purple-500 text-slate-200'
-                : 'border-b-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-b-amethyst text-type-primary'
+                : 'border-b-transparent text-type-secondary hover:text-type-primary'
                 }`}
               onClick={() => {
                 setActiveTab(tab.id);
@@ -56,7 +56,7 @@ export function CenterLane() {
                   e.stopPropagation();
                   closeTab(tab.id);
                 }}
-                className="p-0.5 hover:bg-slate-700 rounded transition-colors ml-1"
+                className="p-0.5 hover:bg-canvas-surface rounded transition-colors ml-1"
               >
                 <X className="w-3 h-3" />
               </button>

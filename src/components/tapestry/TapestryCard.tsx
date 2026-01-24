@@ -34,14 +34,14 @@ export function TapestryCard({ tapestry, onOpen, onEdit, onRemove, onDelete }: T
     const lastOpened = formatRelativeTime(tapestry.lastOpenedAt);
 
     return (
-        <div className="group relative bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-purple-500/50 transition-all duration-200 flex flex-col h-full">
+        <div className="group relative bg-canvas-panel rounded-lg overflow-hidden border border-border hover:border-sapphire/50 transition-all duration-200 flex flex-col h-full">
             {/* Background Image */}
             {tapestry.imagePath && (
                 <div className="absolute inset-0 z-0">
                     <img
                         src={tapestry.imagePath.startsWith('http')
                             ? tapestry.imagePath
-                            : `media:///${tapestry.imagePath.replace(/\\/g, '/')}`}
+                            : `media:///${encodeURI(tapestry.imagePath.replace(/\\/g, '/'))}`}
                         alt={tapestry.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -51,10 +51,10 @@ export function TapestryCard({ tapestry, onOpen, onEdit, onRemove, onDelete }: T
             {/* Content Container - Z-indexed to sit above image */}
             <div className="relative z-10 flex flex-col h-full">
                 {/* Top Section (Thumbnail area) */}
-                <div className={`relative h-32 transition-colors ${tapestry.imagePath ? 'bg-gradient-to-br from-purple-900/50 to-slate-900/50' : 'bg-gradient-to-br from-purple-900/30 to-slate-900'}`}>
+                <div className={`relative h-32 transition-colors ${tapestry.imagePath ? 'bg-transparent' : 'bg-gradient-to-br from-sapphire-900/30 to-canvas-surface'}`}>
                     {!tapestry.imagePath && (
                         <div className="w-full h-full flex items-center justify-center">
-                            <FolderOpen className="w-12 h-12 text-purple-400/30" />
+                            <FolderOpen className="w-12 h-12 text-sapphire/30" />
                         </div>
                     )}
 
@@ -117,7 +117,7 @@ export function TapestryCard({ tapestry, onOpen, onEdit, onRemove, onDelete }: T
                     onClick={() => onOpen(tapestry.id)}
                     className={`p-4 cursor-pointer flex-1 transition-colors ${tapestry.imagePath ? 'bg-slate-900/50 backdrop-blur-sm hover:bg-slate-900/40' : ''}`}
                 >
-                    <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-purple-400 transition-colors shadow-black drop-shadow-md">
+                    <h3 className="text-lg font-semibold text-type-primary mb-1 group-hover:text-sapphire transition-colors shadow-black drop-shadow-md">
                         {tapestry.name}
                     </h3>
 

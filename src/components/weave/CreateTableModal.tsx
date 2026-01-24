@@ -20,7 +20,7 @@ interface CreateTableModalProps {
 
 export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModalProps) {
   const { createTable, isLoading, error } = useWeaveStore();
-  
+
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Uncategorized');
@@ -78,7 +78,7 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
       if (onCreate) {
         onCreate(newTable);
       }
-      
+
       // Reset form
       setName('');
       setDescription('');
@@ -86,7 +86,7 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
       setTags([]);
       setTagInput('');
       setValidationError('');
-      
+
       onClose();
     } catch (err) {
       console.error('Failed to create table:', err);
@@ -105,16 +105,16 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-slate-900 border border-slate-700 rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-canvas-surface border border-border rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <h2 className="text-lg font-semibold text-slate-200">Create New Table</h2>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-type-primary">Create New Table</h2>
           <button
             onClick={handleClose}
-            className="p-1 hover:bg-slate-800 rounded transition-colors"
+            className="p-1 hover:bg-canvas-panel rounded transition-colors"
             disabled={isLoading}
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-type-tertiary" />
           </button>
         </div>
 
@@ -122,7 +122,7 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
         <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Table Name */}
           <div>
-            <label htmlFor="tableName" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="tableName" className="block text-sm font-medium text-type-secondary mb-1">
               Table Name <span className="text-red-400">*</span>
             </label>
             <input
@@ -131,14 +131,14 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., NPC Names"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+              className="w-full bg-canvas-panel border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-amethyst focus:ring-1 focus:ring-amethyst"
               disabled={isLoading}
             />
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="tableDescription" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="tableDescription" className="block text-sm font-medium text-type-secondary mb-1">
               Description
             </label>
             <textarea
@@ -147,14 +147,14 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What is this table used for?"
               rows={3}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 resize-none"
+              className="w-full bg-canvas-panel border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-amethyst focus:ring-1 focus:ring-amethyst resize-none"
               disabled={isLoading}
             />
           </div>
 
           {/* Category */}
           <div>
-            <label htmlFor="tableCategory" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="tableCategory" className="block text-sm font-medium text-type-secondary mb-1">
               Category
             </label>
             <input
@@ -164,7 +164,7 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
               onChange={(e) => setCategory(e.target.value)}
               placeholder="e.g., Oracle, Encounter, Location"
               list="categorySuggestions"
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+              className="w-full bg-canvas-panel border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-amethyst focus:ring-1 focus:ring-amethyst"
               disabled={isLoading}
             />
             <datalist id="categorySuggestions">
@@ -181,7 +181,7 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
 
           {/* Tags */}
           <div>
-            <label htmlFor="tableTags" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="tableTags" className="block text-sm font-medium text-type-secondary mb-1">
               Tags
             </label>
             <div className="flex gap-2 mb-2">
@@ -192,15 +192,15 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagInputKeyDown}
                 placeholder="Add a tag and press Enter"
-                className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                className="flex-1 bg-canvas-panel border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-amethyst focus:ring-1 focus:ring-amethyst"
                 disabled={isLoading}
               />
               <button
                 onClick={handleAddTag}
-                className="px-3 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg transition-colors"
+                className="px-3 py-2 bg-canvas-panel hover:bg-canvas-panel/80 border border-border rounded-lg transition-colors"
                 disabled={isLoading}
               >
-                <Plus className="w-4 h-4 text-slate-300" />
+                <Plus className="w-4 h-4 text-type-secondary" />
               </button>
             </div>
             {tags.length > 0 && (
@@ -208,12 +208,12 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-purple-900/30 border border-purple-700/50 rounded text-xs text-purple-200"
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-amethyst/20 border border-amethyst/30 rounded text-xs text-amethyst"
                   >
                     {tag}
                     <button
                       onClick={() => handleRemoveTag(tag)}
-                      className="hover:text-purple-100 transition-colors"
+                      className="hover:text-amethyst/80 transition-colors"
                       disabled={isLoading}
                     >
                       <X className="w-3 h-3" />
@@ -240,10 +240,10 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-2 p-4 border-t border-slate-700">
+        <div className="flex justify-end gap-2 p-4 border-t border-border">
           <button
             onClick={handleClose}
-            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm text-slate-300 transition-colors"
+            className="px-4 py-2 bg-canvas-panel hover:bg-canvas-panel/80 border border-border rounded-lg text-sm text-type-secondary transition-colors"
             disabled={isLoading}
           >
             Cancel
@@ -251,7 +251,7 @@ export function CreateTableModal({ isOpen, onClose, onCreate }: CreateTableModal
           <button
             onClick={handleCreate}
             disabled={isLoading}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-amethyst hover:bg-amethyst/80 rounded-lg text-sm text-white font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>

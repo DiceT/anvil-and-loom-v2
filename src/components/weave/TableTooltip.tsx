@@ -62,7 +62,7 @@ export function TableTooltip({
 
   return (
     <div
-      className="fixed z-50 w-80 bg-slate-900 border border-slate-700 rounded-lg shadow-xl p-4"
+      className="fixed z-50 w-80 bg-canvas-surface border border-border rounded-lg shadow-xl p-4"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
@@ -71,12 +71,12 @@ export function TableTooltip({
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <FileText className="w-5 h-5 flex-shrink-0 text-purple-400" />
-          <h3 className="font-semibold text-slate-200 truncate">{table.name}</h3>
+          <FileText className="w-5 h-5 flex-shrink-0 text-amethyst" />
+          <h3 className="font-semibold text-type-primary truncate">{table.name}</h3>
         </div>
         <button
           onClick={onClose}
-          className="flex-shrink-0 p-1 text-slate-500 hover:text-slate-300 hover:bg-slate-800 rounded transition-colors"
+          className="flex-shrink-0 p-1 text-type-tertiary hover:text-type-primary hover:bg-canvas-panel rounded transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,29 +86,29 @@ export function TableTooltip({
 
       {/* Description */}
       {table.description && (
-        <p className="text-sm text-slate-400 mb-3 line-clamp-3">
+        <p className="text-sm text-type-secondary mb-3 line-clamp-3">
           {table.description}
         </p>
       )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="bg-slate-800 rounded px-3 py-2">
-          <div className="text-xs text-slate-500 mb-1">Die Type</div>
-          <div className="text-sm font-medium text-slate-200">
+        <div className="bg-canvas-panel rounded px-3 py-2 border border-border/50">
+          <div className="text-xs text-type-tertiary mb-1">Die Type</div>
+          <div className="text-sm font-medium text-type-primary">
             {getDieTypeText(table.maxRoll)}
           </div>
         </div>
-        <div className="bg-slate-800 rounded px-3 py-2">
-          <div className="text-xs text-slate-500 mb-1">Rows</div>
-          <div className="text-sm font-medium text-slate-200">
+        <div className="bg-canvas-panel rounded px-3 py-2 border border-border/50">
+          <div className="text-xs text-type-tertiary mb-1">Rows</div>
+          <div className="text-sm font-medium text-type-primary">
             {table.tableData.length}
           </div>
         </div>
       </div>
 
       {/* Validation Status */}
-      <div className={`flex items-center gap-2 bg-slate-800 rounded px-3 py-2 ${getValidationColor()}`}>
+      <div className={`flex items-center gap-2 bg-canvas-panel rounded px-3 py-2 border border-border/50 ${getValidationColor()}`}>
         {getValidationIcon()}
         <span className="text-sm font-medium">{getValidationText()}</span>
       </div>
@@ -146,12 +146,12 @@ export function TableTooltip({
       {/* Tags */}
       {table.tags && table.tags.length > 0 && (
         <div className="mt-3">
-          <div className="text-xs text-slate-500 mb-1">Tags:</div>
+          <div className="text-xs text-type-tertiary mb-1">Tags:</div>
           <div className="flex flex-wrap gap-1">
             {table.tags.map((tag, i) => (
               <span
                 key={i}
-                className="text-xs bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded"
+                className="text-xs bg-amethyst/10 text-amethyst border border-amethyst/20 px-2 py-0.5 rounded"
               >
                 {tag}
               </span>

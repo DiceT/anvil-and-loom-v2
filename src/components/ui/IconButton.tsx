@@ -34,13 +34,12 @@ export function IconButton({
         rounded
         transition-all
         duration-200
-        ${
-          active
-            ? 'text-slate-50 drop-shadow-[0_0_8px_rgba(148,163,184,0.5)]'
-            : 'text-slate-500 hover:text-blue-400 hover:drop-shadow-[0_0_6px_rgba(96,165,250,0.4)]'
+        ${active
+          ? 'text-type-primary drop-shadow-[0_0_8px_rgba(232,228,220,0.5)]'
+          : 'text-type-tertiary hover:text-sapphire hover:drop-shadow-[0_0_6px_rgba(107,158,221,0.4)]'
         }
         focus:outline-none
-        focus:drop-shadow-[0_0_10px_rgba(96,165,250,0.6)]
+        focus:drop-shadow-[0_0_10px_rgba(107,158,221,0.6)]
         ${className}
       `}
       {...(tooltip ? { 'data-tooltip': tooltip } : {})}

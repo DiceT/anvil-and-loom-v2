@@ -91,10 +91,10 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
         className={`
           relative h-16 rounded-lg border-2 transition-all
           ${slotTables.length > 0
-            ? 'bg-purple-900/20 border-purple-700 hover:border-purple-500 hover:bg-purple-900/30 cursor-pointer'
-            : 'bg-slate-800/30 border-slate-700 hover:border-slate-600'
+            ? 'bg-amethyst/10 border-amethyst/30 hover:border-amethyst hover:bg-amethyst/20 cursor-pointer'
+            : 'bg-canvas-surface border-border hover:border-border-active'
           }
-          ${isOver && slotTables.length < 4 ? 'border-purple-500 bg-purple-900/30' : ''}
+          ${isOver && slotTables.length < 4 ? 'border-amethyst bg-amethyst/20' : ''}
         `}
         onClick={handleRoll}
         role="button"
@@ -112,12 +112,12 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
           {slotTables.length > 0 ? (
             <>
               {/* Table Count */}
-              <div className="text-lg font-bold text-purple-300">
+              <div className="text-lg font-bold text-amethyst">
                 {slotTables.length}/4
               </div>
 
               {/* Die Types */}
-              <div className="flex items-center gap-1 text-xs text-slate-400 mt-1">
+              <div className="flex items-center gap-1 text-xs text-type-tertiary mt-1">
                 {slotTables.slice(0, 3).map((table, idx) => (
                   <span key={table.id}>
                     {getDieTypeText(table.maxRoll)}
@@ -129,14 +129,14 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
 
               {/* Roll Icon (visible on hover) */}
               <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Dices className="w-3 h-3 text-purple-400" />
+                <Dices className="w-3 h-3 text-amethyst" />
               </div>
             </>
           ) : (
             <>
               {/* Empty State */}
-              <Plus className="w-5 h-5 text-slate-600 mb-1" />
-              <div className="text-xs text-slate-600">Empty</div>
+              <Plus className="w-5 h-5 text-type-tertiary mb-1" />
+              <div className="text-xs text-type-tertiary">Empty</div>
             </>
           )}
         </div>
@@ -145,10 +145,10 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
         {slotTables.length > 0 && (
           <button
             onClick={handleClear}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-colors shadow-lg"
+            className="absolute -top-2 -right-2 w-5 h-5 bg-type-tertiary hover:bg-type-secondary rounded-full flex items-center justify-center transition-colors shadow-lg"
             aria-label="Clear macro slot"
           >
-            <X className="w-3 h-3 text-white" />
+            <X className="w-3 h-3 text-canvas" />
           </button>
         )}
       </div>

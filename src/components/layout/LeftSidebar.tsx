@@ -60,7 +60,7 @@ export function LeftSidebar() {
   };
 
   return (
-    <div className="w-12 bg-slate-950 border-r border-slate-800 flex flex-col items-center justify-between py-2">
+    <div className="w-12 bg-canvas-surface border-r border-border flex flex-col items-center justify-between py-2">
       {/* Top Toolbar - Creation/Templates */}
       <div className="flex flex-col gap-1">
         <IconButton
@@ -71,7 +71,7 @@ export function LeftSidebar() {
             // Default blank (optional)
           }}
         />
-        <div className="h-px w-8 bg-slate-800 my-1" /> {/* Divider */}
+        <div className="h-px w-8 bg-border my-1" /> {/* Divider */}
 
         {TEMPLATES.map(template => (
           <IconButton
@@ -114,14 +114,14 @@ export function LeftSidebar() {
           confirmDisabled={!newName.trim()}
         >
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Name <span className="text-red-400">*</span>
+            <label className="block text-sm font-medium text-type-secondary mb-2">
+              Name <span className="text-error">*</span>
             </label>
             <input
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 bg-canvas border border-border rounded-md text-type-primary focus:outline-none focus:ring-2 focus:ring-ruby"
               placeholder={`${selectedTemplate.subtype} name...`}
               autoFocus
               onKeyDown={(e) => {
@@ -130,7 +130,7 @@ export function LeftSidebar() {
                 }
               }}
             />
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-type-tertiary">
               {selectedTemplate.description}
             </p>
           </div>

@@ -37,7 +37,7 @@ export function ThreadCard({
     };
 
     return (
-        <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden flex flex-col my-2 shadow-sm hover:border-slate-600 transition-colors">
+        <div className="bg-canvas-panel border border-border rounded-lg overflow-hidden flex flex-col my-2 shadow-sm hover:border-border-active transition-colors">
             <ThreadHeader
                 thread={thread}
                 isExpanded={isExpanded}

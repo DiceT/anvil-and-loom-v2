@@ -105,21 +105,21 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
   const isNotRollable = table.tableData.length === 0;
 
   return (
-    <div className="flex flex-col h-full bg-slate-950">
+    <div className="flex flex-col h-full bg-canvas">
       {/* A&L-specific Header with Roll and AI buttons */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-canvas-panel">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-slate-200">
+          <h2 className="text-lg font-semibold text-type-primary">
             {table.name}
           </h2>
-          <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">
+          <span className="text-xs text-type-tertiary bg-canvas-surface px-2 py-1 rounded">
             {getDieTypeText(table.maxRoll)}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-type-tertiary">
             {table.tableData.length} row{table.tableData.length !== 1 ? 's' : ''}
           </span>
           {hasUnsavedChanges && (
-            <span className="text-xs text-yellow-400">• Saving...</span>
+            <span className="text-xs text-warning">• Saving...</span>
           )}
         </div>
 
@@ -127,8 +127,8 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
           <button
             onClick={() => setShowAIPanel(!showAIPanel)}
             className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded transition-colors ${showAIPanel
-              ? 'bg-purple-600 text-white'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+              ? 'bg-ruby text-canvas'
+              : 'text-type-secondary hover:text-type-primary hover:bg-canvas-surface'
               }`}
             title="AI Assistant"
           >
@@ -140,15 +140,15 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
             onClick={handleRoll}
             disabled={isRolling || isNotRollable}
             className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded transition-colors ${isRolling
-              ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+              ? 'bg-canvas-surface text-type-tertiary cursor-not-allowed'
               : isNotRollable
-                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : 'bg-purple-600 hover:bg-purple-700 text-white'
+                ? 'bg-canvas-surface text-type-tertiary cursor-not-allowed'
+                : 'bg-gold hover:opacity-90 text-canvas'
               }`}
           >
             {isRolling ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-canvas" />
                 Rolling...
               </>
             ) : (
@@ -163,27 +163,27 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
 
       {/* Roll Result Display */}
       {showRollResult && rollResult && (
-        <div className="px-4 py-3 bg-green-900/20 border-b border-green-800/50">
+        <div className="px-4 py-3 bg-jade/10 border-b border-jade/30">
           <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-600/20 flex items-center justify-center">
-              <Dices className="w-5 h-5 text-green-400" />
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-jade/20 flex items-center justify-center">
+              <Dices className="w-5 h-5 text-jade" />
             </div>
             <div className="flex-1">
-              <div className="text-sm text-green-400 font-medium mb-1">
+              <div className="text-sm text-jade font-medium mb-1">
                 Roll Result: {rollResult.rolls[0]}/{table.maxRoll}
               </div>
-              <div className="text-slate-300">
+              <div className="text-type-secondary">
                 {typeof rollResult.result === 'string' ? rollResult.result : JSON.stringify(rollResult.result)}
               </div>
               {rollResult.warnings.length > 0 && (
-                <div className="mt-2 text-xs text-yellow-400">
+                <div className="mt-2 text-xs text-warning">
                   {rollResult.warnings.join(', ')}
                 </div>
               )}
             </div>
             <button
               onClick={() => setShowRollResult(false)}
-              className="text-slate-500 hover:text-slate-300"
+              className="text-type-tertiary hover:text-type-secondary"
             >
               <X className="w-4 h-4" />
             </button>
@@ -201,7 +201,7 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
 
       {/* AI Panel */}
       {showAIPanel && (
-        <div className="border-t border-slate-800 bg-slate-950">
+        <div className="border-t border-border bg-canvas">
           <WeaveAIPanel
             table={table}
             onGeneratedTable={handleTableGenerated}

@@ -627,11 +627,11 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
       </div>
 
       {isCreatingFolder && (
-        <div className="px-2 py-2 bg-slate-900/50 border-b border-slate-700/50">
+        <div className="px-2 py-2 bg-canvas-panel border-b border-border">
           <input
             autoFocus
             type="text"
-            className="w-full px-2 py-1.5 bg-slate-900 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-purple-500"
+            className="w-full px-2 py-1.5 bg-canvas border border-border rounded text-type-primary text-sm focus:outline-none focus:ring-1 focus:ring-amethyst"
             placeholder="New Folder Name..."
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

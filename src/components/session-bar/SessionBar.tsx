@@ -10,7 +10,7 @@ export function SessionBar() {
     const isSessionActive = !!activeSessionId
 
     return (
-        <div className="border-t border-slate-700 bg-slate-900/95 backdrop-blur-sm p-3">
+        <div className="border-t border-border bg-canvas-panel/95 backdrop-blur-sm p-3">
             {/* Top row: Session toggle + Macros + Navigation + DC */}
             <div className="flex items-center justify-center gap-4">
                 {/* Session Toggle */}

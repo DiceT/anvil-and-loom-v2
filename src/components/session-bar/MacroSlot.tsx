@@ -94,11 +94,11 @@ export function MacroSlot({ slot, visualIndex }: MacroSlotProps) {
   `
 
     const stateStyles = isEmpty
-        ? 'bg-slate-800/50 border border-dashed border-slate-600 hover:border-slate-500'
-        : 'bg-slate-800 border border-slate-600 hover:bg-slate-700 hover:border-slate-500'
+        ? 'bg-canvas-surface/50 border border-dashed border-border hover:border-type-tertiary'
+        : 'bg-canvas-surface border border-border hover:bg-canvas-surface/80 hover:border-sapphire/50'
 
     const dropStyles = isOver && canDrop
-        ? 'bg-purple-500/20 border-2 border-dashed border-purple-500'
+        ? 'bg-amethyst/20 border-2 border-dashed border-amethyst'
         : ''
 
     const dragStyles = isDragging
@@ -117,16 +117,16 @@ export function MacroSlot({ slot, visualIndex }: MacroSlotProps) {
             className={`${baseStyles} ${stateStyles} ${dropStyles} ${dragStyles}`}
         >
             {/* Keyboard shortcut indicator */}
-            <span className="absolute top-1 left-1.5 text-[10px] text-slate-500 font-mono">
+            <span className="absolute top-1 left-1.5 text-[10px] text-type-tertiary font-mono">
                 {visualIndex + 1}
             </span>
 
             {isEmpty ? (
-                <span className="text-slate-500 text-xs">Drop</span>
+                <span className="text-type-tertiary text-xs">Drop</span>
             ) : (
                 <>
                     <MacroSlotIcon type={slot.type} />
-                    <span className="text-[10px] text-slate-300 truncate max-w-[56px] text-center">
+                    <span className="text-[10px] text-type-secondary truncate max-w-[56px] text-center">
                         {slot.label}
                     </span>
                 </>

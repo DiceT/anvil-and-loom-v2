@@ -108,7 +108,7 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
 
                 <div className="flex-1 min-w-0 pt-1">
                     <div className="flex items-center justify-between">
-                        <div className="text-sm font-bold text-purple-200 leading-tight mb-1">{clock.name}</div>
+                        <div className="text-sm font-bold text-clock leading-tight mb-1" style={{ color: 'var(--color-copper)' }}>{clock.name}</div>
                         {onUpdate && (
                             <button
                                 onClick={toggleClockEditing}
@@ -121,11 +121,6 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
                                 <Settings className="w-3 h-3" />
                             </button>
                         )}
-                    </div>
-
-                    <div className="text-xs text-slate-400 flex items-center gap-2">
-                        <Clock className="w-3 h-3" />
-                        <span>{clock.filled} / {clock.segments}</span>
                     </div>
 
                     {clock.isEditing && (
@@ -162,8 +157,7 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
             <div className="px-3 py-3 border-t border-slate-700 bg-slate-800 flex flex-col gap-2">
                 {/* Row 1: Title */}
                 <div className="flex items-center gap-2 min-w-0">
-                    <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <div className="text-sm text-emerald-200 font-bold truncate">
+                    <div className="text-sm text-jade font-bold truncate">
                         {track.name}
                     </div>
                 </div>
@@ -176,7 +170,7 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
                             <button
                                 onClick={handleMarkProgress}
                                 onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); handleMarkProgress(); }}
-                                className="p-1 hover:bg-emerald-600 hover:text-white text-emerald-400 rounded transition-colors"
+                                className="p-1 hover:bg-jade hover:text-canvas text-jade rounded transition-colors"
                                 title="Mark Progress"
                             >
                                 <Plus className="w-3 h-3" />
@@ -185,7 +179,7 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
                             <button
                                 onClick={handleClearProgress}
                                 onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); handleClearProgress(); }}
-                                className="p-1 hover:bg-red-900/50 hover:text-red-400 text-slate-500 rounded transition-colors"
+                                className="p-1 hover:bg-error/50 hover:text-error text-type-tertiary rounded transition-colors"
                                 title="Undo Progress"
                             >
                                 <Minus className="w-3 h-3" />
@@ -216,7 +210,7 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
                                     const next = difficulties[(idx + 1) % difficulties.length];
                                     handleSetDifficulty(next);
                                 }}
-                                className="px-2 py-0.5 text-[0.6rem] uppercase tracking-wider font-bold rounded-sm border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 shadow-sm hover:bg-emerald-900/60 hover:text-emerald-200 transition-colors"
+                                className="px-2 py-0.5 text-[0.6rem] uppercase tracking-wider font-bold rounded-sm border border-jade/30 bg-jade/10 text-jade shadow-sm hover:bg-jade/20 hover:text-jade transition-colors"
                                 title="Click to cycle difficulty"
                             >
                                 {(track.difficulty || 'troublesome').toUpperCase()}
@@ -243,8 +237,8 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
                                 }}
                                 disabled={!onUpdate}
                                 className={`
-                                    flex-1 border border-slate-600 bg-slate-900/50 rounded-sm relative overflow-hidden group
-                                    ${onUpdate ? 'cursor-pointer hover:border-emerald-500/50 hover:bg-slate-800' : 'cursor-default'}
+                                    flex-1 border border-border bg-canvas-surface rounded-sm relative overflow-hidden group
+                                    ${onUpdate ? 'cursor-pointer hover:border-jade/50 hover:bg-canvas' : 'cursor-default'}
                                 `}
                             >
                                 <TickRenderer ticks={ticks} />
@@ -263,10 +257,10 @@ export function ThreadClock({ thread, onUpdate }: ThreadClockProps) {
 
 function TickRenderer({ ticks }: { ticks: number }) {
     if (ticks === 0) return null;
-    if (ticks >= 4) return <div className="absolute inset-0 bg-emerald-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]" />;
+    if (ticks >= 4) return <div className="absolute inset-0 bg-jade shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]" />;
 
     // Ironsworn style: 1=\ 2=X 3=* (or just use quadrants/lines)
-    const strokeClass = "stroke-emerald-500 stroke-[2px]";
+    const strokeClass = "stroke-jade stroke-[2px]";
 
     return (
         <svg viewBox="0 0 10 10" className="absolute inset-0 w-full h-full p-[2px]">
@@ -306,7 +300,7 @@ function ClockRenderer({ segments, filled, onClick, size = 48 }: ClockRendererPr
 
     return (
         <svg width={size} height={size} className="overflow-visible drop-shadow-lg">
-            <circle cx={center} cy={center} r={radius} fill="#1e293b" stroke="#334155" strokeWidth="1" />
+            <circle cx={center} cy={center} r={radius} fill="var(--color-bg-panel, #1e293b)" stroke="var(--color-border, #334155)" strokeWidth="1" />
 
             {Array.from({ length: segments }).map((_, i) => {
                 const isFilled = i < filled;
@@ -314,8 +308,8 @@ function ClockRenderer({ segments, filled, onClick, size = 48 }: ClockRendererPr
                     <path
                         key={i}
                         d={makeSlicePath(i, segments)}
-                        fill={isFilled ? '#a855f7' : 'transparent'}
-                        stroke="#0f172a"
+                        fill={isFilled ? 'var(--color-copper)' : 'transparent'}
+                        stroke="var(--color-bg-app, #0f172a)"
                         strokeWidth="2"
                         className={`transition-colors duration-200 ${onClick ? 'cursor-pointer hover:opacity-80' : ''}`}
                         onMouseDown={(e) => {

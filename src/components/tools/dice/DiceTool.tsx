@@ -137,7 +137,7 @@ export function DiceTool() {
 
 
         {/* Dice Tray Header */}
-        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+        <div className="text-xs font-semibold text-gold uppercase tracking-wide">
           Dice Tray
         </div>
 
@@ -191,15 +191,15 @@ export function DiceTool() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleModifierClick('-1')}
-            className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded transition-colors"
+            className="px-3 py-1 bg-canvas-surface hover:bg-border border border-border text-type-secondary text-xs rounded transition-colors"
           >
             -1
           </button>
           <button
             onClick={() => setAdvantageMode(advantageMode === 'disadvantage' ? 'none' : 'disadvantage')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${advantageMode === 'disadvantage'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+            className={`px-3 py-1 text-xs rounded transition-colors font-semibold ${advantageMode === 'disadvantage'
+              ? 'bg-gold text-canvas'
+              : 'bg-canvas-surface hover:bg-border border border-border text-type-secondary'
               }`}
             data-tooltip="Disadvantage"
           >
@@ -207,9 +207,9 @@ export function DiceTool() {
           </button>
           <button
             onClick={() => setAdvantageMode(advantageMode === 'advantage' ? 'none' : 'advantage')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${advantageMode === 'advantage'
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+            className={`px-3 py-1 text-xs rounded transition-colors font-semibold ${advantageMode === 'advantage'
+              ? 'bg-gold text-canvas'
+              : 'bg-canvas-surface hover:bg-border border border-border text-type-secondary'
               }`}
             data-tooltip="Advantage"
           >
@@ -217,7 +217,7 @@ export function DiceTool() {
           </button>
           <button
             onClick={() => handleModifierClick('+1')}
-            className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded transition-colors"
+            className="px-3 py-1 bg-canvas-surface hover:bg-border border border-border text-type-secondary text-xs rounded transition-colors"
           >
             +1
           </button>
@@ -226,7 +226,7 @@ export function DiceTool() {
         {/* Dice Expression Label */}
         <div
           ref={dragRef}
-          className={`text-xs font-semibold text-slate-400 uppercase tracking-wide ${expression.trim() ? 'cursor-grab hover:text-slate-300' : 'cursor-default'}`}
+          className={`text-xs font-semibold text-gold uppercase tracking-wide ${expression.trim() ? 'cursor-grab hover:text-warning' : 'cursor-default'}`}
           title="Drag to Macro Bar"
         >
           Dice Expression
@@ -241,7 +241,7 @@ export function DiceTool() {
             setError(null);
           }}
           placeholder="e.g., 2d6+3, d20+5"
-          className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="w-full bg-canvas border border-border rounded px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               handleRoll();
@@ -251,7 +251,7 @@ export function DiceTool() {
 
         {/* Error Message */}
         {error && (
-          <div className="text-xs text-red-400 px-2">
+          <div className="text-xs text-error px-2">
             {error}
           </div>
         )}

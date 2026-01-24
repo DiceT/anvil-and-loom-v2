@@ -270,9 +270,13 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
 
         set({ isLoading: true, error: undefined });
         try {
-            // Default to root entries folder for now
-            // In future we might want to allow specifying folder or use current folder
-            const entriesDir = `${tapestry.path}\\entries`;
+            // Default to root entries folder
+            let entriesDir = `${tapestry.path}\\entries`;
+
+            // Allow category-specific subfolders (e.g. Sessions)
+            if (category === 'session') {
+                entriesDir = `${tapestry.path}\\entries\\Sessions`;
+            }
 
             const result = await window.electron.tapestry.createEntry(entriesDir, title, category);
 

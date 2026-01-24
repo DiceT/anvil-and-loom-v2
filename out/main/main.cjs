@@ -1,8 +1,8 @@
 "use strict";
 const electron = require("electron");
 const path = require("path");
-const url = require("url");
 const fs = require("fs/promises");
+const url = require("url");
 const matter = require("gray-matter");
 const uuid = require("uuid");
 const seedrandom = require("seedrandom");
@@ -161,7 +161,8 @@ function getTapestryPaths(root) {
   return {
     loomDir,
     configPath: path__namespace.join(loomDir, "tapestry.json"),
-    entriesDir: path__namespace.join(root, "entries")
+    entriesDir: path__namespace.join(root, "entries"),
+    imagesDir: path__namespace.join(root, ".images")
   };
 }
 async function loadTapestryConfig(root) {
@@ -260,6 +261,7 @@ async function buildFolderTree(folderPath) {
   for (const dirent of dirents) {
     if (dirent.name === ".loom") continue;
     if (dirent.name === ".weave") continue;
+    if (dirent.name === ".images") continue;
     const fullPath = path__namespace.join(folderPath, dirent.name);
     if (dirent.isDirectory()) {
       const children = await buildFolderTree(fullPath);
@@ -328,9 +330,10 @@ function registerTapestryHandlers() {
     const slug = slugify(data.name);
     const basePath = data.basePath || getTapestriesBasePath();
     const root = path__namespace.join(basePath, slug);
-    const { loomDir, entriesDir } = getTapestryPaths(root);
+    const { loomDir, entriesDir, imagesDir } = getTapestryPaths(root);
     await ensureDir(loomDir);
     await ensureDir(entriesDir);
+    await ensureDir(imagesDir);
     const defaultFolders = ["Sessions", "Places", "Dungeons", "NPCs", "Factions", "Relics", "Lore", "Maps", "Others"];
     for (const folder of defaultFolders) {
       await ensureDir(path__namespace.join(entriesDir, folder));
@@ -375,6 +378,8 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
     const entry = registry.tapestries.find((t) => t.id === id);
     if (!entry) return null;
     const config = await loadTapestryConfig(entry.path);
+    const { imagesDir } = getTapestryPaths(entry.path);
+    await ensureDir(imagesDir);
     const now = (/* @__PURE__ */ new Date()).toISOString();
     entry.lastOpenedAt = now;
     entry.updatedAt = now;
@@ -1029,6 +1034,9 @@ function registerWeaveHandlers() {
     }
   });
 }
+electron.protocol.registerSchemesAsPrivileged([
+  { scheme: "media", privileges: { secure: true, supportFetchAPI: true, standard: true, bypassCSP: true, stream: true } }
+]);
 const __filename$1 = url.fileURLToPath(require("url").pathToFileURL(__filename).href);
 const __dirname$1 = path.dirname(__filename$1);
 let mainWindow = null;
@@ -1039,7 +1047,9 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname$1, "../preload/preload.cjs"),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webSecurity: true
+      // explicit default
     }
   });
   if (process.env.ELECTRON_RENDERER_URL) {
@@ -1058,6 +1068,40 @@ electron.app.whenReady().then(() => {
   setupSettingsHandlers();
   registerTapestryHandlers();
   registerWeaveHandlers();
+  electron.protocol.handle("media", async (request) => {
+    try {
+      const parsedUrl = new URL(request.url);
+      let filePath = "";
+      if (parsedUrl.hostname && parsedUrl.hostname.length === 1 && process.platform === "win32") {
+        filePath = `${parsedUrl.hostname}:${parsedUrl.pathname}`;
+      } else {
+        filePath = parsedUrl.pathname;
+        if (process.platform === "win32" && /^\/[a-zA-Z]:/.test(filePath)) {
+          filePath = filePath.slice(1);
+        }
+      }
+      const decodedPath = decodeURIComponent(filePath);
+      console.log("[media-protocol] Request:", request.url);
+      console.log("[media-protocol] Decoded:", decodedPath);
+      const buffer = await fs__namespace.readFile(decodedPath);
+      const ext = path.extname(decodedPath).toLowerCase();
+      let mimeType = "application/octet-stream";
+      if (ext === ".png") mimeType = "image/png";
+      else if (ext === ".jpg" || ext === ".jpeg") mimeType = "image/jpeg";
+      else if (ext === ".webp") mimeType = "image/webp";
+      else if (ext === ".gif") mimeType = "image/gif";
+      else if (ext === ".svg") mimeType = "image/svg+xml";
+      return new Response(buffer, {
+        headers: {
+          "content-type": mimeType,
+          "cache-control": "public, max-age=3600"
+        }
+      });
+    } catch (error) {
+      console.error("[media-protocol] Failed:", request.url, error);
+      return new Response("Not Found", { status: 404 });
+    }
+  });
   createWindow();
   electron.app.on("activate", () => {
     if (electron.BrowserWindow.getAllWindows().length === 0) {

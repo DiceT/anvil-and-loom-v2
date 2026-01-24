@@ -13,13 +13,13 @@ interface MacroSlotIconProps {
 }
 
 const iconMap: Record<MacroType, { icon: typeof Dices; color: string }> = {
-    dice: { icon: Dices, color: 'text-amber-400' },
-    table: { icon: Table, color: 'text-cyan-400' },
-    panel: { icon: Link, color: 'text-purple-400' },
-    oracle: { icon: Sparkles, color: 'text-violet-400' },
-    clock: { icon: Clock, color: 'text-yellow-400' },
-    track: { icon: TrendingUp, color: 'text-emerald-400' },
-    empty: { icon: Dices, color: 'text-slate-600' },
+    dice: { icon: Dices, color: 'text-gold' },
+    table: { icon: Table, color: 'text-amethyst' },
+    panel: { icon: Link, color: 'text-sapphire' }, // Links/System -> Sapphire
+    oracle: { icon: Sparkles, color: 'text-ruby' }, // Magic/AI/Interpretation -> Ruby (or Amethyst if tables) - Philosophy says Ruby for AI/Magic. But Oracle combines tables. Let's use Amethyst for Consistency with tables? Or Ruby for "Sparkles". Philosophy line 22: "Amethyst - Oracle, tables". So Amethyst.
+    clock: { icon: Clock, color: 'text-copper' },
+    track: { icon: TrendingUp, color: 'text-jade' },
+    empty: { icon: Dices, color: 'text-type-tertiary' },
 }
 
 export function MacroSlotIcon({ type }: MacroSlotIconProps) {

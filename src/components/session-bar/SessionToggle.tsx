@@ -35,10 +35,9 @@ export function SessionToggle() {
         border-2
         transition-all duration-200
         ${isActive
-                    ? 'border-red-500 hover:bg-red-500/20'
-                    : 'border-emerald-500 hover:bg-emerald-500/20'
+                    ? 'border-error bg-error/10 hover:bg-error/20'
+                    : 'border-success bg-success/10 hover:bg-success/20'
                 }
-        bg-slate-800
       `}
         >
             {/* Indicator Light */}
@@ -46,14 +45,14 @@ export function SessionToggle() {
                 className={`
           w-3 h-3 rounded-full
           ${isActive
-                        ? 'bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.5)] animate-pulse'
-                        : 'bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.5)]'
+                        ? 'bg-error shadow-[0_0_8px_2px_rgba(207,123,123,0.5)] animate-pulse'
+                        : 'bg-success shadow-[0_0_8px_2px_rgba(126,201,162,0.5)]'
                     }
         `}
             />
 
             {/* Label */}
-            <span className="text-xs font-medium text-slate-200 uppercase tracking-wider">
+            <span className={`text-xs font-medium uppercase tracking-wider ${isActive ? 'text-error' : 'text-success'}`}>
                 {isActive ? 'End' : 'Start'}
             </span>
         </button>

@@ -237,6 +237,16 @@
     box-shadow: 0 0 0 2px var(--color-accent-glow, rgba(124, 106, 239, 0.2));
 }
 
+.input-small::-webkit-outer-spin-button,
+.input-small::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-small[type=number] {
+    -moz-appearance: textfield;
+}
+
 .input-weight {
     width: 40px;
     padding: var(--space-2, 0.5rem);

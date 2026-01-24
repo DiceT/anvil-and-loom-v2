@@ -47,6 +47,26 @@ export function legacyThreadToThread(legacy: LegacyThread): Thread {
             break;
     }
 
+    // Explicit check for embedded data (Legacy objects often store these directly or in meta)
+    if ((legacy as any).clock || legacy.meta?.clock) source = 'clock';
+    if ((legacy as any).track || legacy.meta?.track) source = 'track';
+
+    // Fix lowercase headers or ALL CAPS 'DICE'
+    let header = legacy.header || 'Thread';
+    if (source === 'dice') {
+        header = header.replace(/^DICE/i, 'Dice');
+    } else if (source === 'clock') {
+        const clock = (legacy as any).clock || legacy.meta?.clock;
+        const filled = clock?.filled || 0;
+        const segments = clock?.segments || 4;
+        header = `Clock ${filled}/${segments}`;
+    } else if (source === 'track') {
+        const track = (legacy as any).track || legacy.meta?.track;
+        const filled = track?.filled || 0;
+        const boxes = Math.floor(filled / 4);
+        header = `Track ${boxes}/10`;
+    }
+
     // Construct new Thread
     return {
         id: legacy.id,
@@ -57,7 +77,7 @@ export function legacyThreadToThread(legacy: LegacyThread): Thread {
         source,
         visibility: 'visible',
 
-        header: legacy.header,
+        header,
         summary: legacy.result, // Legacy 'result' is the summary
         content: legacy.content,
 
@@ -109,7 +129,31 @@ export function panelThreadToThread(panelThread: PanelThreadModel): Thread {
 
     // Check source string for backup
     if (panelThread.source && panelThread.type as string !== 'user') {
-        if (panelThread.source.toLowerCase().includes('dice')) source = 'dice';
+        const lowerSource = panelThread.source.toLowerCase();
+        if (lowerSource.includes('dice')) source = 'dice';
+        if (lowerSource.includes('clock')) source = 'clock';
+        if (lowerSource.includes('track')) source = 'track';
+    }
+
+    // Explicit check for payload data (stronger signal)
+    if (panelThread.payload?.clock) source = 'clock';
+    if (panelThread.payload?.track) source = 'track';
+
+    // Construct Header
+    let header = panelThread.source || 'Thread';
+
+    // Fix Casing and Format
+    if (source === 'dice') {
+        header = header.replace(/^DICE/i, 'Dice');
+    } else if (source === 'clock') {
+        const filled = panelThread.payload?.clock?.filled || 0;
+        const segments = panelThread.payload?.clock?.segments || 4;
+        header = `Clock ${filled}/${segments}`;
+    } else if (source === 'track') {
+        // "Track [x]/10"
+        const filled = panelThread.payload?.track?.filled || 0;
+        const boxes = Math.floor(filled / 4);
+        header = `Track ${boxes}/10`;
     }
 
     return {
@@ -121,7 +165,7 @@ export function panelThreadToThread(panelThread: PanelThreadModel): Thread {
         source,
         visibility: 'visible',
 
-        header: panelThread.source || 'Thread', // Panel thread uses 'source' often as header
+        header,
         summary: panelThread.summary,
         content: panelThread.content,
 
@@ -132,12 +176,12 @@ export function panelThreadToThread(panelThread: PanelThreadModel): Thread {
             dice: panelThread.payload?.dice || (panelThread.payload && (panelThread.payload.breakdown || panelThread.payload.total !== undefined) ? panelThread.payload : undefined),
         },
 
-        aiInterpretations: panelThread.aiInterpretations?.map(i => ({
-            id: i.id,
+        aiInterpretations: panelThread.aiInterpretations?.map((i, idx) => ({
+            id: (i as any).id || `ai_interp_${idx}_${Date.now()}`, // Fallback ID
             personaId: i.personaId,
             personaName: i.personaName,
             content: i.content,
-            timestamp: i.timestamp,
+            timestamp: (i as any).timestamp || i.createdAt || new Date().toISOString(), // Fallback timestamp mapping
             status: 'accepted' // Assume existing interpretations are accepted
         })),
 

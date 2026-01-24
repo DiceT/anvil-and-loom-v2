@@ -15,7 +15,7 @@ export function RightSidebar() {
   };
 
   return (
-    <div className="w-12 bg-slate-950 border-l border-slate-800 flex flex-col items-center justify-between py-2">
+    <div className="w-12 bg-canvas-surface border-l border-border flex flex-col items-center justify-between py-2">
       {/* Top Toolbar */}
       <div className="flex flex-col gap-1">
         <IconButton

@@ -32,14 +32,14 @@ export function Stitchboard() {
 
 
     return (
-        <div className="flex flex-col h-full bg-slate-900 text-slate-200 overflow-y-auto">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="flex flex-col h-full bg-canvas-panel text-type-primary overflow-y-auto">
+            <div className="p-4 border-b border-border flex items-center justify-between">
                 <div>
-                    <h2 className="text-lg font-semibold flex items-center gap-2 text-purple-400">
+                    <h2 className="text-lg font-semibold flex items-center gap-2 text-amethyst">
                         <LinkIcon size={20} />
                         Stitchboard
                     </h2>
-                    <p className="text-xs text-slate-500 truncate max-w-[150px]">{activeEntry.title}</p>
+                    <p className="text-xs text-type-tertiary truncate max-w-[150px]">{activeEntry.title}</p>
                 </div>
                 <button
                     onClick={() => {
@@ -52,7 +52,7 @@ export function Stitchboard() {
                             }
                         });
                     }}
-                    className="p-1.5 text-slate-500 hover:text-purple-400 hover:bg-slate-800 rounded transition-colors"
+                    className="p-1.5 text-type-tertiary hover:text-amethyst hover:bg-canvas-surface rounded transition-colors"
                     title="Rebuild Index"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,14 +65,14 @@ export function Stitchboard() {
             </div>
 
             {/* Outgoing Stitches */}
-            <div className="p-4 border-b border-slate-800">
-                <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+            <div className="p-4 border-b border-border">
+                <h3 className="text-sm font-medium text-type-secondary mb-3 flex items-center gap-2">
                     <ArrowRight size={16} />
                     Stitches ({outgoing.length})
                 </h3>
 
                 {outgoing.length === 0 ? (
-                    <p className="text-xs text-slate-600 italic">No outgoing stitches</p>
+                    <p className="text-xs text-type-tertiary italic">No outgoing stitches</p>
                 ) : (
                     <div className="space-y-2">
                         {outgoing.map(target => {
@@ -83,14 +83,14 @@ export function Stitchboard() {
                                     onClick={() => handleNavigate(target)}
                                     disabled={!isResolved}
                                     className={`w-full text-left px-3 py-2 rounded text-sm flex items-center justify-between group ${isResolved
-                                        ? 'hover:bg-slate-800 text-slate-300'
-                                        : 'text-slate-600 cursor-not-allowed'
+                                        ? 'hover:bg-canvas-surface text-type-secondary'
+                                        : 'text-type-tertiary cursor-not-allowed'
                                         }`}
                                 >
-                                    <span className={!isResolved ? 'line-through decoration-slate-700' : ''}>
+                                    <span className={!isResolved ? 'line-through decoration-type-tertiary' : ''}>
                                         {target}
                                     </span>
-                                    {!isResolved && <span className="text-[10px] text-slate-700">Missing</span>}
+                                    {!isResolved && <span className="text-[10px] text-type-tertiary">Missing</span>}
                                 </button>
                             );
                         })}
@@ -100,28 +100,28 @@ export function Stitchboard() {
 
             {/* Incoming Backstitches */}
             <div className="p-4">
-                <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-type-secondary mb-3 flex items-center gap-2">
                     <ArrowLeft size={16} />
                     Backstitches ({incoming.length})
                 </h3>
 
                 {incoming.length === 0 ? (
-                    <p className="text-xs text-slate-600 italic">No backstitches</p>
+                    <p className="text-xs text-type-tertiary italic">No backstitches</p>
                 ) : (
                     <div className="space-y-4">
                         {incoming.map((ref, idx) => {
                             const isMapPin = ref.context.startsWith('📍');
                             return (
-                                <div key={`${ref.sourceId}-${idx}`} className="bg-slate-800/50 rounded p-3 text-sm">
+                                <div key={`${ref.sourceId}-${idx}`} className="bg-canvas-surface/50 rounded p-3 text-sm">
                                     <button
                                         onClick={() => handleNavigate(ref.sourceTitle)}
-                                        className="font-medium text-purple-400 hover:text-purple-300 hover:underline mb-1 flex items-center gap-2"
+                                        className="font-medium text-amethyst hover:text-amethyst/80 hover:underline mb-1 flex items-center gap-2"
                                     >
-                                        {isMapPin && <MapPin size={14} className="text-orange-400" />}
+                                        {isMapPin && <MapPin size={14} className="text-gold" />}
                                         {ref.sourceTitle}
                                     </button>
                                     {!isMapPin && (
-                                        <div className="text-xs text-slate-500 bg-slate-900/50 p-2 rounded border-l-2 border-slate-700 italic">
+                                        <div className="text-xs text-type-secondary bg-canvas-panel/50 p-2 rounded border-l-2 border-border italic">
                                             "...{ref.context}..."
                                         </div>
                                     )}

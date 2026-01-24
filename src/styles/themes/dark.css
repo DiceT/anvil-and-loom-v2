@@ -1,0 +1,30 @@
+/* DARK THEME MAPPINGS */
+:root,
+[data-theme="dark"] {
+    /* Canvas */
+    --bg-app: var(--token-charcoal-deep);
+    --bg-surface: var(--token-charcoal-surface);
+    --bg-panel: var(--token-charcoal-panel);
+    --border-app: var(--token-charcoal-border);
+
+    /* Typography */
+    --text-primary: var(--token-white-warm);
+    --text-secondary: var(--token-grey-earthy);
+    --text-tertiary: var(--token-grey-muted);
+
+    /* Palette Names (Passthrough for now, can be adjusted per theme if needed) */
+    --color-gold: var(--token-gold);
+    --color-ruby: var(--token-ruby);
+    --color-emerald: var(--token-emerald);
+    --color-sapphire: var(--token-sapphire);
+    --color-amethyst: var(--token-amethyst);
+    --color-copper: var(--token-copper);
+    --color-jade: var(--token-jade);
+    --color-ivory: var(--token-ivory);
+
+    /* Semantic States */
+    --state-success: var(--token-jade);
+    --state-warning: var(--token-gold);
+    --state-error: var(--token-red-muted);
+    --state-info: var(--token-sapphire);
+}

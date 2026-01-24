@@ -1,0 +1,31 @@
+:root {
+    /* 
+   * BASE TOKENS (The Gemstones)
+   * Primitive values that form the palette.
+   * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   */
+
+    /* Threads / Accents */
+    --token-gold: #d4a574;
+    --token-ruby: #c77dba;
+    --token-emerald: #5db3a1;
+    --token-sapphire: #6b9edd;
+    --token-amethyst: #9d8cca;
+    --token-copper: #a67c52;
+    /* Antique Bronze */
+    --token-jade: #7ec9a2;
+
+    /* Neutrals (for construction) */
+    --token-charcoal-deep: #0f0f12;
+    --token-charcoal-surface: #1a1a22;
+    --token-charcoal-panel: #252530;
+    --token-charcoal-border: #2a2a38;
+
+    --token-white-warm: #e8e4dc;
+    --token-ivory: #f0e6d3;
+    /* Player/User */
+    --token-grey-earthy: #a8a4a0;
+    --token-grey-muted: #6b6865;
+
+    --token-red-muted: #cf7b7b;
+}

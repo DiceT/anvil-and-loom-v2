@@ -134,19 +134,19 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
           if (csvRows.length === 0) {
             throw new Error('No valid CSV rows found');
           }
-          
+
           // Skip header row if it looks like a header
           const startIndex = csvRows.length > 1 && isNaN(parseInt(csvRows[0][0])) ? 1 : 0;
-          
+
           for (let i = startIndex; i < csvRows.length; i++) {
             const row = csvRows[i];
             if (row.length < 2) continue;
-            
+
             const floor = parseInt(row[0]);
             const ceiling = parseInt(row[1]);
-            
+
             if (isNaN(floor) || isNaN(ceiling)) continue;
-            
+
             rows.push({
               floor,
               ceiling,
@@ -155,7 +155,7 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
               weight: 1,
             });
           }
-          
+
           if (rows.length === 0) {
             throw new Error('No valid CSV rows found. Format: floor,ceiling,result');
           }
@@ -166,22 +166,22 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
           if (!Array.isArray(jsonData)) {
             throw new Error('JSON must be an array of table rows');
           }
-          
+
           rows = jsonData.map((item, index) => {
             if (typeof item !== 'object' || item === null) {
               throw new Error(`Invalid row at index ${index}`);
             }
-            
+
             const row = item as Record<string, unknown>;
-            
+
             if (typeof row.floor !== 'number' || typeof row.ceiling !== 'number') {
               throw new Error(`Row at index ${index} is missing floor or ceiling`);
             }
-            
+
             // Handle result field properly based on type
             let resultValue: string | { tag: string } | Record<string, unknown>;
             const resultType = (row.resultType as 'text' | 'table' | 'object') || 'text';
-            
+
             if (resultType === 'table' && typeof row.result === 'object' && row.result !== null && 'tag' in row.result) {
               resultValue = { tag: String((row.result as { tag: unknown }).tag) };
             } else if (resultType === 'object' && typeof row.result === 'object' && row.result !== null) {
@@ -189,7 +189,7 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
             } else {
               resultValue = String(row.result || '');
             }
-            
+
             return {
               floor: row.floor,
               ceiling: row.ceiling,
@@ -198,7 +198,7 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
               weight: typeof row.weight === 'number' ? row.weight : 1,
             };
           });
-          
+
           if (rows.length === 0) {
             throw new Error('No valid JSON rows found');
           }
@@ -245,16 +245,16 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-canvas-surface border border-border rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <Upload className="w-5 h-5 text-purple-400" />
-            <h2 className="text-lg font-semibold text-slate-200">Quick Import</h2>
+            <Upload className="w-5 h-5 text-amethyst" />
+            <h2 className="text-lg font-semibold text-type-primary">Quick Import</h2>
           </div>
           <button
             onClick={handleCancel}
-            className="p-1 text-slate-500 hover:text-slate-300 rounded transition-colors"
+            className="p-1 text-type-tertiary hover:text-type-primary rounded transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -264,7 +264,7 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {/* Format Selector */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-type-secondary mb-2">
               Format
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -272,11 +272,10 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
                 <button
                   key={fmt}
                   onClick={() => setFormat(fmt)}
-                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    format === fmt
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                  }`}
+                  className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${format === fmt
+                      ? 'bg-amethyst text-white'
+                      : 'bg-canvas-panel text-type-secondary hover:bg-canvas-panel/80'
+                    }`}
                 >
                   {getFormatIcon(fmt)}
                   {getFormatLabel(fmt)}
@@ -286,8 +285,8 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
           </div>
 
           {/* Format Help Text */}
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <p className="text-xs text-slate-400">
+          <div className="bg-canvas-panel/50 rounded-lg p-3">
+            <p className="text-xs text-type-tertiary">
               {format === 'list' && 'Paste a numbered list (1., 2., 3.), bullet list (-, *), or plain text with one item per line.'}
               {format === 'csv' && 'Paste CSV data with format: floor,ceiling,result. Quoted fields and commas in results are supported.'}
               {format === 'json' && 'Paste a JSON array of table rows with floor, ceiling, resultType, and result fields.'}
@@ -296,7 +295,7 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
 
           {/* Content Input */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-type-secondary mb-2">
               Content
             </label>
             <textarea
@@ -306,16 +305,16 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
                 format === 'list'
                   ? '1. First item\n2. Second item\n3. Third item'
                   : format === 'csv'
-                  ? '1,2,First result\n3,4,Second result\n5,6,Third result'
-                  : '[\n  {"floor": 1, "ceiling": 2, "resultType": "text", "result": "First result"},\n  {"floor": 3, "ceiling": 4, "resultType": "text", "result": "Second result"}\n]'
+                    ? '1,2,First result\n3,4,Second result\n5,6,Third result'
+                    : '[\n  {"floor": 1, "ceiling": 2, "resultType": "text", "result": "First result"},\n  {"floor": 3, "ceiling": 4, "resultType": "text", "result": "Second result"}\n]'
               }
-              className="w-full h-48 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 resize-none font-mono"
+              className="w-full h-48 bg-canvas-panel border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-amethyst resize-none font-mono"
             />
           </div>
 
           {/* Parsing Status */}
           {isParsing && (
-            <div className="flex items-center gap-2 text-slate-400">
+            <div className="flex items-center gap-2 text-type-tertiary">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm">Parsing...</span>
             </div>
@@ -333,31 +332,31 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
           {parsedRows.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-slate-300">
+                <label className="block text-sm font-medium text-type-secondary">
                   Preview ({parsedRows.length} {parsedRows.length === 1 ? 'row' : 'rows'})
                 </label>
                 {isValid && (
-                  <div className="flex items-center gap-1 text-green-400">
+                  <div className="flex items-center gap-1 text-emerald-400">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-xs">Valid</span>
                   </div>
                 )}
               </div>
-              <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3 max-h-48 overflow-y-auto">
+              <div className="bg-canvas-panel/50 border border-border rounded-lg p-3 max-h-48 overflow-y-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-slate-400 border-b border-slate-700">
+                    <tr className="text-type-tertiary border-b border-border">
                       <th className="text-left py-1 px-2 font-medium">Roll</th>
                       <th className="text-left py-1 px-2 font-medium">Result</th>
                     </tr>
                   </thead>
                   <tbody>
                     {parsedRows.map((row, index) => (
-                      <tr key={index} className="border-b border-slate-700/50 last:border-b-0">
-                        <td className="py-1 px-2 text-slate-300 font-mono text-xs">
+                      <tr key={index} className="border-b border-border/50 last:border-b-0">
+                        <td className="py-1 px-2 text-type-secondary font-mono text-xs">
                           {row.floor}-{row.ceiling}
                         </td>
-                        <td className="py-1 px-2 text-slate-400 text-xs truncate max-w-md">
+                        <td className="py-1 px-2 text-type-tertiary text-xs truncate max-w-md">
                           {typeof row.result === 'string' ? row.result : JSON.stringify(row.result)}
                         </td>
                       </tr>
@@ -370,17 +369,17 @@ export function QuickImportModal({ table, onClose, onImport }: QuickImportModalP
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-700">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
           <button
             onClick={handleCancel}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-medium text-slate-200 transition-colors"
+            className="px-4 py-2 bg-canvas-panel hover:bg-canvas-panel/80 rounded-lg text-sm font-medium text-type-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleImport}
             disabled={!isValid || parsedRows.length === 0}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:text-slate-500 rounded-lg text-sm font-medium text-white transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-amethyst hover:bg-amethyst/80 disabled:bg-canvas-panel disabled:text-type-tertiary rounded-lg text-sm font-medium text-white transition-colors flex items-center gap-2"
           >
             <Upload className="w-4 h-4" />
             Import {parsedRows.length} {parsedRows.length === 1 ? 'Row' : 'Rows'}

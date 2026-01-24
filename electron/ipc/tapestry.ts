@@ -70,6 +70,7 @@ function getTapestryPaths(root: string) {
         loomDir,
         configPath: path.join(loomDir, 'tapestry.json'),
         entriesDir: path.join(root, 'entries'),
+        imagesDir: path.join(root, '.images'),
     };
 }
 
@@ -182,6 +183,7 @@ async function buildFolderTree(folderPath: string): Promise<TapestryNode[]> {
     for (const dirent of dirents) {
         if (dirent.name === '.loom') continue;
         if (dirent.name === '.weave') continue;
+        if (dirent.name === '.images') continue;
 
         const fullPath = path.join(folderPath, dirent.name);
 
@@ -261,9 +263,10 @@ export function registerTapestryHandlers() {
         const basePath = data.basePath || getTapestriesBasePath();
         const root = path.join(basePath, slug);
 
-        const { loomDir, entriesDir } = getTapestryPaths(root);
+        const { loomDir, entriesDir, imagesDir } = getTapestryPaths(root);
         await ensureDir(loomDir);
         await ensureDir(entriesDir);
+        await ensureDir(imagesDir);
 
         // Create Default Folders
         const defaultFolders = ['Sessions', 'Places', 'Dungeons', 'NPCs', 'Factions', 'Relics', 'Lore', 'Maps', 'Others'];
@@ -324,6 +327,11 @@ Roll some dice or pull on The Weave, then write your first Thread of the story.`
         if (!entry) return null;
 
         const config = await loadTapestryConfig(entry.path);
+
+        // Ensure .images folder exists (migration for existing tapestries)
+        const { imagesDir } = getTapestryPaths(entry.path);
+        await ensureDir(imagesDir);
+
         const now = new Date().toISOString();
         entry.lastOpenedAt = now;
         entry.updatedAt = now;

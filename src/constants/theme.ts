@@ -1,12 +1,14 @@
 export const ThreadColors: Record<string, string> = {
-    dice: '#222244',        // Deep Blue
-    interpretation: '#442244', // Magenta-ish
-    ai: '#442244',          // Magenta-ish
-    user: '#0f52ba',        // Sapphire Blue (Distinct from Dice)
-    chat: '#0f52ba',        // Legacy alias for user
-    system: '#1e293b',      // Slate
-    weave: '#064e3b',       // Emerald Green (Forest Green)
-    other: '#1e293b',       // Slate
+    dice: '#d4a574',        // Gold
+    interpretation: '#9d8cca', // Amethyst (Oracle)
+    ai: '#c77dba',          // Ruby
+    user: '#f0e6d3',        // Ivory (Voice/User)
+    chat: '#f0e6d3',        // Ivory (Legacy)
+    system: '#6b9edd',      // Sapphire (System/Links)
+    weave: '#9d8cca',       // Amethyst (Weave)
+    clock: '#a67c52',       // Antique Bronze (Time)
+    track: '#7ec9a2',       // Jade (Progress)
+    other: '#252530',       // Panel/Slate
 };
 
 // Map legacy 'chat' to 'user' if needed, or just deprecate it.

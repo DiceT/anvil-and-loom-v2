@@ -212,7 +212,7 @@ export function WeaveContextMenu({
   const menuContent = (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden"
+      className="fixed z-50 min-w-48 bg-canvas-surface border border-border rounded-lg shadow-xl overflow-hidden"
       style={{
         left: `${adjustedPosition.x}px`,
         top: `${adjustedPosition.y}px`,
@@ -236,11 +236,10 @@ export function WeaveContextMenu({
                   setShowCategorySubmenu(false);
                 }
               }}
-              className={`w-full px-3 py-2 flex items-center justify-between text-sm transition-colors ${
-                focusedIndex === index
-                  ? 'bg-purple-600/30 text-purple-200'
-                  : 'text-slate-300 hover:bg-slate-800'
-              }`}
+              className={`w-full px-3 py-2 flex items-center justify-between text-sm transition-colors ${focusedIndex === index
+                  ? 'bg-amethyst/10 text-amethyst'
+                  : 'text-type-secondary hover:bg-canvas-panel'
+                }`}
               role="menuitem"
               tabIndex={index === focusedIndex ? 0 : -1}
             >
@@ -254,7 +253,7 @@ export function WeaveContextMenu({
             {/* Export Submenu */}
             {item.id === 'export' && showCategorySubmenu && (
               <div
-                className="absolute left-full top-0 ml-1 min-w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden"
+                className="absolute left-full top-0 ml-1 min-w-48 bg-canvas-surface border border-border rounded-lg shadow-xl overflow-hidden"
                 role="menu"
                 aria-label="Export options"
               >
@@ -262,7 +261,7 @@ export function WeaveContextMenu({
                   <button
                     key={exportItem.id}
                     onClick={() => handleExportSubmenuClick(exportItem)}
-                    className="w-full px-3 py-2 flex items-center gap-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+                    className="w-full px-3 py-2 flex items-center gap-2 text-sm text-type-secondary hover:bg-canvas-panel transition-colors"
                     role="menuitem"
                   >
                     <exportItem.icon className="w-4 h-4 flex-shrink-0" />
@@ -275,7 +274,7 @@ export function WeaveContextMenu({
             {/* Move to Category Submenu */}
             {item.id === 'move' && showCategorySubmenu && (
               <div
-                className="absolute left-full top-0 ml-1 min-w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden max-h-64 overflow-y-auto"
+                className="absolute left-full top-0 ml-1 min-w-48 bg-canvas-surface border border-border rounded-lg shadow-xl overflow-hidden max-h-64 overflow-y-auto"
                 role="menu"
                 aria-label="Categories"
               >
@@ -283,7 +282,7 @@ export function WeaveContextMenu({
                   <button
                     key={category}
                     onClick={() => handleCategoryClick(category)}
-                    className="w-full px-3 py-2 flex items-center gap-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors"
+                    className="w-full px-3 py-2 flex items-center gap-2 text-sm text-type-secondary hover:bg-canvas-panel transition-colors"
                     role="menuitem"
                   >
                     <Folder className="w-4 h-4 flex-shrink-0" />
@@ -297,8 +296,8 @@ export function WeaveContextMenu({
       </div>
 
       {/* Table Name Display */}
-      <div className="px-3 py-2 border-t border-slate-700 bg-slate-800/50">
-        <p className="text-xs text-slate-500 truncate">{table.name}</p>
+      <div className="px-3 py-2 border-t border-border bg-canvas-panel">
+        <p className="text-xs text-type-tertiary truncate">{table.name}</p>
       </div>
     </div>
   );

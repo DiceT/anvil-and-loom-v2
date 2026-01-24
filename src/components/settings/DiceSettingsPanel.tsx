@@ -8,11 +8,11 @@ export function DiceSettingsPanel() {
     return (
         <div className="space-y-8">
             <div>
-                <h3 className="text-lg font-medium text-slate-100 mb-4">Appearance</h3>
+                <h3 className="text-lg font-medium text-type-primary mb-4">Appearance</h3>
                 <div className="grid grid-cols-2 gap-6">
                     {/* Dice Color */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                        <label className="block text-sm font-medium text-type-secondary mb-2">
                             Dice Color
                         </label>
                         <div className="flex gap-2">
@@ -26,7 +26,7 @@ export function DiceSettingsPanel() {
                                 type="text"
                                 value={dice.diceColor}
                                 onChange={(e) => updateDiceSettings({ diceColor: e.target.value })}
-                                className="flex-1 bg-slate-800 border border-slate-700 text-slate-200 px-3 py-2 rounded text-sm focus:outline-none focus:border-purple-500"
+                                className="flex-1 bg-canvas-surface border border-border text-type-primary px-3 py-2 rounded text-sm focus:outline-none focus:border-gold"
                                 placeholder="#8b5cf6"
                             />
                         </div>
@@ -34,7 +34,7 @@ export function DiceSettingsPanel() {
 
                     {/* Number Color */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                        <label className="block text-sm font-medium text-type-secondary mb-2">
                             Number Color
                         </label>
                         <div className="flex gap-2">
@@ -48,7 +48,7 @@ export function DiceSettingsPanel() {
                                 type="text"
                                 value={dice.numberColor}
                                 onChange={(e) => updateDiceSettings({ numberColor: e.target.value })}
-                                className="flex-1 bg-slate-800 border border-slate-700 text-slate-200 px-3 py-2 rounded text-sm focus:outline-none focus:border-purple-500"
+                                className="flex-1 bg-canvas-surface border border-border text-type-primary px-3 py-2 rounded text-sm focus:outline-none focus:border-gold"
                                 placeholder="#ffffff"
                             />
                         </div>
@@ -57,11 +57,11 @@ export function DiceSettingsPanel() {
             </div>
 
             <div>
-                <h3 className="text-lg font-medium text-slate-100 mb-4">Material & Style</h3>
+                <h3 className="text-lg font-medium text-type-primary mb-4">Material & Style</h3>
                 <div className="space-y-6">
                     {/* Material */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                        <label className="block text-sm font-medium text-type-secondary mb-2">
                             Material
                         </label>
                         <div className="grid grid-cols-4 gap-2">
@@ -70,8 +70,8 @@ export function DiceSettingsPanel() {
                                     key={mat}
                                     onClick={() => updateDiceSettings({ material: mat })}
                                     className={`px-4 py-2 rounded text-sm font-medium transition-colors border ${dice.material === mat
-                                            ? 'bg-purple-600 border-purple-500 text-white'
-                                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                                        ? 'bg-gold border-gold text-canvas'
+                                        : 'bg-canvas-surface border-border text-type-secondary hover:bg-border'
                                         }`}
                                 >
                                     {mat.charAt(0).toUpperCase() + mat.slice(1)}
@@ -82,7 +82,7 @@ export function DiceSettingsPanel() {
 
                     {/* Dice Style */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                        <label className="block text-sm font-medium text-type-secondary mb-2">
                             Dice Style
                         </label>
                         <div className="grid grid-cols-3 gap-2">
@@ -91,8 +91,8 @@ export function DiceSettingsPanel() {
                                     key={set}
                                     onClick={() => updateDiceSettings({ diceSet: set })}
                                     className={`px-4 py-2 rounded text-sm font-medium transition-colors border ${dice.diceSet === set
-                                            ? 'bg-purple-600 border-purple-500 text-white'
-                                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                                        ? 'bg-gold border-gold text-canvas'
+                                        : 'bg-canvas-surface border-border text-type-secondary hover:bg-border'
                                         }`}
                                 >
                                     {set.charAt(0).toUpperCase() + set.slice(1)}
@@ -103,7 +103,7 @@ export function DiceSettingsPanel() {
 
                     {/* Surface Type */}
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                        <label className="block text-sm font-medium text-type-secondary mb-2">
                             Surface
                         </label>
                         <div className="grid grid-cols-3 gap-2">
@@ -112,8 +112,8 @@ export function DiceSettingsPanel() {
                                     key={surface}
                                     onClick={() => updateDiceSettings({ surfaceType: surface })}
                                     className={`px-4 py-2 rounded text-sm font-medium transition-colors border ${dice.surfaceType === surface
-                                            ? 'bg-purple-600 border-purple-500 text-white'
-                                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                                        ? 'bg-gold border-gold text-canvas'
+                                        : 'bg-canvas-surface border-border text-type-secondary hover:bg-border'
                                         }`}
                                 >
                                     {surface.charAt(0).toUpperCase() + surface.slice(1)}

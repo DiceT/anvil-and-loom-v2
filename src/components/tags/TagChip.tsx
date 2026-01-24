@@ -31,12 +31,12 @@ export function TagChip({ tag, onRemove, onClick, removable = false }: TagChipPr
             className={`
                 inline-flex items-center gap-1 
                 px-2 py-0.5 
-                bg-purple-500/10 
-                border border-purple-500/20 
-                text-purple-400 
+                bg-amethyst/10 
+                border border-amethyst/20 
+                text-amethyst 
                 text-xs font-medium 
                 rounded-full
-                ${onClick ? 'hover:bg-purple-500/20 cursor-pointer' : ''}
+                ${onClick ? 'hover:bg-amethyst/20 cursor-pointer' : ''}
                 transition-colors
             `}
             onClick={handleClick}
@@ -45,7 +45,7 @@ export function TagChip({ tag, onRemove, onClick, removable = false }: TagChipPr
             {removable && onRemove && (
                 <button
                     onClick={handleRemove}
-                    className="hover:text-purple-300 transition-colors p-0.5"
+                    className="hover:text-amethyst/80 transition-colors p-0.5"
                     aria-label={`Remove tag ${displayTag}`}
                 >
                     <X className="w-3 h-3" />

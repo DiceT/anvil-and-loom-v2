@@ -241,30 +241,30 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-950">
+    <div className="flex flex-col h-full bg-canvas">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-900">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-canvas-panel">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-400" />
-          <h2 className="text-lg font-semibold text-slate-200">AI Assistant</h2>
+          <Sparkles className="w-5 h-5 text-ruby" />
+          <h2 className="text-lg font-semibold text-type-primary">AI Assistant</h2>
         </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Generate New Table */}
-        <div className="bg-slate-900 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-slate-300 mb-3">Generate New Table</h3>
+        <div className="bg-canvas-panel rounded-lg p-4">
+          <h3 className="text-sm font-medium text-type-secondary mb-3">Generate New Table</h3>
           <div className="space-y-3">
             <input
               type="text"
               placeholder="Table topic (e.g., Cursed Items, Random Encounters, d66 Treasures)"
               value={generatePrompt}
               onChange={(e) => setGeneratePrompt(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-canvas-surface border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-ruby"
             />
             <textarea
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full bg-canvas-surface border border-border rounded-lg px-3 py-2 text-sm text-type-primary placeholder-type-tertiary focus:outline-none focus:border-ruby resize-none"
               placeholder="Optional: Add detailed instructions (e.g., 'Focus on horror themes, each item should have a drawback')"
               value={customInstructions}
               onChange={(e) => setCustomInstructions(e.target.value)}
@@ -272,18 +272,18 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
             />
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-400">Entries</label>
+                <label className="text-xs text-type-tertiary">Entries</label>
                 <input
                   type="number"
                   min={1}
                   max={100}
                   value={fillCount}
                   onChange={(e) => setFillCount(Number(e.target.value) || 10)}
-                  className="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-slate-200 focus:outline-none focus:border-purple-500"
+                  className="w-20 bg-canvas-surface border border-border rounded px-2 py-1 text-sm text-type-primary focus:outline-none focus:border-ruby"
                 />
               </div>
               <button
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:text-slate-500 rounded-lg text-sm font-medium text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-ruby hover:opacity-90 disabled:bg-canvas-surface disabled:text-type-tertiary rounded-lg text-sm font-medium text-canvas transition-colors"
                 onClick={handleGenerate}
                 disabled={isLoading || !generatePrompt.trim()}
               >
@@ -291,7 +291,7 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
                 Generate
               </button>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-type-tertiary">
               Tip: Include "d66", "d88", or "2d6" in your topic for automatic dice notation handling.
             </p>
           </div>
@@ -299,24 +299,24 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
 
         {/* Fill Table */}
         {table && (
-          <div className="bg-slate-900 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-slate-300 mb-3">Fill Current Table</h3>
-            <p className="text-xs text-slate-400 mb-3">
+          <div className="bg-canvas-panel rounded-lg p-4">
+            <h3 className="text-sm font-medium text-type-secondary mb-3">Fill Current Table</h3>
+            <p className="text-xs text-type-tertiary mb-3">
               Add more rows to "{table.name}" using AI
             </p>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-400">Target Rows</label>
+                <label className="text-xs text-type-tertiary">Target Rows</label>
                 <input
                   type="number"
                   min={table.tableData.length + 1}
                   value={fillCount}
                   onChange={(e) => setFillCount(Number(e.target.value))}
-                  className="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-slate-200 focus:outline-none focus:border-purple-500"
+                  className="w-20 bg-canvas-surface border border-border rounded px-2 py-1 text-sm text-type-primary focus:outline-none focus:border-ruby"
                 />
               </div>
               <button
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-700 disabled:text-slate-500 rounded-lg text-sm font-medium text-white transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-ruby hover:opacity-90 disabled:bg-canvas-surface disabled:text-type-tertiary rounded-lg text-sm font-medium text-canvas transition-colors"
                 onClick={handleFill}
                 disabled={isLoading}
               >
@@ -324,7 +324,7 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
                 Fill Table
               </button>
             </div>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-type-tertiary mt-2">
               Currently {table.tableData.length} rows. Will add {Math.max(0, fillCount - table.tableData.length)} more.
             </p>
           </div>
@@ -332,10 +332,10 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
 
         {/* Review Table */}
         {table && table.tableData.length > 0 && (
-          <div className="bg-slate-900 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-slate-300 mb-3">Review Table</h3>
+          <div className="bg-canvas-panel rounded-lg p-4">
+            <h3 className="text-sm font-medium text-type-secondary mb-3">Review Table</h3>
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:text-slate-500 rounded-lg text-sm font-medium text-slate-200 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-canvas-surface hover:bg-border disabled:bg-canvas-surface disabled:text-type-tertiary rounded-lg text-sm font-medium text-type-primary transition-colors"
               onClick={handleReview}
               disabled={isLoading}
             >
@@ -347,17 +347,17 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
 
         {/* Error Display */}
         {error && (
-          <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-3 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="bg-error/10 border border-error/50 rounded-lg p-3 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-error flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-error">{error}</p>
           </div>
         )}
 
         {/* Result Display */}
         {lastResult && !error && (
-          <div className="bg-green-900/20 border border-green-700/50 rounded-lg p-3 flex items-start gap-2">
-            <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-green-400 whitespace-pre-wrap">{lastResult}</p>
+          <div className="bg-jade/10 border border-jade/50 rounded-lg p-3 flex items-start gap-2">
+            <CheckCircle className="w-4 h-4 text-jade flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-jade whitespace-pre-wrap">{lastResult}</p>
           </div>
         )}
       </div>

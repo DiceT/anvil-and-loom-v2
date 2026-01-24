@@ -276,8 +276,8 @@ export function TapestryTree() {
     }
 
     return (
-        <div className="h-full flex flex-col bg-slate-900 border-r border-slate-800">
-            <div className="flex items-center justify-between p-3 border-b border-slate-800">
+        <div className="h-full flex flex-col bg-canvas-surface border-r border-border">
+            <div className="flex items-center justify-between p-3 border-b border-border">
                 <div className="flex items-center gap-0 -space-x-1">
                     <button
                         onClick={() => handleNewFolder(tree?.path || '')}
@@ -298,16 +298,16 @@ export function TapestryTree() {
 
             {/* Active Filter Bar */}
             {activeTagFilter && (
-                <div className="px-4 py-2 bg-purple-900/20 border-b border-purple-500/20 flex items-center justify-between">
+                <div className="px-4 py-2 bg-sapphire/20 border-b border-sapphire/20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Tag className="w-3 h-3 text-purple-400" />
-                        <span className="text-xs text-purple-300">
-                            Filtering by <span className="font-medium text-purple-200">#{activeTagFilter}</span>
+                        <Tag className="w-3 h-3 text-sapphire" />
+                        <span className="text-xs text-sapphire-light">
+                            Filtering by <span className="font-medium text-sapphire-lighter">#{activeTagFilter}</span>
                         </span>
                     </div>
                     <button
                         onClick={() => setTagFilter(null)}
-                        className="p-1 hover:bg-purple-500/20 rounded-full text-purple-400 hover:text-purple-200 transition-colors"
+                        className="p-1 hover:bg-sapphire/20 rounded-full text-sapphire hover:text-sapphire-lighter transition-colors"
                         title="Clear filter"
                     >
                         <X className="w-3 h-3" />
