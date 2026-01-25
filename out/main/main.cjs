@@ -822,18 +822,71 @@ async function ensureWeaveDir() {
   await fs__namespace.mkdir(weaveDir, { recursive: true });
   return weaveDir;
 }
+function sanitizeFilename(name) {
+  return name.replace(/[<>:"/\\|?*]/g, "-").replace(/\s+/g, " ").trim().slice(0, 64);
+}
+async function getUniqueFilePath(dir, name, tableId) {
+  const sanitized = sanitizeFilename(name) || "Untitled-Table";
+  let fileName = `${sanitized}.json`;
+  let filePath = path__namespace.join(dir, fileName);
+  try {
+    await fs__namespace.access(filePath);
+  } catch {
+    return filePath;
+  }
+  try {
+    const data = await fs__namespace.readFile(filePath, "utf-8");
+    const existing = JSON.parse(data);
+    if (existing.id === tableId) {
+      return filePath;
+    }
+  } catch {
+  }
+  let counter = 1;
+  while (true) {
+    fileName = `${sanitized} (${counter}).json`;
+    filePath = path__namespace.join(dir, fileName);
+    try {
+      await fs__namespace.access(filePath);
+      try {
+        const data = await fs__namespace.readFile(filePath, "utf-8");
+        const existing = JSON.parse(data);
+        if (existing.id === tableId) {
+          return filePath;
+        }
+      } catch {
+      }
+      counter++;
+    } catch {
+      return filePath;
+    }
+  }
+}
 async function readTableFiles() {
   try {
     const weaveDir = getWeaveDirPath();
     const entries = await fs__namespace.readdir(weaveDir, { withFileTypes: true });
     const tables = [];
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
     for (const entry of entries) {
       if (entry.isFile() && entry.name.endsWith(".json")) {
-        const filePath = path__namespace.join(weaveDir, entry.name);
+        const oldPath = path__namespace.join(weaveDir, entry.name);
         try {
-          const data = await fs__namespace.readFile(filePath, "utf-8");
+          const data = await fs__namespace.readFile(oldPath, "utf-8");
           const table = JSON.parse(data);
-          table.sourcePath = filePath;
+          let currentPath = oldPath;
+          if (uuidRegex.test(entry.name)) {
+            const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
+            if (newPath !== oldPath) {
+              try {
+                await fs__namespace.rename(oldPath, newPath);
+                currentPath = newPath;
+              } catch (err) {
+                console.error(`Failed to migrate table ${entry.name}`, err);
+              }
+            }
+          }
+          table.sourcePath = currentPath;
           tableCache.set(table.id, table);
           tables.push(table);
         } catch (error) {
@@ -851,10 +904,16 @@ async function readTableFiles() {
 }
 async function writeTableFile(table) {
   const weaveDir = await ensureWeaveDir();
-  const fileName = `${table.id}.json`;
-  const filePath = path__namespace.join(weaveDir, fileName);
-  table.sourcePath = filePath;
-  await fs__namespace.writeFile(filePath, JSON.stringify(table, null, 2), "utf-8");
+  const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
+  if (table.sourcePath && table.sourcePath !== newPath) {
+    try {
+      await fs__namespace.access(table.sourcePath);
+      await fs__namespace.unlink(table.sourcePath);
+    } catch (e) {
+    }
+  }
+  table.sourcePath = newPath;
+  await fs__namespace.writeFile(newPath, JSON.stringify(table, null, 2), "utf-8");
   tableCache.set(table.id, table);
 }
 async function deleteTableFile(tableId) {
@@ -885,11 +944,26 @@ function rollTable(table, resolveTokens = true) {
   const engine = new RandomTableEngine();
   const result = engine.roll(table);
   if (resolveTokens) {
+    if (typeof result.result === "object" && result.result !== null && "tag" in result.result) {
+      const refTag = result.result.tag;
+      const refTable = findTableByTag(refTag);
+      if (refTable) {
+        const subResult = rollTable(refTable, true);
+        return {
+          seed: result.seed,
+          tableChain: [table.name, ...subResult.tableChain],
+          rolls: [...result.rolls, ...subResult.rolls],
+          warnings: [...result.warnings, ...subResult.warnings],
+          result: subResult.result
+        };
+      }
+      return result;
+    }
     const resolver = new TokenResolver();
     const resolved = resolver.resolve(result.result, (tag) => {
       const refTable = findTableByTag(tag);
       if (refTable) {
-        return rollTable(refTable, true, result.rolls);
+        return rollTable(refTable, true);
       }
       return null;
     });

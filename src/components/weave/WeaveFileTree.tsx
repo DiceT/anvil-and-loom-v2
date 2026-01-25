@@ -5,12 +5,11 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useDrag } from 'react-dnd';
-import { createTableMacro } from '../../types/macro';
+
+
 import {
   DndContext,
   closestCenter,
-  pointerWithin,
   PointerSensor,
   useSensor,
   useSensors,
@@ -18,7 +17,7 @@ import {
   useDroppable,
   type DragEndEvent,
   type DragStartEvent,
-  type CollisionDetection,
+
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -30,7 +29,6 @@ import { useWeaveStore } from '../../stores/useWeaveStore';
 import { useTabStore } from '../../stores/useTabStore';
 import { WeaveService } from '../../core/weave/WeaveService';
 import { ContextMenu } from './shared/ContextMenu';
-import { MacroBar } from './shared/MacroBar';
 import type { Table } from '../../types/weave';
 import './shared/FileTree.css';
 
@@ -105,31 +103,17 @@ function DraggableTableItem({ table, onClick, onContextMenu, onQuickRoll, select
     isDragging: isSorting,
   } = useSortable({ id: table.id });
 
-  // React-DnD hook for Macro Bar dragging
-  // @ts-ignore
-  const [{ isDragging: isMacroDragging }, dragRef] = useDrag({
-    type: 'TABLE',
-    item: {
-      type: 'TABLE',
-      macroData: createTableMacro(0, table.id, table.name)
-    },
-    collect: (monitor: any) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
+
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isSorting || isMacroDragging ? 0.5 : 1,
+    opacity: isSorting ? 0.5 : 1,
   };
 
   return (
     <div
-      ref={(node) => {
-        setNodeRef(node);
-        dragRef(node);
-      }}
+      ref={setNodeRef}
       style={style}
       className={`table-item ${selectedTableId === table.id ? 'selected' : ''} draggable-table`}
       onClick={(e) => {
@@ -195,7 +179,7 @@ function CategoryHeaderDropZone({ category, children }: {
 }
 
 export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps) {
-  const { tables, selectedTableId, loadTables, saveTable, deleteTable, addTableToMacro, clearMacro, macros, rollMacroSlot, validateTable, customCategories, createCategory, renameCategory, deleteCategory } = useWeaveStore();
+  const { tables, selectedTableId, loadTables, saveTable, deleteTable, validateTable, customCategories, createCategory, renameCategory, deleteCategory } = useWeaveStore();
   const { openTab } = useTabStore();
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -204,19 +188,7 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
     useSensor(PointerSensor)
   );
 
-  // Custom collision detection: use pointer position for macro slots, closestCenter for others
-  const customCollisionDetection: CollisionDetection = (args) => {
-    // First, check for macro slots using pointer position
-    const pointerCollisions = pointerWithin(args);
-    const macroCollision = pointerCollisions.find(c => c.id.toString().startsWith('macro-'));
 
-    if (macroCollision) {
-      return [macroCollision];
-    }
-
-    // Fall back to closestCenter for categories
-    return closestCenter(args);
-  };
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -229,12 +201,7 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
     if (over && active.id !== over.id) {
       const table = tables.find(t => t.id === active.id);
       if (table) {
-        // Check if over.id is a macro slot
-        if (over.id.toString().startsWith('macro-')) {
-          const slotIndex = parseInt(over.id.toString().replace('macro-', ''));
-          addTableToMacro(slotIndex, table.id);
-          return;
-        }
+
 
         // Check if over.id is a category
         const isCategoryDrop = allCategories.includes(over.id as string);
@@ -476,21 +443,7 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
     });
   };
 
-  // MacroBar props based on useWeaveStore
-  const macroSlots = macros.map((macro, index) => ({
-    id: `${index}`,
-    macro: macro.tables.length > 0 ? { tableIds: macro.tables } : null,
-  }));
 
-  const handleMacroSlotClick = async (slotId: string) => {
-    const slotIndex = parseInt(slotId);
-    await rollMacroSlot(slotIndex);
-  };
-
-  const handleClearMacro = async (slotId: string) => {
-    const slotIndex = parseInt(slotId);
-    await clearMacro(slotIndex);
-  };
 
   const getMenuItems = () => {
     if (menu.type === 'category') {
@@ -651,7 +604,7 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
 
       <DndContext
         sensors={sensors}
-        collisionDetection={customCollisionDetection}
+        collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
@@ -663,12 +616,6 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
           ) : null}
         </DragOverlay>
 
-        <MacroBar
-          macros={macroSlots}
-          tables={tables}
-          onRoll={handleMacroSlotClick}
-          onClear={handleClearMacro}
-        />
         <div className="file-tree-content">
           {Object.entries(filteredGrouped).map(([category, categoryTables]) => (
             <div key={category} className="file-tree-category">
@@ -689,21 +636,24 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
                 strategy={verticalListSortingStrategy}
               >
                 <ul className="table-list">
-                  {categoryTables.map((table) => {
-                    const status = validationStatus[table.id];
-                    return (
-                      <li key={table.id}>
-                        <DraggableTableItem
-                          table={table}
-                          onClick={() => handleTableClick(table)}
-                          onContextMenu={(e) => handleTableContextMenu(e, table)}
-                          onQuickRoll={handleQuickRoll}
-                          selectedTableId={selectedTableId}
-                          validationStatus={status}
-                        />
-                      </li>
-                    );
-                  })}
+                  {categoryTables
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((table) => {
+                      const status = validationStatus[table.id];
+                      return (
+                        <li key={table.id}>
+                          <DraggableTableItem
+                            table={table}
+                            onClick={() => handleTableClick(table)}
+                            onContextMenu={(e) => handleTableContextMenu(e, table)}
+                            onQuickRoll={handleQuickRoll}
+                            selectedTableId={selectedTableId}
+                            validationStatus={status}
+                          />
+                        </li>
+                      );
+                    })}
                 </ul>
               </SortableContext>
             </div>

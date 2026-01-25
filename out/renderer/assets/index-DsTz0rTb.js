@@ -18932,16 +18932,6 @@ function createDiceMacro(index2, expression) {
     diceExpression: expression
   };
 }
-function createTableMacro(index2, tableId, tableName) {
-  return {
-    id: `macro_${index2}_${Date.now()}`,
-    index: index2,
-    type: "table",
-    label: tableName.length > 6 ? tableName.slice(0, 5) + "…" : tableName,
-    tableId,
-    tableName
-  };
-}
 function createPanelMacro(index2, panelId, panelPath, panelTitle) {
   return {
     id: `macro_${index2}_${Date.now()}`,
@@ -51731,7 +51721,7 @@ const interpretAction = {
   execute: async (thread, context) => {
     try {
       const { interpretThread } = await __vitePreload(async () => {
-        const { interpretThread: interpretThread2 } = await import("./threadInterpreter-B9tE20-b.js");
+        const { interpretThread: interpretThread2 } = await import("./threadInterpreter-BvPHwJGx.js");
         return { interpretThread: interpretThread2 };
       }, true ? [] : void 0, import.meta.url);
       const interpretation = await interpretThread(thread);
@@ -57638,47 +57628,6 @@ const rectIntersection = (_ref) => {
   }
   return collisions.sort(sortCollisionsDesc);
 };
-function isPointWithinRect(point2, rect) {
-  const {
-    top,
-    left,
-    bottom,
-    right
-  } = rect;
-  return top <= point2.y && point2.y <= bottom && left <= point2.x && point2.x <= right;
-}
-const pointerWithin = (_ref) => {
-  let {
-    droppableContainers,
-    droppableRects,
-    pointerCoordinates
-  } = _ref;
-  if (!pointerCoordinates) {
-    return [];
-  }
-  const collisions = [];
-  for (const droppableContainer of droppableContainers) {
-    const {
-      id: id2
-    } = droppableContainer;
-    const rect = droppableRects.get(id2);
-    if (rect && isPointWithinRect(pointerCoordinates, rect)) {
-      const corners = cornersOfRectangle(rect);
-      const distances = corners.reduce((accumulator, corner) => {
-        return accumulator + distanceBetween(pointerCoordinates, corner);
-      }, 0);
-      const effectiveDistance = Number((distances / 4).toFixed(4));
-      collisions.push({
-        id: id2,
-        data: {
-          droppableContainer,
-          value: effectiveDistance
-        }
-      });
-    }
-  }
-  return collisions.sort(sortCollisionsAsc);
-};
 function adjustScale(transform, rect1, rect2) {
   return {
     ...transform,
@@ -62439,7 +62388,7 @@ async function executeMacro(slot) {
 async function executeDiceMacro(slot) {
   if (!slot.diceExpression) return;
   const { rollDiceExpression } = await __vitePreload(async () => {
-    const { rollDiceExpression: rollDiceExpression2 } = await import("./diceEngine-CIXgudN3.js");
+    const { rollDiceExpression: rollDiceExpression2 } = await import("./diceEngine-Ce5UWSmq.js");
     return { rollDiceExpression: rollDiceExpression2 };
   }, true ? [] : void 0, import.meta.url);
   await rollDiceExpression(slot.diceExpression);
@@ -62541,7 +62490,7 @@ async function executeTrackMacro(slot) {
     updateThread(slot.trackId, { track: { ...track2, filled: newFilled } });
   }
 }
-function MacroSlot$1({ slot, visualIndex }) {
+function MacroSlot({ slot, visualIndex }) {
   const { setSlot, clearSlot, moveSlot } = useMacroStore();
   const [showTooltip, setShowTooltip] = reactExports.useState(false);
   const isEmpty = slot.type === "empty";
@@ -62625,11 +62574,11 @@ function MacroSlot$1({ slot, visualIndex }) {
     }
   );
 }
-function MacroBar$1() {
+function MacroBar() {
   const { getVisibleSlots } = useMacroStore();
   const visibleSlots = getVisibleSlots();
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-2", children: visibleSlots.map((slot, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-    MacroSlot$1,
+    MacroSlot,
     {
       slot,
       visualIndex: i
@@ -101980,7 +101929,7 @@ function SessionBar() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-border bg-canvas-panel/95 backdrop-blur-sm p-3", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center gap-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(SessionToggle, {}),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(MacroBar$1, {}),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(MacroBar, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsx(RowNavigation, {}),
       /* @__PURE__ */ jsxRuntimeExports.jsx(TargetNumberDisplay, {})
     ] }),
@@ -102732,96 +102681,6 @@ function ContextMenu({ x, y, items, onClose }) {
     }
   );
 }
-function MacroSlot({ slot, tables, onRoll, onClear, onHover, onLeave }) {
-  const { setNodeRef, isOver } = useDroppable({
-    id: `macro-${slot.id}`,
-    data: { slotId: slot.id }
-  });
-  const handleKeyDown2 = (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleClick2();
-    }
-  };
-  const hasTables = slot.macro !== null && slot.macro.tableIds.length > 0;
-  const tableCount = slot.macro?.tableIds.length || 0;
-  const handleClick2 = () => {
-    if (hasTables) {
-      onRoll(slot.id);
-    }
-  };
-  const handleContextMenu = (e) => {
-    e.preventDefault();
-    if (hasTables) {
-      onClear(slot.id);
-    }
-  };
-  const handleMouseEnter = () => {
-    if (hasTables && slot.macro) {
-      const macroTables = tables.filter((t) => slot.macro.tableIds.includes(t.id));
-      onHover(slot.id, macroTables);
-    }
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      ref: setNodeRef,
-      className: `macro-slot ${hasTables ? "has-tables" : ""} ${isOver ? "drag-over" : ""}`,
-      onClick: handleClick2,
-      onContextMenu: handleContextMenu,
-      onMouseEnter: handleMouseEnter,
-      onMouseLeave: onLeave,
-      onKeyDown: handleKeyDown2,
-      role: "button",
-      tabIndex: 0,
-      title: hasTables ? `Click to roll macro ${slot.id}, right-click to clear` : `Drag tables here to create macro ${slot.id}`,
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "slot-number", children: slot.id }),
-        hasTables && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "table-count", children: tableCount })
-      ]
-    }
-  );
-}
-function MacroTooltip({ slotId, tables }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "macro-tooltip", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "macro-tooltip-header", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "macro-tooltip-title", children: [
-      "Macro ",
-      slotId
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "macro-tooltip-list", children: tables.map((table2) => /* @__PURE__ */ jsxRuntimeExports.jsx("li", { className: "macro-tooltip-item", children: table2.name }, table2.id)) })
-  ] });
-}
-function MacroBar({ macros, tables, onRoll, onClear }) {
-  const [hoveredSlot, setHoveredSlot] = reactExports.useState(null);
-  const handleHover = (slotId, slotTables) => {
-    setHoveredSlot({ slotId, tables: slotTables });
-  };
-  const handleLeave = () => {
-    setHoveredSlot(null);
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "macro-bar", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "macro-slots", children: macros.map((slot) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MacroSlot,
-      {
-        slot,
-        tables,
-        onRoll,
-        onClear,
-        onHover: handleHover,
-        onLeave: handleLeave
-      },
-      slot.id
-    )) }),
-    hoveredSlot && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      MacroTooltip,
-      {
-        slotId: hoveredSlot.slotId,
-        tables: hoveredSlot.tables,
-        onClose: handleLeave
-      }
-    )
-  ] });
-}
 const TABLE_PRESETS = {
   d66: {
     name: "New d66 Table",
@@ -102865,28 +102724,15 @@ function DraggableTableItem({ table: table2, onClick, onContextMenu, onQuickRoll
     transition,
     isDragging: isSorting
   } = useSortable({ id: table2.id });
-  const [{ isDragging: isMacroDragging }, dragRef] = useDrag({
-    type: "TABLE",
-    item: {
-      type: "TABLE",
-      macroData: createTableMacro(0, table2.id, table2.name)
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    })
-  });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isSorting || isMacroDragging ? 0.5 : 1
+    opacity: isSorting ? 0.5 : 1
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
-      ref: (node2) => {
-        setNodeRef(node2);
-        dragRef(node2);
-      },
+      ref: setNodeRef,
       style,
       className: `table-item ${selectedTableId === table2.id ? "selected" : ""} draggable-table`,
       onClick: (e) => {
@@ -102936,20 +102782,12 @@ function CategoryHeaderDropZone({ category, children }) {
   );
 }
 function WeaveFileTree({ onNewTable, onDeleteTable }) {
-  const { tables, selectedTableId, loadTables, saveTable, deleteTable: deleteTable2, addTableToMacro, clearMacro, macros, rollMacroSlot, validateTable, customCategories, createCategory, renameCategory, deleteCategory } = useWeaveStore();
+  const { tables, selectedTableId, loadTables, saveTable, deleteTable: deleteTable2, validateTable, customCategories, createCategory, renameCategory, deleteCategory } = useWeaveStore();
   const { openTab } = useTabStore();
   const [activeId, setActiveId] = reactExports.useState(null);
   const sensors = useSensors(
     useSensor(PointerSensor)
   );
-  const customCollisionDetection = (args) => {
-    const pointerCollisions = pointerWithin(args);
-    const macroCollision = pointerCollisions.find((c2) => c2.id.toString().startsWith("macro-"));
-    if (macroCollision) {
-      return [macroCollision];
-    }
-    return closestCenter(args);
-  };
   const handleDragStart = (event) => {
     setActiveId(event.active.id);
   };
@@ -102959,11 +102797,6 @@ function WeaveFileTree({ onNewTable, onDeleteTable }) {
     if (over && active.id !== over.id) {
       const table2 = tables.find((t) => t.id === active.id);
       if (table2) {
-        if (over.id.toString().startsWith("macro-")) {
-          const slotIndex = parseInt(over.id.toString().replace("macro-", ""));
-          addTableToMacro(slotIndex, table2.id);
-          return;
-        }
         const isCategoryDrop = allCategories.includes(over.id);
         if (isCategoryDrop) {
           const newCategory = over.id;
@@ -103158,18 +102991,6 @@ function WeaveFileTree({ onNewTable, onDeleteTable }) {
       weaveTableId: table2.id
     });
   };
-  const macroSlots = macros.map((macro, index2) => ({
-    id: `${index2}`,
-    macro: macro.tables.length > 0 ? { tableIds: macro.tables } : null
-  }));
-  const handleMacroSlotClick = async (slotId) => {
-    const slotIndex = parseInt(slotId);
-    await rollMacroSlot(slotIndex);
-  };
-  const handleClearMacro = async (slotId) => {
-    const slotIndex = parseInt(slotId);
-    await clearMacro(slotIndex);
-  };
   const getMenuItems = () => {
     if (menu.type === "category") {
       return [
@@ -103306,20 +103127,11 @@ function WeaveFileTree({ onNewTable, onDeleteTable }) {
       DndContext,
       {
         sensors,
-        collisionDetection: customCollisionDetection,
+        collisionDetection: closestCenter,
         onDragStart: handleDragStart,
         onDragEnd: handleDragEnd,
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(DragOverlay, { children: activeId ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "drag-preview", children: tables.find((t) => t.id === activeId)?.name }) : null }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            MacroBar,
-            {
-              macros: macroSlots,
-              tables,
-              onRoll: handleMacroSlotClick,
-              onClear: handleClearMacro
-            }
-          ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "file-tree-content", children: Object.entries(filteredGrouped).map(([category, categoryTables]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "file-tree-category", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(CategoryHeaderDropZone, { category, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
               "div",
@@ -103338,7 +103150,7 @@ function WeaveFileTree({ onNewTable, onDeleteTable }) {
               {
                 items: categoryTables.map((t) => t.id),
                 strategy: verticalListSortingStrategy,
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "table-list", children: categoryTables.map((table2) => {
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { className: "table-list", children: categoryTables.slice().sort((a2, b2) => a2.name.localeCompare(b2.name)).map((table2) => {
                   const status = validationStatus[table2.id];
                   return /* @__PURE__ */ jsxRuntimeExports.jsx("li", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
                     DraggableTableItem,

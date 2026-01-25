@@ -47,6 +47,65 @@ async function ensureWeaveDir(): Promise<string> {
 }
 
 /**
+ * Sanitize a string to be safe for filenames
+ */
+function sanitizeFilename(name: string): string {
+    // Replace invalid characters with hyphens
+    return name.replace(/[<>:"/\\|?*]/g, '-')
+        .replace(/\s+/g, ' ') // Collapse whitespace
+        .trim()
+        .slice(0, 64); // Limit length
+}
+
+/**
+ * Get a unique file path for a table, handling collisions
+ */
+async function getUniqueFilePath(dir: string, name: string, tableId: string): Promise<string> {
+    const sanitized = sanitizeFilename(name) || 'Untitled-Table';
+    let fileName = `${sanitized}.json`;
+    let filePath = path.join(dir, fileName);
+
+    // If file doesn't exist, it's ours
+    try {
+        await fs.access(filePath);
+    } catch {
+        return filePath;
+    }
+
+    // File exists, check if it's the same table
+    try {
+        const data = await fs.readFile(filePath, 'utf-8');
+        const existing = JSON.parse(data) as Table;
+        if (existing.id === tableId) {
+            return filePath; // It's us!
+        }
+    } catch {
+        // Ignore read error, treat as collision
+    }
+
+    // Collision: append number
+    let counter = 1;
+    while (true) {
+        fileName = `${sanitized} (${counter}).json`;
+        filePath = path.join(dir, fileName);
+        try {
+            await fs.access(filePath);
+            // File exists, check if it's us (unlikely for incrementing counter, but safety first)
+            try {
+                const data = await fs.readFile(filePath, 'utf-8');
+                const existing = JSON.parse(data) as Table;
+                if (existing.id === tableId) {
+                    return filePath;
+                }
+            } catch { }
+            counter++;
+        } catch {
+            return filePath; // Free slot
+        }
+    }
+}
+
+/**
  * Read all table files from the .weave directory
  */
 async function readTableFiles(): Promise<Table[]> {
@@ -54,16 +113,32 @@ async function readTableFiles(): Promise<Table[]> {
         const weaveDir = getWeaveDirPath();
         const entries = await fs.readdir(weaveDir, { withFileTypes: true });
         const tables: Table[] = [];
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
 
         for (const entry of entries) {
             if (entry.isFile() && entry.name.endsWith('.json')) {
-                const filePath = path.join(weaveDir, entry.name);
+                const oldPath = path.join(weaveDir, entry.name);
                 try {
-                    const data = await fs.readFile(filePath, 'utf-8');
+                    const data = await fs.readFile(oldPath, 'utf-8');
                     const table = JSON.parse(data) as Table;
 
-                    // Update sourcePath to current location
-                    table.sourcePath = filePath;
+                    let currentPath = oldPath;
+
+                    // MIGRATION: If filename is UUID, rename it to Human Readable
+                    if (uuidRegex.test(entry.name)) {
+                        const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
+                        if (newPath !== oldPath) {
+                            try {
+                                await fs.rename(oldPath, newPath);
+                                currentPath = newPath;
+                            } catch (err) {
+                                console.error(`Failed to migrate table ${entry.name}`, err);
+                            }
+                        }
+                    }
+
+                    // Update sourcePath
+                    table.sourcePath = currentPath;
 
                     // Cache the table
                     tableCache.set(table.id, table);
@@ -89,11 +164,23 @@ async function readTableFiles(): Promise<Table[]> {
  */
 async function writeTableFile(table: Table): Promise<void> {
     const weaveDir = await ensureWeaveDir();
-    const fileName = `${table.id}.json`;
-    const filePath = path.join(weaveDir, fileName);
 
-    table.sourcePath = filePath;
-    await fs.writeFile(filePath, JSON.stringify(table, null, 2), 'utf-8');
+    // Calculate new path based on Name
+    const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
+
+    // If sourcePath exists and is different, remove the old file (Rename)
+    if (table.sourcePath && table.sourcePath !== newPath) {
+        try {
+            // Only delete if the old path actually exists
+            await fs.access(table.sourcePath);
+            await fs.unlink(table.sourcePath);
+        } catch (e) {
+            // Ignore (maybe file didn't exist or we can't delete it)
+        }
+    }
+
+    table.sourcePath = newPath;
+    await fs.writeFile(newPath, JSON.stringify(table, null, 2), 'utf-8');
 
     // Update cache
     tableCache.set(table.id, table);
@@ -112,6 +199,8 @@ async function deleteTableFile(tableId: string): Promise<void> {
                 throw error;
             }
         }
+    } else {
+        // Fallback or retry? cache should be populated.
     }
     tableCache.delete(tableId);
 }
@@ -143,12 +232,34 @@ function rollTable(table: Table, resolveTokens: boolean = true): any {
     const result = engine.roll(table);
 
     if (resolveTokens) {
+        // Handle TableReference explicitly (recursive roll)
+        if (typeof result.result === 'object' && result.result !== null && 'tag' in result.result) {
+            const refTag = (result.result as any).tag;
+            const refTable = findTableByTag(refTag);
+            if (refTable) {
+                const subResult = rollTable(refTable, true);
+                // Merge context from sub-roll
+                return {
+                    seed: result.seed,
+                    tableChain: [table.name, ...subResult.tableChain],
+                    rolls: [...result.rolls, ...subResult.rolls],
+                    warnings: [...result.warnings, ...subResult.warnings],
+                    result: subResult.result,
+                };
+            }
+            // If table not found, fall through or return as is?
+            // Fall through might confuse TokenResolver if it still doesn't like TableReference.
+            // But if we can't resolve it, we assume it's just a result value?
+            // We should probably just return it if we can't find the table.
+            return result;
+        }
+
         const resolver = new TokenResolver();
-        const resolved = resolver.resolve(result.result, (tag) => {
+        const resolved = resolver.resolve(result.result as string | Record<string, unknown>, (tag) => {
             const refTable = findTableByTag(tag);
             if (refTable) {
                 // Pass the initial roll value when resolving tokens recursively
-                return rollTable(refTable, true, result.rolls);
+                return rollTable(refTable, true);
             }
             return null;
         });
