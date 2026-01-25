@@ -1,6 +1,11 @@
 export interface ImageEntry {
     texture?: HTMLImageElement;
     bump?: HTMLImageElement;
+    // PBR maps (optional)
+    normal?: HTMLImageElement;
+    roughness?: HTMLImageElement;
+    metalness?: HTMLImageElement;
+    displacement?: HTMLImageElement;
 }
 
 export interface TextureDefinition {
@@ -9,6 +14,12 @@ export interface TextureDefinition {
     source?: string;
     bump?: string;
     material?: string;
+    // PBR maps (optional)
+    normal?: string;
+    roughness?: string;
+    metalness?: string;
+    displacement?: string;
+    isPBR?: boolean;  // Flag to use PBR rendering path
 }
 
 export interface ColorSet {

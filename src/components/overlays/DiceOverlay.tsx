@@ -33,7 +33,7 @@ export function DiceOverlay() {
                     if (containerRef.current) {
                         containerRef.current.style.visibility = 'hidden';
                     }
-                }, 2000);
+                }, 30000);
             };
 
             diceEngine.on('rollStart', onRollStart);

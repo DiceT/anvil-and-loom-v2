@@ -3,17 +3,33 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 export class SceneManager {
     private scene: THREE.Scene;
-    private camera: THREE.PerspectiveCamera;
+    private camera: THREE.OrthographicCamera;
     private controls: OrbitControls;
     private ambientLight: THREE.AmbientLight;
     private directionalLight: THREE.DirectionalLight;
 
+    // Visible world units (controls zoom level - smaller = bigger dice)
+    private viewHeight: number = 20;
+
     constructor(domElement: HTMLElement) {
         this.scene = new THREE.Scene();
 
-        // Setup Camera
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
-        this.camera.position.set(0, 25, 0); // Closer zoom
+        // Get container dimensions
+        const containerWidth = domElement.clientWidth || window.innerWidth;
+        const containerHeight = domElement.clientHeight || window.innerHeight;
+        const aspect = containerWidth / containerHeight;
+
+        // Setup Orthographic Camera (no perspective distortion)
+        // viewHeight controls how much of the world is visible vertically
+        const halfH = this.viewHeight / 2;
+        const halfW = halfH * aspect;
+
+        this.camera = new THREE.OrthographicCamera(
+            -halfW, halfW,   // left, right
+            halfH, -halfH,   // top, bottom (Y is flipped for top-down)
+            0.1, 1000        // near, far
+        );
+        this.camera.position.set(0, 50, 0); // Looking down
         this.camera.lookAt(0, 0, 0);
 
         // Setup Controls
@@ -27,8 +43,8 @@ export class SceneManager {
         this.ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         this.scene.add(this.ambientLight);
 
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        this.directionalLight.position.set(5, 50, 5); // Overhead light
+        this.directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        this.directionalLight.position.set(15, 42, 15); // Balanced height and angle
         this.directionalLight.castShadow = true;
         this.directionalLight.shadow.mapSize.width = 2048;
         this.directionalLight.shadow.mapSize.height = 2048;
@@ -113,20 +129,11 @@ export class SceneManager {
     }
 
     public getVisibleBounds() {
-        // Calculate visible area at Y=0 (Table surface)
-        // Camera distance (Y=25)
-        const distance = this.camera.position.y;
+        // For orthographic camera, visible bounds are directly from frustum
+        const halfH = (this.camera.top - this.camera.bottom) / 2;
+        const halfW = (this.camera.right - this.camera.left) / 2;
 
-        // Vertical FOV in radians
-        const vFOV = THREE.MathUtils.degToRad(this.camera.fov);
-
-        // Visible height (Depth)
-        const height = 2 * Math.tan(vFOV / 2) * distance;
-
-        // Visible width (Width)
-        const width = height * this.camera.aspect;
-
-        return { width, depth: height };
+        return { width: halfW * 2, depth: halfH * 2 };
     }
 
     public setDebugVisibility(visible: boolean) {
@@ -139,12 +146,40 @@ export class SceneManager {
         return this.scene;
     }
 
-    public getCamera(): THREE.PerspectiveCamera {
+    public getCamera(): THREE.OrthographicCamera {
         return this.camera;
     }
 
     public updateCamera(width: number, height: number) {
-        this.camera.aspect = width / height;
+        const aspect = width / height;
+        const halfH = this.viewHeight / 2;
+        const halfW = halfH * aspect;
+
+        this.camera.left = -halfW;
+        this.camera.right = halfW;
+        this.camera.top = halfH;
+        this.camera.bottom = -halfH;
+
         this.camera.updateProjectionMatrix();
+    }
+
+    /**
+     * Set the zoom level (how many world units are visible vertically)
+     */
+    public setViewHeight(newViewHeight: number) {
+        this.viewHeight = newViewHeight;
+    }
+
+    /**
+     * Convert normalized device coordinates to world position on the Y=0 plane.
+     */
+    public getWorldPosition(ndcX: number, ndcY: number): THREE.Vector3 {
+        // For Orthographic camera, we can unproject directly
+        const vec = new THREE.Vector3(ndcX, ndcY, 0.5);
+        vec.unproject(this.camera);
+        // Y will be at some depth - we want the X/Z on the ground plane
+        // For top-down ortho, X and Z map directly
+        vec.y = 0;
+        return vec;
     }
 }

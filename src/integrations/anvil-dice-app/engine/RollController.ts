@@ -3,7 +3,7 @@ import * as CANNON from 'cannon-es';
 import { DiceForge } from './DiceForge';
 import { PhysicsWorld } from './core/PhysicsWorld';
 import { DiceParser } from './DiceParser';
-import type { DiceTheme, PhysicsSettings, RollResult } from './types';
+import type { DiceTheme, PhysicsSettings, RollResult, DiceRollRequest, DiePositionRequest } from './types';
 import { DEFAULT_THEME, DEFAULT_PHYSICS } from './types';
 
 interface ActiveDie {
@@ -14,6 +14,9 @@ interface ActiveDie {
     groupId: number; // Index in ParseResult.groups
     type: string;    // 'd6', 'd100', 'd%_tens', 'd%_ones'
     rollId: number;  // Unique ID for this specific die spawn
+    isRepositioning?: boolean;
+    targetPosition?: THREE.Vector3;
+    targetQuaternion?: THREE.Quaternion;
 }
 
 export class RollController {
@@ -22,7 +25,7 @@ export class RollController {
     private scene: THREE.Scene;
 
     private activeDice: ActiveDie[] = [];
-    private bounds = { width: 44, depth: 28 };
+    private bounds = { width: 44, depth: 28, offsetX: 0, offsetZ: 0 };
 
     // Settings
     private currentTheme: DiceTheme = DEFAULT_THEME;
@@ -35,7 +38,7 @@ export class RollController {
     private currentModifier = 0;
     private currentNotation = "";
     private currentParseResult: import('./DiceParser').ParseResult | null = null;
-    private spawnOrigin: 'right' | 'bottom' = 'right';
+    private spawnOrigin: 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' = 'right';
 
     constructor(physicsWorld: PhysicsWorld, scene: THREE.Scene) {
         this.physicsWorld = physicsWorld;
@@ -51,49 +54,127 @@ export class RollController {
         this.currentPhysics = physics;
     }
 
-    public setBounds(width: number, depth: number) {
-        this.bounds = { width, depth };
+    public setBounds(width: number, depth: number, offsetX: number = 0, offsetZ: number = 0) {
+        this.bounds = { width, depth, offsetX, offsetZ };
     }
 
-    public setSpawnOrigin(origin: 'right' | 'bottom') {
+    public setSpawnOrigin(origin: 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right') {
         this.spawnOrigin = origin;
     }
 
-    public roll(notation: string) {
+    public roll(request: string | DiceRollRequest[]) {
         this.clear();
         this.isRolling = true;
-        this.currentNotation = notation;
 
-        const parsed = DiceParser.parse(notation);
-        this.currentParseResult = parsed;
-        this.currentModifier = parsed.modifier;
+        // Handle array of requests (per-group theming)
+        if (Array.isArray(request)) {
+            // Combine all notations
+            const combinedNotation = request.map(r => r.notation).join(' + ');
+            this.currentNotation = combinedNotation;
 
-        // Reset UI via callback (optional, or wait for finish)
+            let dieKey = 0;
+            let groupIndex = 0;
 
-        // Spawn Dice
-        let dieKey = 0;
-        parsed.groups.forEach((group, groupIndex) => {
-            const count = Math.abs(group.count);
+            request.forEach((req) => {
+                const parsed = DiceParser.parse(req.notation);
+                const groupTheme = req.theme
+                    ? { ...this.currentTheme, ...req.theme }
+                    : this.currentTheme;
 
-            for (let i = 0; i < count; i++) {
-                if (group.type === 'd%') {
-                    this.spawnDie('d100', dieKey++, groupIndex, 'd%_tens');
-                    this.spawnDie('d10', dieKey++, groupIndex, 'd%_ones');
-                } else if (group.type === 'd66') {
-                    // d66 = d60 (Tens) + d6 (Ones)
-                    this.spawnDie('d60', dieKey++, groupIndex, 'd66_tens');
-                    this.spawnDie('d6', dieKey++, groupIndex, 'd66_ones');
-                } else if (group.type === 'd88') {
-                    // d88 = d80 (Tens) + d8 (Ones)
-                    this.spawnDie('d80', dieKey++, groupIndex, 'd88_tens');
-                    this.spawnDie('d8', dieKey++, groupIndex, 'd88_ones');
-                } else {
-                    this.spawnDie(group.type, dieKey++, groupIndex, group.type);
+                this.currentModifier += parsed.modifier;
+
+                parsed.groups.forEach((group) => {
+                    const count = Math.abs(group.count);
+
+                    for (let i = 0; i < count; i++) {
+                        if (group.type === 'd%') {
+                            this.spawnDie('d100', dieKey++, groupIndex, 'd%_tens', groupTheme);
+                            this.spawnDie('d10', dieKey++, groupIndex, 'd%_ones', groupTheme);
+                        } else if (group.type === 'd66') {
+                            // d66 = d6 (Tens) + d6 (Ones) with secondary colors
+                            const tensTheme = { ...groupTheme };
+                            const onesTheme = groupTheme.diceColorSecondary
+                                ? {
+                                    ...groupTheme,
+                                    diceColor: groupTheme.diceColorSecondary,
+                                    labelColor: groupTheme.labelColorSecondary || groupTheme.labelColor,
+                                    outlineColor: groupTheme.outlineColorSecondary || groupTheme.outlineColor
+                                }
+                                : groupTheme;
+                            this.spawnDie('d6', dieKey++, groupIndex, 'd66_tens', tensTheme);
+                            this.spawnDie('d6', dieKey++, groupIndex, 'd66_ones', onesTheme);
+                        } else if (group.type === 'd88') {
+                            // d88 = d8 (Tens) + d8 (Ones) with secondary colors
+                            const tensTheme = { ...groupTheme };
+                            const onesTheme = groupTheme.diceColorSecondary
+                                ? {
+                                    ...groupTheme,
+                                    diceColor: groupTheme.diceColorSecondary,
+                                    labelColor: groupTheme.labelColorSecondary || groupTheme.labelColor,
+                                    outlineColor: groupTheme.outlineColorSecondary || groupTheme.outlineColor
+                                }
+                                : groupTheme;
+                            this.spawnDie('d8', dieKey++, groupIndex, 'd88_tens', tensTheme);
+                            this.spawnDie('d8', dieKey++, groupIndex, 'd88_ones', onesTheme);
+                        } else {
+                            this.spawnDie(group.type, dieKey++, groupIndex, group.type, groupTheme);
+                        }
+                    }
+                    groupIndex++;
+                });
+            });
+
+            // Store combined parse result
+            this.currentParseResult = DiceParser.parse(combinedNotation);
+
+        } else {
+            // Simple string notation
+            this.currentNotation = request;
+
+            const parsed = DiceParser.parse(request);
+            this.currentParseResult = parsed;
+            this.currentModifier = parsed.modifier;
+
+            let dieKey = 0;
+            parsed.groups.forEach((group, groupIndex) => {
+                const count = Math.abs(group.count);
+
+                for (let i = 0; i < count; i++) {
+                    if (group.type === 'd%') {
+                        this.spawnDie('d100', dieKey++, groupIndex, 'd%_tens', this.currentTheme);
+                        this.spawnDie('d10', dieKey++, groupIndex, 'd%_ones', this.currentTheme);
+                    } else if (group.type === 'd66') {
+                        // d66 = d6 (Tens) + d6 (Ones) with secondary colors
+                        const onesTheme = this.currentTheme.diceColorSecondary
+                            ? {
+                                ...this.currentTheme,
+                                diceColor: this.currentTheme.diceColorSecondary,
+                                labelColor: this.currentTheme.labelColorSecondary || this.currentTheme.labelColor,
+                                outlineColor: this.currentTheme.outlineColorSecondary || this.currentTheme.outlineColor
+                            }
+                            : this.currentTheme;
+                        this.spawnDie('d6', dieKey++, groupIndex, 'd66_tens', this.currentTheme);
+                        this.spawnDie('d6', dieKey++, groupIndex, 'd66_ones', onesTheme);
+                    } else if (group.type === 'd88') {
+                        // d88 = d8 (Tens) + d8 (Ones) with secondary colors
+                        const onesTheme = this.currentTheme.diceColorSecondary
+                            ? {
+                                ...this.currentTheme,
+                                diceColor: this.currentTheme.diceColorSecondary,
+                                labelColor: this.currentTheme.labelColorSecondary || this.currentTheme.labelColor,
+                                outlineColor: this.currentTheme.outlineColorSecondary || this.currentTheme.outlineColor
+                            }
+                            : this.currentTheme;
+                        this.spawnDie('d8', dieKey++, groupIndex, 'd88_tens', this.currentTheme);
+                        this.spawnDie('d8', dieKey++, groupIndex, 'd88_ones', onesTheme);
+                    } else {
+                        this.spawnDie(group.type, dieKey++, groupIndex, group.type, this.currentTheme);
+                    }
                 }
-            }
-        });
+            });
+        }
 
-        // If no dice were spawned (e.g. only modifiers or empty), finish immediately
+        // If no dice were spawned, finish immediately
         if (this.activeDice.length === 0) {
             this.isRolling = false;
             this.finishRoll();
@@ -111,15 +192,111 @@ export class RollController {
         this.currentNotation = "";
     }
 
-    public update() {
-        if (!this.isRolling || this.activeDice.length === 0) return;
+    /**
+     * Reposition dice to specific world coordinates.
+     * NOTE: Optimal rotation is currently only mapped for d8.
+     */
+    public async repositionDice(targets: DiePositionRequest[], duration: number = 500): Promise<void> {
+        // Find matching dice by ID
+        const diceToMove: ActiveDie[] = [];
+
+        for (const target of targets) {
+            const die = this.activeDice.find(d => d.rollId === target.id);
+            if (die) {
+                die.isRepositioning = true;
+                die.targetPosition = new THREE.Vector3(target.position.x, target.position.y, target.position.z);
+
+                if (target.rotation) {
+                    die.targetQuaternion = new THREE.Quaternion(
+                        target.rotation.x,
+                        target.rotation.y,
+                        target.rotation.z,
+                        target.rotation.w
+                    );
+                } else {
+                    // Use optimal rotation if available
+                    die.targetQuaternion = this.getOptimalRotation(die);
+                }
+
+                // Disable physics during repositioning
+                die.body.type = CANNON.Body.KINEMATIC;
+                diceToMove.push(die);
+            }
+        }
+
+        if (diceToMove.length === 0) return;
+
+        // Animate over duration
+        const startTime = performance.now();
+        const startPositions = diceToMove.map(d => d.mesh.position.clone());
+        const startQuaternions = diceToMove.map(d => d.mesh.quaternion.clone());
+
+        return new Promise((resolve) => {
+            const animate = () => {
+                const elapsed = performance.now() - startTime;
+                const t = Math.min(elapsed / duration, 1);
+                const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+                for (let i = 0; i < diceToMove.length; i++) {
+                    const die = diceToMove[i];
+                    if (!die.targetPosition || !die.targetQuaternion) continue;
+
+                    // Lerp position
+                    die.mesh.position.lerpVectors(startPositions[i], die.targetPosition, eased);
+                    die.mesh.quaternion.copy(startQuaternions[i]).slerp(die.targetQuaternion, eased);
+
+                    // Sync physics body
+                    die.body.position.set(die.mesh.position.x, die.mesh.position.y, die.mesh.position.z);
+                    die.body.quaternion.set(die.mesh.quaternion.x, die.mesh.quaternion.y, die.mesh.quaternion.z, die.mesh.quaternion.w);
+                }
+
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Done. Re-enable physics if needed
+                    for (const die of diceToMove) {
+                        die.isRepositioning = false;
+                        die.body.type = CANNON.Body.DYNAMIC;
+                        die.body.velocity.set(0, 0, 0);
+                        die.body.angularVelocity.set(0, 0, 0);
+                    }
+                    resolve();
+                }
+            };
+            animate();
+        });
+    }
+
+    public update(time: number) {
+        if (!this.isRolling || this.activeDice.length === 0) {
+            // Update liquid shader even when not rolling
+            this.activeDice.forEach(die => {
+                if (die.mesh.userData.isLiquid && die.mesh.userData.liquidMesh) {
+                    const liquidMat = die.mesh.userData.liquidMesh.material as THREE.ShaderMaterial;
+                    if (liquidMat.uniforms && liquidMat.uniforms.time) {
+                        liquidMat.uniforms.time.value = time % 7200;
+                    }
+                }
+            });
+            return;
+        }
 
         let allStopped = true;
 
         // Sync Physics to Visuals & Check Stability
         this.activeDice.forEach(die => {
+            if (die.isRepositioning) return; // Skip repositioning dice
+
             die.mesh.position.copy(die.body.position as any);
             die.mesh.quaternion.copy(die.body.quaternion as any);
+
+            // Update liquid shader
+            if (die.mesh.userData.isLiquid && die.mesh.userData.liquidMesh) {
+                const liquidMat = die.mesh.userData.liquidMesh.material as THREE.ShaderMaterial;
+                if (liquidMat.uniforms && liquidMat.uniforms.time) {
+                    liquidMat.uniforms.time.value = time % 7200;
+                }
+            }
 
             if (!die.stopped) {
                 // Check velocity
@@ -131,7 +308,6 @@ export class RollController {
                     die.stopped = true;
                     // Calculate Result immediately when one stops
                     die.result = this.getDieValue(die);
-                    console.log(`Die stopped. Result: ${die.result}`);
                 } else {
                     allStopped = false;
                 }
@@ -140,7 +316,6 @@ export class RollController {
 
         if (allStopped && this.isRolling) {
             this.isRolling = false;
-            console.log("All dice stopped.");
             this.finishRoll();
         }
     }
@@ -149,6 +324,7 @@ export class RollController {
         // Aggregate Results
         let total = 0;
         const breakdown: { type: string, value: number, dropped?: boolean }[] = [];
+        const diceList: { id: number; groupId: number; value: number; type: string }[] = [];
 
         // Group dice by groupId to handle d%
         const groups = new Map<number, ActiveDie[]>();
@@ -158,12 +334,9 @@ export class RollController {
         });
 
         groups.forEach((dice, _) => {
-            // Detect special types
-            // Just check the first die's type to guess group intent?
             const firstType = dice[0]?.type || '';
 
             if (firstType.startsWith('d%')) {
-                // Sort by ID to ensure pairs
                 dice.sort((a, b) => a.rollId - b.rollId);
 
                 for (let i = 0; i < dice.length; i += 2) {
@@ -179,11 +352,11 @@ export class RollController {
                         if (isNaN(ones)) ones = 0;
 
                         let val = tens + ones;
-                        // d%: 00 + 0 = 100
                         if (val === 0 && tensStr === '00' && onesStr === '0') val = 100;
 
                         total += val;
                         breakdown.push({ type: 'd%', value: val });
+                        diceList.push({ id: tenDie.rollId, groupId: tenDie.groupId, value: val, type: 'd%' });
                     }
                 }
             } else if (firstType.startsWith('d66')) {
@@ -192,12 +365,13 @@ export class RollController {
                     const tenDie = dice[i];
                     const oneDie = dice[i + 1];
                     if (tenDie && oneDie) {
-                        const tens = parseInt(String(tenDie.result)) || 10;
+                        const tens = parseInt(String(tenDie.result)) || 1;
                         const ones = parseInt(String(oneDie.result)) || 1;
-                        // d60 returns 10..60. Just add.
-                        const val = tens + ones;
+                        // d66: tens is 1-6, ones is 1-6, result is tens*10 + ones
+                        const val = tens * 10 + ones;
                         total += val;
                         breakdown.push({ type: 'd66', value: val });
+                        diceList.push({ id: tenDie.rollId, groupId: tenDie.groupId, value: val, type: 'd66' });
                     }
                 }
             } else if (firstType.startsWith('d88')) {
@@ -206,21 +380,21 @@ export class RollController {
                     const tenDie = dice[i];
                     const oneDie = dice[i + 1];
                     if (tenDie && oneDie) {
-                        const tens = parseInt(String(tenDie.result)) || 10;
+                        const tens = parseInt(String(tenDie.result)) || 1;
                         const ones = parseInt(String(oneDie.result)) || 1;
-                        const val = tens + ones;
+                        // d88: tens is 1-8, ones is 1-8, result is tens*10 + ones
+                        const val = tens * 10 + ones;
                         total += val;
                         breakdown.push({ type: 'd88', value: val });
+                        diceList.push({ id: tenDie.rollId, groupId: tenDie.groupId, value: val, type: 'd88' });
                     }
                 }
             } else {
                 // Standard Dice
-                // Check Parsed Group for Keep Logic
                 const groupConfig = this.currentParseResult?.groups[dice[0].groupId];
 
-                // Collect values first to sort if needed
                 type DieRef = { die: ActiveDie, val: number };
-                let dieRefs: DieRef[] = [];
+                const dieRefs: DieRef[] = [];
 
                 dice.forEach(d => {
                     let valStr = String(d.result);
@@ -233,12 +407,9 @@ export class RollController {
 
                 // Apply Keep Logic
                 if (groupConfig && groupConfig.keep) {
-                    // Sort
                     if (groupConfig.keep === 'highest') {
-                        // Descending
                         dieRefs.sort((a, b) => b.val - a.val);
                     } else {
-                        // Lowest -> Ascending
                         dieRefs.sort((a, b) => a.val - b.val);
                     }
 
@@ -250,13 +421,14 @@ export class RollController {
                             total += ref.val;
                         }
                         breakdown.push({ type: ref.die.type, value: ref.val, dropped: !kept });
+                        diceList.push({ id: ref.die.rollId, groupId: ref.die.groupId, value: ref.val, type: ref.die.type });
                     });
 
                 } else {
-                    // Standard Sum
                     dieRefs.forEach(ref => {
                         total += ref.val;
                         breakdown.push({ type: ref.die.type, value: ref.val, dropped: false });
+                        diceList.push({ id: ref.die.rollId, groupId: ref.die.groupId, value: ref.val, type: ref.die.type });
                     });
                 }
             }
@@ -269,12 +441,50 @@ export class RollController {
             total: total,
             notation: this.currentNotation,
             breakdown: breakdown,
-            modifier: this.currentModifier
+            modifier: this.currentModifier,
+            dice: diceList
         };
 
         if (this.onRollComplete) {
             this.onRollComplete(result);
         }
+    }
+
+    /**
+     * Get the optimal rotation for a die to show its current value clearly.
+     * NOTE: Currently only mapped for d8. Other dice return current rotation.
+     */
+    private getOptimalRotation(die: ActiveDie): THREE.Quaternion {
+        // Only d8 has optimal rotation mapping currently
+        if (die.type !== 'd8') {
+            return die.mesh.quaternion.clone();
+        }
+
+        // d8 face normals - maps value to target normal (pointing up)
+        const d8Normals: { [key: number]: THREE.Vector3 } = {
+            1: new THREE.Vector3(1, 1, 1).normalize(),
+            2: new THREE.Vector3(-1, -1, 1).normalize(),
+            3: new THREE.Vector3(-1, 1, -1).normalize(),
+            4: new THREE.Vector3(1, -1, -1).normalize(),
+            5: new THREE.Vector3(-1, 1, 1).normalize(),
+            6: new THREE.Vector3(1, -1, 1).normalize(),
+            7: new THREE.Vector3(1, 1, -1).normalize(),
+            8: new THREE.Vector3(-1, -1, -1).normalize()
+        };
+
+        const val = parseInt(String(die.result));
+        const targetNormal = d8Normals[val];
+
+        if (!targetNormal) {
+            return die.mesh.quaternion.clone();
+        }
+
+        // Calculate quaternion to rotate targetNormal to world up (0, 1, 0)
+        const worldUp = new THREE.Vector3(0, 1, 0);
+        const q = new THREE.Quaternion();
+        q.setFromUnitVectors(targetNormal, worldUp);
+
+        return q;
     }
 
     private getDieValue(die: ActiveDie): string | number {
@@ -283,21 +493,14 @@ export class RollController {
 
         if (!faceValues || faceValues.length === 0) return '?';
 
-        // 1. Get World Up Vector (0, 1, 0)
-        // 2. Transform into Local Space of the Die
         const worldUp = new THREE.Vector3(0, 1, 0);
-
-        // Inverse Quaternion of the die
         const quaternion = mesh.quaternion.clone().invert();
-
-        // Apply inverse rotation to World Up -> Local Up
         const localUp = worldUp.applyQuaternion(quaternion);
 
-        // 3. Check for D4 (values are arrays)
+        // Check for D4 (values are arrays)
         const isD4 = Array.isArray(faceValues[0].value);
 
         if (isD4) {
-            // For D4, look for the face pointing DOWN (opposite to up)
             const localDown = localUp.clone().negate();
 
             let closestFace = null;
@@ -319,7 +522,6 @@ export class RollController {
             return result || '?';
 
         } else {
-            // Standard Dice (Face pointing UP)
             let closestFace = null;
             let maxDot = -Infinity;
 
@@ -335,42 +537,180 @@ export class RollController {
         }
     }
 
-    private spawnDie(type: string, rollId: number, groupId: number, subType: string) {
+    private spawnDie(type: string, rollId: number, groupId: number, subType: string, theme: DiceTheme) {
         try {
             // If d%_tens or d%_ones, we need physical mesh for d100/d10
-            let meshType = type; // Default
-            if (subType === 'd%_tens') meshType = 'd100'; // Tens Die
-            if (subType === 'd%_ones') meshType = 'd10';  // Ones Die
+            let meshType = type;
+            if (subType === 'd%_tens') meshType = 'd100';
+            if (subType === 'd%_ones') meshType = 'd10';
 
-            // Use Current Theme
-            const mesh = this.diceForge.createdice(meshType, this.currentTheme);
+            const mesh = this.diceForge.createdice(meshType, theme);
 
             // Spawn Position based on spawnOrigin
             let x = 0, y = 0, z = 0;
             let vx = 0, vy = 0, vz = 0;
+            let angularX = 0, angularY = 0, angularZ = 0;
             const throwForce = (this.currentPhysics.throwForce || 40) + Math.random() * 5;
 
-            if (this.spawnOrigin === 'bottom') {
-                // Spawn at +Z (assuming +Z is "bottom" of screen in top-down view)
-                // Bounds Depth / 2 = Bottom wall
-                const wallZ = this.bounds.depth / 2;
-                const spawnZ = wallZ - 1; // Just inside
+            // Special behavior for d2 (coin flip)
+            if (meshType === 'd2') {
+                // Spawn from high above, near center with slight random offset
+                x = (Math.random() - 0.5) * 4;
+                y = 45 + Math.random() * 5; // Very high drop
+                z = (Math.random() - 0.5) * 3;
 
-                // Spread along X axis
+                // Some horizontal velocity for arc effect
+                vx = (Math.random() - 0.5) * 8;
+                vy = 0; // Let gravity do the work
+                vz = (Math.random() - 0.5) * 8;
+
+                // Clean flip spin along ONE horizontal axis only
+                const flipAxis = Math.random() > 0.5 ? 'x' : 'z';
+                const flipSpeed = 12 + Math.random() * 8; // More visible flip with longer drop
+                if (flipAxis === 'x') {
+                    angularX = flipSpeed * (Math.random() > 0.5 ? 1 : -1);
+                    angularY = 0;
+                    angularZ = 0;
+                } else {
+                    angularX = 0;
+                    angularY = 0;
+                    angularZ = flipSpeed * (Math.random() > 0.5 ? 1 : -1);
+                }
+
+            } else if (this.spawnOrigin === 'bottom') {
+                // Dice enter from bottom, throw upward (-Z)
+                const wallZ = this.bounds.depth / 2;
+                const spawnZ = wallZ - 1;
+
                 const safeX = (this.bounds.width / 2) - 4;
                 const spread = safeX > 0 ? safeX * 2 : 5;
 
                 x = (Math.random() - 0.5) * spread;
-                y = 5 + Math.random() * 2; // Higher drop
-                z = spawnZ + (Math.random() * 2); // Slightly varied
+                y = 5 + Math.random() * 2;
+                z = spawnZ + (Math.random() * 2);
 
-                // Velocity: -Z (towards center/top)
-                vx = (Math.random() - 0.5) * 5; // Slight drift
-                vy = 0; // Gravity does the rest
+                vx = (Math.random() - 0.5) * 5;
+                vy = 0;
                 vz = -throwForce;
 
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
+            } else if (this.spawnOrigin === 'top') {
+                // Dice enter from top, throw downward (+Z)
+                const wallZ = this.bounds.depth / 2;
+                const spawnZ = -wallZ + 1;
+
+                const safeX = (this.bounds.width / 2) - 4;
+                const spread = safeX > 0 ? safeX * 2 : 5;
+
+                x = (Math.random() - 0.5) * spread;
+                y = 5 + Math.random() * 2;
+                z = spawnZ - (Math.random() * 2);
+
+                vx = (Math.random() - 0.5) * 5;
+                vy = 0;
+                vz = throwForce;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
+            } else if (this.spawnOrigin === 'left') {
+                // Dice enter from left, throw rightward (+X)
+                const wallX = this.bounds.width / 2;
+                const spawnX = -wallX + 1;
+
+                const safeZ = (this.bounds.depth / 2) - 3;
+                const spread = safeZ > 0 ? safeZ * 2 : 2;
+
+                x = spawnX - (Math.random() - 0.5) * 1;
+                y = 2 + Math.random() * 1;
+                z = (Math.random() - 0.5) * spread;
+
+                vx = throwForce;
+                vy = 0;
+                vz = (Math.random() - 0.5) * 2;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
+            } else if (this.spawnOrigin === 'top-left') {
+                // Dice enter from top-left corner, throw diagonally toward center
+                const wallX = this.bounds.width / 2;
+                const wallZ = this.bounds.depth / 2;
+
+                x = -wallX + 1 + (Math.random() - 0.5) * 2;
+                y = 3 + Math.random() * 2;
+                z = -wallZ + 1 + (Math.random() - 0.5) * 2;
+
+                const diagForce = throwForce * 0.7;
+                vx = diagForce;
+                vy = 0;
+                vz = diagForce;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
+            } else if (this.spawnOrigin === 'top-right') {
+                // Dice enter from top-right corner
+                const wallX = this.bounds.width / 2;
+                const wallZ = this.bounds.depth / 2;
+
+                x = wallX - 1 + (Math.random() - 0.5) * 2;
+                y = 3 + Math.random() * 2;
+                z = -wallZ + 1 + (Math.random() - 0.5) * 2;
+
+                const diagForce = throwForce * 0.7;
+                vx = -diagForce;
+                vy = 0;
+                vz = diagForce;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
+            } else if (this.spawnOrigin === 'bottom-left') {
+                // Dice enter from bottom-left corner
+                const wallX = this.bounds.width / 2;
+                const wallZ = this.bounds.depth / 2;
+
+                x = -wallX + 1 + (Math.random() - 0.5) * 2;
+                y = 3 + Math.random() * 2;
+                z = wallZ - 1 + (Math.random() - 0.5) * 2;
+
+                const diagForce = throwForce * 0.7;
+                vx = diagForce;
+                vy = 0;
+                vz = -diagForce;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
+            } else if (this.spawnOrigin === 'bottom-right') {
+                // Dice enter from bottom-right corner
+                const wallX = this.bounds.width / 2;
+                const wallZ = this.bounds.depth / 2;
+
+                x = wallX - 1 + (Math.random() - 0.5) * 2;
+                y = 3 + Math.random() * 2;
+                z = wallZ - 1 + (Math.random() - 0.5) * 2;
+
+                const diagForce = throwForce * 0.7;
+                vx = -diagForce;
+                vy = 0;
+                vz = -diagForce;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
+
             } else {
-                // Default: Right Side (+X)
+                // Default: right - Dice enter from right, throw leftward (-X)
                 const wallX = this.bounds.width / 2;
                 const spawnX = wallX - 1;
 
@@ -381,11 +721,18 @@ export class RollController {
                 y = 2 + Math.random() * 1;
                 z = (Math.random() - 0.5) * spread;
 
-                // Velocity: -X (towards left)
                 vx = -throwForce;
                 vy = 0;
                 vz = (Math.random() - 0.5) * 2;
+
+                angularX = (Math.random() - 0.5) * 20;
+                angularY = (Math.random() - 0.5) * 20;
+                angularZ = (Math.random() - 0.5) * 20;
             }
+
+            // Apply bounds offset to spawn position
+            x += this.bounds.offsetX;
+            z += this.bounds.offsetZ;
 
             mesh.position.set(x, y, z);
             mesh.castShadow = true;
@@ -412,13 +759,10 @@ export class RollController {
                 Math.random() * Math.PI * 2
             );
 
-            // Velocity set above
             const velocity = new CANNON.Vec3(vx, vy, vz);
-
             body.velocity.copy(velocity);
-            body.angularVelocity.set((Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20);
+            body.angularVelocity.set(angularX, angularY, angularZ);
 
-            // Register
             this.scene.add(mesh);
             this.physicsWorld.addBody(body);
 
@@ -428,7 +772,7 @@ export class RollController {
                 stopped: false,
                 result: null,
                 groupId: groupId,
-                type: subType, // 'd%_tens', 'd10', etc.
+                type: subType,
                 rollId: rollId
             });
 

@@ -23,6 +23,38 @@ export const TEXTURELIST: { [key: string]: TextureDefinition } = {
     'wovenlinen': { name: 'Woven Linen', composite: 'multiply', source: 'textures/wovenlinen.png', bump: 'textures/wovenlinen-bump.png', material: 'cloth' },
     'thearchitect': { name: 'The Architect', composite: 'multiply', source: 'textures/thearchitect.png', bump: 'textures/thearchitect-bump.png', material: 'metal' },
     'eldritchvein': { name: 'Eldritch Vein', composite: 'multiply', source: 'textures/eldritchvein.png', bump: 'textures/eldritchvein-bump.png', material: 'metal' },
+    // PBR Textures
+    'metal053c': {
+        name: 'Rusted Iron',
+        composite: 'source-over',
+        source: 'textures/pbr/metal053c/Metal053C_1K-JPG_Color.jpg',
+        normal: 'textures/pbr/metal053c/Metal053C_1K-JPG_NormalGL.jpg',
+        roughness: 'textures/pbr/metal053c/Metal053C_1K-JPG_Roughness.jpg',
+        metalness: 'textures/pbr/metal053c/Metal053C_1K-JPG_Metalness.jpg',
+        displacement: 'textures/pbr/metal053c/Metal053C_1K-JPG_Displacement.jpg',
+        material: 'metal',
+        isPBR: true
+    },
+    'concrete010': {
+        name: 'Concrete',
+        composite: 'source-over',
+        source: 'textures/pbr/contrete010/Concrete010_1K-JPG_Color.jpg',
+        normal: 'textures/pbr/contrete010/Concrete010_1K-JPG_NormalGL.jpg',
+        roughness: 'textures/pbr/contrete010/Concrete010_1K-JPG_Roughness.jpg',
+        displacement: 'textures/pbr/contrete010/Concrete010_1K-JPG_Displacement.jpg',
+        material: 'stone',
+        isPBR: true
+    },
+    'wood040': {
+        name: 'Polished Wood',
+        composite: 'source-over',
+        source: 'textures/pbr/wood040/Wood040_1K-JPG_Color.jpg',
+        normal: 'textures/pbr/wood040/Wood040_1K-JPG_NormalGL.jpg',
+        roughness: 'textures/pbr/wood040/Wood040_1K-JPG_Roughness.jpg',
+        displacement: 'textures/pbr/wood040/Wood040_1K-JPG_Displacement.jpg',
+        material: 'wood',
+        isPBR: true
+    },
 };
 
 // Global cache to persist loaded images across engine restarts
@@ -63,6 +95,11 @@ class ImageLoader {
         for (const k in TEXTURELIST) {
             if (TEXTURELIST[k].source) totalToLoad++;
             if (TEXTURELIST[k].bump) totalToLoad++;
+            // PBR maps
+            if (TEXTURELIST[k].normal) totalToLoad++;
+            if (TEXTURELIST[k].roughness) totalToLoad++;
+            if (TEXTURELIST[k].metalness) totalToLoad++;
+            if (TEXTURELIST[k].displacement) totalToLoad++;
         }
 
         if (totalToLoad === 0) {
@@ -95,6 +132,39 @@ class ImageLoader {
                 img.onerror = () => { console.warn('Bump load failed:', entry.bump); checkDone(); };
                 img.src = entry.bump;
                 globalImageCache[key].bump = img;
+            }
+
+            // PBR maps
+            if (entry.normal) {
+                const img = new Image();
+                img.onload = checkDone;
+                img.onerror = () => { console.warn('Normal load failed:', entry.normal); checkDone(); };
+                img.src = entry.normal;
+                globalImageCache[key].normal = img;
+            }
+
+            if (entry.roughness) {
+                const img = new Image();
+                img.onload = checkDone;
+                img.onerror = () => { console.warn('Roughness load failed:', entry.roughness); checkDone(); };
+                img.src = entry.roughness;
+                globalImageCache[key].roughness = img;
+            }
+
+            if (entry.metalness) {
+                const img = new Image();
+                img.onload = checkDone;
+                img.onerror = () => { console.warn('Metalness load failed:', entry.metalness); checkDone(); };
+                img.src = entry.metalness;
+                globalImageCache[key].metalness = img;
+            }
+
+            if (entry.displacement) {
+                const img = new Image();
+                img.onload = checkDone;
+                img.onerror = () => { console.warn('Displacement load failed:', entry.displacement); checkDone(); };
+                img.src = entry.displacement;
+                globalImageCache[key].displacement = img;
             }
         }
     }

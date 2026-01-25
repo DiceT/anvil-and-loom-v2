@@ -3,8 +3,10 @@ import * as CANNON from 'cannon-es';
 import { DiceColors } from './DiceColors';
 import type { DiceTheme } from './types';
 import { DEFAULT_THEME } from './types';
+import { LiquidShader, SingularityLiquidShader, FlameCoreShader, VortexLiquidShader, NebulaLiquidShader, CausticLiquidShader } from './core/shaders';
 
 export class DiceForge {
+
     private diceColors: DiceColors;
     private geometryCache: Record<string, THREE.Geometry> = {};
 
@@ -16,23 +18,7 @@ export class DiceForge {
 
     private static readonly D4_LABELS = ['1', '2', '3', '4'];
     private static readonly D6_LABELS = ['1', '2', '3', '4', '5', '6'];
-    private static readonly D60_LABELS = ['10', '20', '30', '40', '50', '60']; // Tens d6
-
     private static readonly D8_LABELS = ['1', '7', '5', '3', '6', '4', '2', '8'];
-    private static readonly D80_LABELS = ['10', '70', '50', '30', '60', '40', '20', '80']; // Tens d8
-
-    private static readonly D14_LABELS = [
-        '1', '13', '5', '9', '7', '3', '11',   // Top Hemisphere
-        '8', '12', '4', '14', '2', '10', '6'   // Bottom Hemisphere
-    ];
-    private static readonly D16_LABELS = [
-        '1', '15', '3', '7', '11', '9', '5', '13',  // Top Hemisphere (1-8)
-        '8', '4', '12', '16', '2', '14', '10', '6'  // Bottom Hemisphere (9-16)
-    ];
-    private static readonly D18_LABELS = [
-        '1', '17', '3', '13', '7', '9', '11', '5', '15',  // Top Hemisphere (1-9)
-        '10', '8', '14', '4', '18', '2', '16', '6', '12'  // Bottom Hemisphere (10-18)
-    ];
 
     // D10: Swapped 3<->5<->7 to fix order (1,5,7,3,9 -> 1,7,3,5,9)
     private static readonly D10_LABELS = ['1', '2', '5', '4', '7', '6', '3', '8', '9', '0'];
@@ -67,33 +53,13 @@ export class DiceForge {
                 geometry = this.getGeometry('d6', 1.0 * scale);
                 baseLabels = DiceForge.D6_LABELS;
                 break;
-            case 'd60':
-                geometry = this.getGeometry('d6', 1.0 * scale);
-                baseLabels = DiceForge.D60_LABELS;
-                break;
             case 'd8':
                 geometry = this.getGeometry('d8', 1.0 * scale);
                 baseLabels = DiceForge.D8_LABELS;
                 break;
-            case 'd80':
-                geometry = this.getGeometry('d8', 1.0 * scale);
-                baseLabels = DiceForge.D80_LABELS;
-                break;
             case 'd10':
                 geometry = this.getGeometry('d10', 1.0 * scale);
                 baseLabels = DiceForge.D10_LABELS;
-                break;
-            case 'd14':
-                geometry = this.getGeometry('d14', 1.0 * scale);
-                baseLabels = DiceForge.D14_LABELS;
-                break;
-            case 'd16':
-                geometry = this.getGeometry('d16', 1.0 * scale);
-                baseLabels = DiceForge.D16_LABELS;
-                break;
-            case 'd18':
-                geometry = this.getGeometry('d18', 1.0 * scale);
-                baseLabels = DiceForge.D18_LABELS;
                 break;
             case 'd12':
                 geometry = this.getGeometry('d12', 0.9 * scale);
@@ -121,12 +87,128 @@ export class DiceForge {
         mesh.receiveShadow = true;
         (mesh as any).body_shape = (geometry as any).cannon_shape;
 
+        // Set outer mesh to render after inner shader mesh (for transmission materials)
+        mesh.renderOrder = 1;
+
+        // --- LIQUID/SHADER CORE LOGIC ---
+        // --- LIQUID/SHADER CORE LOGIC ---
+        if (theme.shader && theme.shader !== 'none') {
+            // Create Inner Mesh (Liquid/Effect)
+            // Clone the main geometry (now has smooth normals!)
+            const innerGeom = geometry.clone();
+            innerGeom.scale(0.90, 0.90, 0.90);
+
+            // Shader colors: shaderColor = base, shaderColorSecondary = liquid/secondary
+            const baseCol = new THREE.Color(theme.shaderColor || theme.diceColor);
+            const liquidCol = new THREE.Color(theme.shaderColorSecondary || theme.outlineColor);
+
+            // Select shader based on shader type
+            let selectedShader = LiquidShader;
+            let extraUniforms: Record<string, { value: number }> = {};
+
+            switch (theme.shader) {
+                case 'singularity':
+                    selectedShader = SingularityLiquidShader;
+                    break;
+                case 'flamecore':
+                    selectedShader = FlameCoreShader;
+                    extraUniforms = {
+                        coreRadius: { value: 0.18 },
+                        scale: { value: 2.5 },
+                        speed: { value: 1.2 },
+                        intensity: { value: 1.0 }
+                    };
+                    break;
+                case 'vortex':
+                    selectedShader = VortexLiquidShader;
+                    extraUniforms = {
+                        scale: { value: 2.5 },
+                        swirl: { value: 2.0 },
+                        speed: { value: 0.8 },
+                        intensity: { value: 1.0 }
+                    };
+                    break;
+                case 'nebula':
+                    selectedShader = NebulaLiquidShader;
+                    extraUniforms = {
+                        scale: { value: 2.2 },
+                        speed: { value: 0.5 },
+                        intensity: { value: 1.0 }
+                    };
+                    break;
+                case 'caustic':
+                    selectedShader = CausticLiquidShader;
+                    extraUniforms = {
+                        scale: { value: 1.0 },
+                        speed: { value: 1.0 },
+                        intensity: { value: 1.0 }
+                    };
+                    break;
+                case 'liquid':
+                default:
+                    // liquid uses LiquidShader
+                    break;
+            }
+
+            // Material settings - Hybrid Transparency
+            // transparent: true (allows alpha blending)
+            // depthWrite: true (ensures transmission sees it)
+            let materialSide: THREE.Side = THREE.FrontSide;
+            let materialTransparent = true;
+            let materialDepthWrite = true;
+
+            const liquidMaterial = new THREE.ShaderMaterial({
+                vertexShader: selectedShader.vertexShader,
+                fragmentShader: selectedShader.fragmentShader,
+                uniforms: {
+                    time: { value: 0.0 },
+                    baseColor: { value: baseCol },
+                    liquidColor: { value: liquidCol },
+                    ...extraUniforms
+                },
+                side: materialSide,
+                transparent: materialTransparent,
+                depthWrite: materialDepthWrite,
+                toneMapped: false  // CRITICAL: Bypass Three.js tone mapping to preserve vibrant colors
+            });
+
+            const innerMesh = new THREE.Mesh(innerGeom, liquidMaterial);
+            innerMesh.renderOrder = -1; // Render slightly before outer shell
+            mesh.add(innerMesh);
+
+            // FLAMECORE SPECIAL: Add a second, smaller core mesh for the Primary color
+            if (theme.shader === 'flamecore') {
+                const coreGeom = innerGeom.clone();
+                coreGeom.scale(0.4, 0.4, 0.4); // 40% of the flame mesh size
+
+                // Simple glowing material for the core (Primary color)
+                const coreMaterial = new THREE.MeshBasicMaterial({
+                    color: baseCol,
+                    transparent: true,
+                    opacity: 0.5,
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+
+                const coreMesh = new THREE.Mesh(coreGeom, coreMaterial);
+                coreMesh.renderOrder = -2; // Render before the flame layer
+                mesh.add(coreMesh);
+
+                // Store reference for animation if needed
+                mesh.userData.coreMesh = coreMesh;
+            }
+
+            // Mark for Animation
+            mesh.userData.isLiquid = true;
+            mesh.userData.liquidMesh = innerMesh;
+        }
+
         // Store Face Normals and Values for Result Detection
         mesh.userData.faceValues = [];
         for (const face of geometry.faces) {
             // Check bounds just in case
             if (face.materialIndex >= 0 && face.materialIndex < labels.length) {
-                let value = labels[face.materialIndex];
+                const value = labels[face.materialIndex];
 
                 // Skip materials representing edges (empty labels)
                 if (!value || (Array.isArray(value) && value.length === 0)) continue;
@@ -148,8 +230,6 @@ export class DiceForge {
     private calculateLabels(type: string, baseLabels: string[]): any[] {
         if (type === 'd2') {
             // Edge (0), Face1 (1), Face2 (2)
-            // Geometry faces will have materialIndex 0 for edge, 1 for top, 2 for bottom?
-            // Or simpler: index 1 and 2 are top/bottom. 0 is edge.
             return ['', baseLabels[0], baseLabels[1]];
         }
         if (type === 'd4') {
@@ -161,13 +241,14 @@ export class DiceForge {
         }
         const labels = [...baseLabels];
         if (type === 'd10' || type === 'd100') { labels.unshift(''); }
-        else if (type === 'd14' || type === 'd16' || type === 'd18') { labels.unshift(''); }
         else { labels.unshift(''); labels.unshift(''); }
         return labels;
     }
 
     private getGeometry(type: string, radius: number): THREE.Geometry {
-        if (this.geometryCache[type]) return this.geometryCache[type];
+        const cacheKey = `${type}_${radius}`;
+        if (this.geometryCache[cacheKey]) return this.geometryCache[cacheKey];
+
         let geom: THREE.Geometry | null = null;
         switch (type) {
             case 'd2': geom = this.create_d2_geometry(radius); break;
@@ -178,11 +259,8 @@ export class DiceForge {
             case 'd100': geom = this.create_d10_geometry(radius); break; // Reuse D10 geometry
             case 'd12': geom = this.create_d12_geometry(radius); break;
             case 'd20': geom = this.create_d20_geometry(radius); break;
-            case 'd14': geom = this.create_trapezohedron_geometry(radius, 7); break;
-            case 'd16': geom = this.create_trapezohedron_geometry(radius, 8); break;
-            case 'd18': geom = this.create_trapezohedron_geometry(radius, 9); break;
         }
-        if (geom) { this.geometryCache[type] = geom; return geom; }
+        if (geom) { this.geometryCache[cacheKey] = geom; return geom; }
         throw new Error(`Failed to create geometry for ${type}`);
     }
 
@@ -204,17 +282,47 @@ export class DiceForge {
         // Material Props
         let roughness = 0.5;
         let metalness = 0.1;
+        let emissiveColor = new THREE.Color(0x000000);
+        let emissiveIntensity = 0.0;
+        let envMapIntensity = 1.0;
 
-        // Simple Material Mapping
+        // Material Mapping (including Master materials)
         switch (theme.material) {
-            case 'metal': roughness = 0.2; metalness = 0.8; break;
-            case 'wood': roughness = 0.8; metalness = 0.0; break;
-            case 'glass': roughness = 0.1; metalness = 0.1; break;
-            case 'plastic': default: roughness = 0.5; metalness = 0.1; break;
+            case 'glass':
+                roughness = 0.1;
+                metalness = 0.1;
+                break;
+
+            // MASTER MATERIALS
+            case 'stone_master':
+                roughness = 0.85;
+                metalness = 0.0;
+                envMapIntensity = 0.2; // Low environmental reflection
+                break;
+            case 'metal_master':
+                roughness = 0.5;
+                metalness = 0.7;
+                envMapIntensity = 0.8;
+                break;
+            case 'arcane_master':
+                roughness = 0.5;
+                metalness = 0.15;
+                // Emission Matches Label Color, but slightly dimmed base
+                emissiveColor = new THREE.Color(labelColor);
+                emissiveIntensity = 4.0; // Strong glow
+                break;
+
+
+
+            case 'plastic':
+            default:
+                roughness = 0.5;
+                metalness = 0.1;
+                break;
         }
 
         for (let i = 0; i < labels.length; i++) {
-            let labelText = labels[i];
+            const labelText = labels[i];
             let isEdge = false;
             if (!labelText || (Array.isArray(labelText) && labelText.length === 0)) isEdge = true;
 
@@ -256,36 +364,23 @@ export class DiceForge {
 
             // Font Scaling based on Family
             let fontScale = 1.0;
-            if (fontName.includes('Faculty') || fontName.includes('Orbitron')) {
+            if (fontName.includes('Orbitron')) {
                 fontScale = 0.85;
-            } else if (fontName.includes('IM Fell')) {
-                fontScale = 1.15;
             }
 
-            // Reduce font size for double-digit dice types (d100, d80, d60)
-            if (type === 'd100' || type === 'd80' || type === 'd60') {
-                fontScale *= 0.6; // 40% reduction
-            }
-
-            // Reduce font size for custom trapezohedrons (crowded faces)
-            if (type === 'd14') {
-                fontScale *= 0.75; // 25% reduction
-            } else if (type === 'd16' || type === 'd18') {
-                fontScale *= 0.55; // ~45% reduction (Another 25% relative or absolute? going with significant drop)
-            }
             // Draw Text Function (Reused for Bump)
             const drawText = (context: CanvasRenderingContext2D) => {
                 if (type === 'd4' && Array.isArray(labelText)) {
-                    const fSize = Math.round(60 * fontScale);
+                    const fSize = Math.round(36 * fontScale);
                     context.font = `bold ${fSize}px ${fontName}`;
-                    let ts = 256;
+                    const ts = 256;
                     for (let k = 0; k < labelText.length; k++) {
-                        context.strokeText(labelText[k], 0, -ts * 0.3);
+                        if (!['glass', 'arcane_resin', 'void_glass', 'liquid_core', 'liquid_singularity', 'liquid_flamecore', 'liquid_vortex', 'liquid_nebula'].includes(theme.material)) context.strokeText(labelText[k], 0, -ts * 0.3);
                         context.fillText(labelText[k], 0, -ts * 0.3);
                         context.rotate(Math.PI * 2 / 3);
                     }
                 } else {
-                    const fSize = Math.round(120 * fontScale);
+                    const fSize = Math.round(72 * fontScale);
                     context.font = `bold ${fSize}px ${fontName}`;
                     let angleDeg = 0;
                     if (type === 'd8') angleDeg = (i % 2 === 0) ? -7.5 : -127.5;
@@ -296,9 +391,9 @@ export class DiceForge {
                     if (angleDeg !== 0) context.rotate(angleDeg * Math.PI / 180);
 
                     let textStr = String(labelText);
-                    if ((textStr === '6' || textStr === '9') && type !== 'd6') textStr += '.';
+                    if ((textStr === '6' || textStr === '9') && type !== 'd6' && type !== 'd8') textStr += '.';
 
-                    context.strokeText(textStr, 0, 0);
+                    if (!['glass', 'arcane_resin', 'void_glass', 'liquid_core', 'liquid_singularity', 'liquid_flamecore', 'liquid_vortex', 'liquid_nebula'].includes(theme.material)) context.strokeText(textStr, 0, 0);
                     context.fillText(textStr, 0, 0);
                 }
             };
@@ -308,7 +403,6 @@ export class DiceForge {
 
             const tex = new THREE.CanvasTexture(canvas);
             // ⚠️ DO NOT TOUCH - This encoding is CRITICAL for correct colors across Electron and Web!
-            // Setting this to LinearEncoding or removing it WILL break dark textures.
             tex.encoding = THREE.sRGBEncoding;
             tex.needsUpdate = true;
 
@@ -343,24 +437,148 @@ export class DiceForge {
                 bumpTex.needsUpdate = true;
             }
 
-            // Use MeshPhysicalMaterial for advanced properties (Glass, Metal)
-            const materialParams: THREE.MeshPhysicalMaterialParameters = {
+            // --- Emissive Map Generation (for Glow effects) ---
+            let emissiveTex: THREE.Texture | null = null;
+            let alphaMaskTex: THREE.Texture | null = null;  // Alpha mask for isolating text
+            if (theme.shader && theme.shader !== 'none') {
+                const canvasEmit = document.createElement('canvas');
+                canvasEmit.width = 256;
+                canvasEmit.height = 256;
+                const ctxEmit = canvasEmit.getContext('2d')!;
+
+                // 1. Background = Black (No emission)
+                ctxEmit.fillStyle = '#000000';
+                ctxEmit.fillRect(0, 0, 256, 256);
+
+                // 2. Text = Label Color (Emission source)
+                ctxEmit.fillStyle = labelColor;
+                ctxEmit.strokeStyle = outlineColor;
+                ctxEmit.lineWidth = 8;
+                ctxEmit.textAlign = 'center';
+                ctxEmit.textBaseline = 'middle';
+
+                ctxEmit.save();
+                ctxEmit.translate(128, 128);
+                drawText(ctxEmit);
+                ctxEmit.restore();
+
+                emissiveTex = new THREE.CanvasTexture(canvasEmit);
+                emissiveTex.encoding = THREE.sRGBEncoding;
+                emissiveTex.needsUpdate = true;
+
+                // --- Alpha Mask (Ruins & Realms pattern): Gray background for partial transparency ---
+                // Gray = ~25% opacity (glass areas), White = 100% opacity (text areas)
+                const canvasAlpha = document.createElement('canvas');
+                canvasAlpha.width = 256;
+                canvasAlpha.height = 256;
+                const ctxAlpha = canvasAlpha.getContext('2d')!;
+
+                // Background = Near black (~4% opacity) for nearly invisible glass
+                ctxAlpha.fillStyle = '#0a0a0a';
+                ctxAlpha.fillRect(0, 0, 256, 256);
+
+                // Text = White (100% opacity)
+                ctxAlpha.fillStyle = '#ffffff';
+                ctxAlpha.strokeStyle = '#ffffff';
+                ctxAlpha.lineWidth = 8;
+                ctxAlpha.textAlign = 'center';
+                ctxAlpha.textBaseline = 'middle';
+
+                ctxAlpha.save();
+                ctxAlpha.translate(128, 128);
+                drawText(ctxAlpha);
+                ctxAlpha.restore();
+
+                alphaMaskTex = new THREE.CanvasTexture(canvasAlpha);
+                alphaMaskTex.needsUpdate = true;
+            }
+
+            // Use MeshPhysicalMaterial for advanced properties
+            const isShaderActive = (theme.shader && theme.shader !== 'none');
+
+            const materialParams: any = {
                 map: tex,
                 bumpMap: bumpTex,
-                bumpScale: 0.08, // Strength of the bump effect
+                bumpScale: 0.08,
                 roughness,
                 metalness,
-                flatShading: true // CRITICAL: Ensures crisp edges, reducing "blob" look
+                emissive: isShaderActive ? 0xffffff : emissiveColor,
+                emissiveMap: emissiveTex,
+                emissiveIntensity: isShaderActive ? 1.5 : isEdge ? 0 : emissiveIntensity,
+                alphaMap: null,
+                envMapIntensity,
+                flatShading: true
             };
 
-            if (theme.material === 'glass') {
-                materialParams.transparent = true;
-                materialParams.opacity = 0.85; // 85% opacity (Final User Choice)
-                materialParams.side = THREE.DoubleSide;
-                // depthWrite default is true
-                materialParams.transmission = 0.0;
+            // ARCANE MASTER SPECIAL: Emissive Map for Text Only
+            if (theme.material === 'arcane_master' && !isEdge) {
+                materialParams.emissiveMap = tex;
+                materialParams.emissive = new THREE.Color(0xffffff);
             }
-            // Note: For real glass refraction, we'd use transmission > 0...
+
+            if (theme.material === 'glass') {
+                // Pure Glass - AlphaMap controls per-pixel transparency
+                // Gray areas (~25% opacity) = transparent glass, White areas = opaque numbers
+                materialParams.transparent = true;
+                materialParams.opacity = 1.0;
+                materialParams.side = THREE.DoubleSide;
+                materialParams.roughness = 0.05;
+                materialParams.metalness = 0.0;
+                // Use alphaMap for per-pixel transparency
+                if (!isEdge && alphaMaskTex) {
+                    materialParams.alphaMap = alphaMaskTex;
+                }
+                // Emissive numbers for visibility
+                if (!isEdge && emissiveTex) {
+                    materialParams.emissiveMap = emissiveTex;
+                    materialParams.emissive = new THREE.Color(0xffffff);
+                    materialParams.emissiveIntensity = 2.5;
+                }
+            } else if (theme.material === 'void_glass') {
+                // Void Glass - Specific aesthetic
+                materialParams.color = new THREE.Color(0x0a0b12); // Override color
+                materialParams.roughness = 0.05;
+                materialParams.metalness = 0.0;
+                materialParams.transmission = 0.35;
+                materialParams.thickness = 0.9;
+                materialParams.ior = 1.48;
+                materialParams.attenuationColor = new THREE.Color(0x221133);
+                materialParams.attenuationDistance = 2.5;
+                materialParams.clearcoat = 0.8;
+                materialParams.clearcoatRoughness = 0.05;
+                materialParams.transparent = true;
+                materialParams.side = THREE.FrontSide;
+                // Emissive numbers for visibility
+                if (!isEdge && emissiveTex) {
+                    materialParams.emissiveMap = emissiveTex;
+                    materialParams.emissive = new THREE.Color(0xffffff);
+                    materialParams.emissiveIntensity = 2.5;
+                }
+            } else if (theme.material === 'arcane_resin') {
+                materialParams.color = new THREE.Color(0x141018);
+                materialParams.roughness = 0.18;
+                materialParams.bumpMap = null; // No normal per spec
+                materialParams.metalness = 0.0;
+                materialParams.transmission = 0.35;
+                materialParams.thickness = 0.9;
+                materialParams.ior = 1.45;
+                materialParams.attenuationColor = new THREE.Color(0x3a1b4a);
+                materialParams.attenuationDistance = 1.6;
+                materialParams.clearcoat = 0.65;
+                materialParams.clearcoatRoughness = 0.10;
+                materialParams.transparent = true;
+                materialParams.side = THREE.FrontSide;
+                // Emissive numbers for visibility
+                if (!isEdge && emissiveTex) {
+                    materialParams.emissiveMap = emissiveTex;
+                    materialParams.emissive = new THREE.Color(0xffffff);
+                    materialParams.emissiveIntensity = 2.5;
+                }
+            } else if (theme.material === 'relic_stone') {
+                materialParams.color = new THREE.Color(0x2a2a2a);
+                materialParams.roughness = 0.82;
+                materialParams.metalness = 0.0;
+            }
 
             const mat = new THREE.MeshPhysicalMaterial(materialParams);
             materials.push(mat);
@@ -373,16 +591,16 @@ export class DiceForge {
     }
 
     private make_geom(vertices: any[], faces: number[][], radius: number, tab: number, af: number) {
-        var geom = new THREE.Geometry();
-        for (var i = 0; i < vertices.length; ++i) {
+        const geom = new THREE.Geometry();
+        for (let i = 0; i < vertices.length; ++i) {
             // FIX: Normalize vertices before scaling to ensure consistent radius
-            var vertex = (new THREE.Vector3(vertices[i][0], vertices[i][1], vertices[i][2])).normalize().multiplyScalar(radius);
+            const vertex = (new THREE.Vector3(vertices[i][0], vertices[i][1], vertices[i][2])).normalize().multiplyScalar(radius);
             (vertex as any).index = geom.vertices.push(vertex) - 1;
         }
-        for (var i = 0; i < faces.length; ++i) {
-            var ii = faces[i], fl = ii.length - 1;
-            var aa = Math.PI * 2 / fl;
-            for (var j = 0; j < fl - 2; ++j) {
+        for (let i = 0; i < faces.length; ++i) {
+            const ii = faces[i], fl = ii.length - 1;
+            const aa = Math.PI * 2 / fl;
+            for (let j = 0; j < fl - 2; ++j) {
                 geom.faces.push(new THREE.Face3(ii[0], ii[j + 1], ii[j + 2], [geom.vertices[ii[0]],
                 geom.vertices[ii[j + 1]], geom.vertices[ii[j + 2]]], undefined, ii[fl] + 1));
                 if (ii[fl] !== -1) {
@@ -411,22 +629,22 @@ export class DiceForge {
     }
 
     private make_d10_geom(vertices: THREE.Vector3[], faces: number[][], radius: number, tab: number, af: number) {
-        var geom = new THREE.Geometry();
-        for (var i = 0; i < vertices.length; ++i) {
-            // FIX: Normalize vertices before scaling
-            var vertex = vertices[i].normalize().multiplyScalar(radius);
+        const geom = new THREE.Geometry();
+        for (let i = 0; i < vertices.length; ++i) {
+            // D10 should NOT normalize - keep original proportions for tall shape
+            const vertex = vertices[i].clone().multiplyScalar(radius);
             (vertex as any).index = geom.vertices.push(vertex) - 1;
         }
-        for (var i = 0; i < faces.length; ++i) {
-            var ii = faces[i], fl = ii.length - 1;
-            var aa = Math.PI * 2 / fl;
-            var w = 0.65;
-            var h = 0.85;
-            var v0 = 1 - 1 * h;
-            var v1 = 1 - (0.895 / 1.105) * h;
-            var v2 = 1;
+        for (let i = 0; i < faces.length; ++i) {
+            const ii = faces[i], fl = ii.length - 1;
+            const aa = Math.PI * 2 / fl;
+            const w = 0.65;
+            const h = 0.85;
+            const v0 = 1 - 1 * h;
+            const v1 = 1 - (0.895 / 1.105) * h;
+            const v2 = 1;
 
-            for (var j = 0; j < fl - 2; ++j) {
+            for (let j = 0; j < fl - 2; ++j) {
                 geom.faces.push(new THREE.Face3(ii[0], ii[j + 1], ii[j + 2], [geom.vertices[ii[0]],
                 geom.vertices[ii[j + 1]], geom.vertices[ii[j + 2]]], undefined, ii[fl] + 1));
 
@@ -464,9 +682,9 @@ export class DiceForge {
     }
 
     private create_d2_geometry(radius: number) {
-        const segments = 24; // Optimization: Reduced from 40 to 24 for physics stability
-        const h = 0.1 * radius; // THINNNER! Reduced from 0.2 to 0.1
-        const bevel = 0.05 * radius; // Bevel size
+        const segments = 24;
+        const h = 0.1 * radius;
+        const bevel = 0.05 * radius;
         const r_outer = radius;
         const r_inner = radius - bevel;
         const h_inner = h;
@@ -474,18 +692,12 @@ export class DiceForge {
 
         const geom = new THREE.Geometry();
 
-        // Vertex Indices Offset
         let idx = 0;
-
-        // Vertices Helper
         const pushVert = (x: number, y: number, z: number) => { geom.vertices.push(new THREE.Vector3(x, y, z)); return idx++; };
 
-        // 1. Top Center
         const topCenter = pushVert(0, h, 0);
-        // 2. Bot Center
         const botCenter = pushVert(0, -h, 0);
 
-        // Rings
         const topInnerStart = idx;
         for (let i = 0; i < segments; i++) {
             const a = (i / segments) * Math.PI * 2;
@@ -509,7 +721,6 @@ export class DiceForge {
 
         const centerUV = new THREE.Vector2(0.5, 0.5);
 
-        // UV Logic: Top needs FLIP X (1-u). Bottom needs NORMAL (u).
         const getUV_Top = (r_ratio: number, i: number) => {
             const ang = (i / segments) * Math.PI * 2;
             return new THREE.Vector2(0.5 - 0.5 * Math.cos(ang) * r_ratio, 0.5 + 0.5 * Math.sin(ang) * r_ratio);
@@ -519,33 +730,23 @@ export class DiceForge {
             return new THREE.Vector2(0.5 + 0.5 * Math.cos(ang) * r_ratio, 0.5 + 0.5 * Math.sin(ang) * r_ratio);
         };
 
-        // --- FACES ---
-
-        // 1. Top Face (Center -> Inner)
+        // Top Face
         for (let i = 0; i < segments; i++) {
             const next = (i + 1) % segments;
             const f = new THREE.Face3(topCenter, topInnerStart + next, topInnerStart + i);
             f.materialIndex = 1;
             geom.faces.push(f);
-            geom.faceVertexUvs[0].push([
-                centerUV,
-                getUV_Top(0.9, next),
-                getUV_Top(0.9, i)
-            ]);
+            geom.faceVertexUvs[0].push([centerUV, getUV_Top(0.9, next), getUV_Top(0.9, i)]);
         }
 
-        // 2. Top Chamfer (Inner -> Outer)
+        // Top Chamfer
         for (let i = 0; i < segments; i++) {
             const next = (i + 1) % segments;
             const i1 = topInnerStart + i; const i2 = topInnerStart + next;
             const o1 = topOuterStart + i; const o2 = topOuterStart + next;
 
-            // Quad: i1, i2, o2, o1. Split into 2 tris.
-            // Tri 1: i1, o2, o1 (Check winding: Inner is "Up". Outer is "Down". Normal Up/Out)
-            // Vector Inner->Outer is Out.
-            // CCW: i1->o2->o1?
-            const f1 = new THREE.Face3(i1, i2, o1); // i1->i2->o1
-            f1.materialIndex = 1; // Chamfer gets Face Color
+            const f1 = new THREE.Face3(i1, i2, o1);
+            f1.materialIndex = 1;
             geom.faces.push(f1);
             geom.faceVertexUvs[0].push([getUV_Top(0.9, i), getUV_Top(0.9, next), getUV_Top(1.0, i)]);
 
@@ -555,13 +756,12 @@ export class DiceForge {
             geom.faceVertexUvs[0].push([getUV_Top(0.9, next), getUV_Top(1.0, next), getUV_Top(1.0, i)]);
         }
 
-        // 3. Side (Outer Top -> Outer Bot) - Material 0 (Edge)
+        // Side (Edge)
         for (let i = 0; i < segments; i++) {
             const next = (i + 1) % segments;
             const t1 = topOuterStart + i; const t2 = topOuterStart + next;
             const b1 = botOuterStart + i; const b2 = botOuterStart + next;
 
-            // Quads
             const f1 = new THREE.Face3(t1, b1, t2);
             f1.materialIndex = 0;
             geom.faces.push(f1);
@@ -573,18 +773,11 @@ export class DiceForge {
             geom.faceVertexUvs[0].push([new THREE.Vector2(1, 1), new THREE.Vector2(0, 0), new THREE.Vector2(1, 0)]);
         }
 
-        // 4. Bot Chamfer (Outer -> Inner) - Material 2
+        // Bot Chamfer
         for (let i = 0; i < segments; i++) {
             const next = (i + 1) % segments;
             const o1 = botOuterStart + i; const o2 = botOuterStart + next;
             const i1 = botInnerStart + i; const i2 = botInnerStart + next;
-
-            // Winding: Pointing Down.
-            // CCW from Bottom. CW from Top.
-            // i1->i2 is CW from top?
-            // Let's use logic from Top and flip.
-            // Top: i1, i2, o1. 
-            // Bot: i1, o1, i2?
 
             const f1 = new THREE.Face3(i1, o1, i2);
             f1.materialIndex = 2;
@@ -597,23 +790,13 @@ export class DiceForge {
             geom.faceVertexUvs[0].push([getUV_Bot(1.0, i), getUV_Bot(1.0, next), getUV_Bot(0.9, next)]);
         }
 
-        // 5. Bot Face (Inner -> Center)
+        // Bot Face
         for (let i = 0; i < segments; i++) {
             const next = (i + 1) % segments;
-            // Top was: Center, Next, i
-            // Bot should include reverse?
-            // Bot viewed from top is CW (Center, i, Next).
-            // Normal needs to point Down.
-            // Center->i->Next is CW? No, Center->Next->i is CCW.
-            // So Center->i->Next is CW (Down).
             const f = new THREE.Face3(botCenter, i + botInnerStart, next + botInnerStart);
             f.materialIndex = 2;
             geom.faces.push(f);
-            geom.faceVertexUvs[0].push([
-                centerUV,
-                getUV_Bot(0.9, i),
-                getUV_Bot(0.9, next)
-            ]);
+            geom.faceVertexUvs[0].push([centerUV, getUV_Bot(0.9, i), getUV_Bot(0.9, next)]);
         }
 
         geom.computeFaceNormals();
@@ -628,34 +811,34 @@ export class DiceForge {
     }
 
     private create_d4_geometry(radius: number) {
-        var vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
-        var faces = [[1, 0, 2, 1], [0, 1, 3, 2], [0, 3, 2, 3], [1, 2, 3, 4]];
+        const vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
+        const faces = [[1, 0, 2, 1], [0, 1, 3, 2], [0, 3, 2, 3], [1, 2, 3, 4]];
         return this.create_geom(vertices, faces, radius, -0.1, Math.PI * 7 / 6);
     }
 
     private create_d6_geometry(radius: number) {
-        var vertices = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+        const vertices = [[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
         [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]];
-        var faces = [[0, 3, 2, 1, 1], [1, 2, 6, 5, 2], [0, 1, 5, 4, 3],
+        const faces = [[0, 3, 2, 1, 1], [1, 2, 6, 5, 2], [0, 1, 5, 4, 3],
         [3, 7, 6, 2, 4], [0, 4, 7, 3, 5], [4, 5, 6, 7, 6]];
         return this.create_geom(vertices, faces, radius, 0.1, Math.PI / 4);
     }
 
     private create_d8_geometry(radius: number) {
-        var vertices = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
-        var faces = [[0, 2, 4, 1], [0, 4, 3, 2], [0, 3, 5, 3], [0, 5, 2, 4], [1, 3, 4, 5],
+        const vertices = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+        const faces = [[0, 2, 4, 1], [0, 4, 3, 2], [0, 3, 5, 3], [0, 5, 2, 4], [1, 3, 4, 5],
         [1, 4, 2, 6], [1, 2, 5, 7], [1, 5, 3, 8]];
         return this.create_geom(vertices, faces, radius, 0, -Math.PI / 4 / 2);
     }
 
     private create_d10_geometry(radius: number) {
-        var a = Math.PI * 2 / 10, h = 0.105;
-        var vertices = [];
-        for (var i = 0, b = 0; i < 10; ++i, b += a) {
+        const a = Math.PI * 2 / 10, h = 0.105;
+        const vertices = [];
+        for (let i = 0, b = 0; i < 10; ++i, b += a) {
             vertices.push([Math.cos(b), Math.sin(b), h * (i % 2 ? 1 : -1)]);
         }
-        vertices.push([0, 0, -1]); vertices.push([0, 0, 1]);
-        var faces = [
+        vertices.push([0, 0, -1.2]); vertices.push([0, 0, 1.2]);  // Taller tips for proper d10 proportions
+        const faces = [
             [5, 6, 7, 11, 0], [4, 3, 2, 10, 1], [1, 2, 3, 11, 2], [0, 9, 8, 10, 3],
             [7, 8, 9, 11, 4], [8, 7, 6, 10, 5], [9, 0, 1, 11, 6], [2, 1, 0, 10, 7],
             [3, 4, 5, 11, 8], [6, 5, 4, 10, 9]
@@ -664,69 +847,26 @@ export class DiceForge {
     }
 
     private create_d12_geometry(radius: number) {
-        var p = (1 + Math.sqrt(5)) / 2, q = 1 / p;
-        var vertices = [[0, q, p], [0, q, -p], [0, -q, p], [0, -q, -p], [p, 0, q],
+        const p = (1 + Math.sqrt(5)) / 2, q = 1 / p;
+        const vertices = [[0, q, p], [0, q, -p], [0, -q, p], [0, -q, -p], [p, 0, q],
         [p, 0, -q], [-p, 0, q], [-p, 0, -q], [q, p, 0], [q, -p, 0], [-q, p, 0],
         [-q, -p, 0], [1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1], [-1, 1, 1],
         [-1, 1, -1], [-1, -1, 1], [-1, -1, -1]];
-        var faces = [[2, 14, 4, 12, 0, 1], [15, 9, 11, 19, 3, 2], [16, 10, 17, 7, 6, 3], [6, 7, 19, 11, 18, 4],
+        const faces = [[2, 14, 4, 12, 0, 1], [15, 9, 11, 19, 3, 2], [16, 10, 17, 7, 6, 3], [6, 7, 19, 11, 18, 4],
         [6, 18, 2, 0, 16, 5], [18, 11, 9, 14, 2, 6], [1, 17, 10, 8, 13, 7], [1, 13, 5, 15, 3, 8],
         [13, 8, 12, 4, 5, 9], [5, 4, 14, 9, 15, 10], [0, 12, 8, 10, 16, 11], [3, 19, 7, 17, 1, 12]];
         return this.create_geom(vertices, faces, radius, 0.2, -Math.PI / 4 / 2);
     }
 
     private create_d20_geometry(radius: number) {
-        var t = (1 + Math.sqrt(5)) / 2;
-        var vertices = [[-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0],
+        const t = (1 + Math.sqrt(5)) / 2;
+        const vertices = [[-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0],
         [0, -1, t], [0, 1, t], [0, -1, -t], [0, 1, -t],
         [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1]];
-        var faces = [[0, 11, 5, 1], [0, 5, 1, 2], [0, 1, 7, 3], [0, 7, 10, 4], [0, 10, 11, 5],
+        const faces = [[0, 11, 5, 1], [0, 5, 1, 2], [0, 1, 7, 3], [0, 7, 10, 4], [0, 10, 11, 5],
         [1, 5, 9, 6], [5, 11, 4, 7], [11, 10, 2, 8], [10, 7, 6, 9], [7, 1, 8, 10],
         [3, 9, 4, 11], [3, 4, 2, 12], [3, 2, 6, 13], [3, 6, 8, 14], [3, 8, 9, 15],
         [4, 9, 5, 16], [2, 4, 11, 17], [6, 2, 10, 18], [8, 6, 7, 19], [9, 8, 1, 20]];
         return this.create_geom(vertices, faces, radius, -0.2, -Math.PI / 4 / 2);
-    }
-
-    private create_trapezohedron_geometry(radius: number, sides: number) {
-        // sides = N. Ring Count = 2N.
-        // Goal: Labels 1..N are Top Faces. Labels N+1..2N are Bot Faces.
-
-        var ringCount = sides * 2;
-        var h = 0.105;
-        var angleStep = Math.PI * 2 / ringCount;
-
-        var vertices = [];
-
-        // Ring
-        for (var i = 0, b = 0; i < ringCount; ++i, b += angleStep) {
-            vertices.push([Math.cos(b), Math.sin(b), h * (i % 2 ? 1 : -1)]);
-        }
-        // Poles
-        vertices.push([0, 0, -1]); // Index 2N (Bottom Pole)
-        vertices.push([0, 0, 1]);  // Index 2N+1 (Top Pole)
-
-        var faces = [];
-
-        // 1. Top Faces (Indices 0 to N-1 -> Labels 1 to N)
-        // Connected to Top Pole (2N+1). Centered on Even vertices.
-        for (let k = 0; k < sides; k++) {
-            let center = (k * 2); // 0, 2, 4...
-            let prev = (center - 1 + ringCount) % ringCount;
-            let next = (center + 1) % ringCount;
-            // Winding: Prev -> Center -> Next -> TopPole
-            faces.push([prev, center, next, ringCount + 1, k]);
-        }
-
-        // 2. Bot Faces (Indices N to 2N-1 -> Labels N+1 to 2N)
-        // Connected to Bot Pole (2N). Centered on Odd vertices.
-        for (let k = 0; k < sides; k++) {
-            let center = (k * 2) + 1; // 1, 3, 5...
-            let prev = (center - 1 + ringCount) % ringCount;
-            let next = (center + 1) % ringCount;
-            // Winding: Next -> Center -> Prev -> BotPole
-            faces.push([next, center, prev, ringCount, sides + k]);
-        }
-
-        return this.make_d10_geom(vertices.map(v => new THREE.Vector3(v[0], v[1], v[2])), faces, radius, 0.3, Math.PI);
     }
 }

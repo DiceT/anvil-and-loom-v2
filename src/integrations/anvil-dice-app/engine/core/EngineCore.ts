@@ -22,10 +22,12 @@ export class EngineCore {
         this.renderer.setSize(container.clientWidth, container.clientHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        // Fix Color Space (r124 uses older naming)
-        // this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.setClearColor(0x000000, 0); // Force transparent background
         this.renderer.domElement.style.pointerEvents = 'none'; // Ensure clicks pass through canvas
+        this.renderer.domElement.style.position = 'absolute';
+        this.renderer.domElement.style.top = '0';
+        this.renderer.domElement.style.left = '0';
+        this.renderer.domElement.style.zIndex = '5';
         container.appendChild(this.renderer.domElement);
 
         // Initialize Systems
@@ -50,10 +52,14 @@ export class EngineCore {
         }
     }
 
-    public updateBounds(width: number, depth: number) {
-        this.physicsWorld.updateBounds(width, depth);
+    public getWorldPosition(ndcX: number, ndcY: number): THREE.Vector3 {
+        return this.sceneManager.getWorldPosition(ndcX, ndcY);
+    }
+
+    public updateBounds(width: number, depth: number, offsetX: number = 0, offsetZ: number = 0) {
+        this.physicsWorld.updateBounds(width, depth, offsetX, offsetZ);
         this.sceneManager.updateDebugBounds(width, depth);
-        this.rollController.setBounds(width, depth);
+        this.rollController.setBounds(width, depth, offsetX, offsetZ);
     }
 
     public fitBoundsToScreen() {
@@ -101,8 +107,8 @@ export class EngineCore {
         // Step Physics
         this.physicsWorld.step(deltaTime);
 
-        // Update Dice (Sync Physics -> Visuals)
-        this.rollController.update();
+        // Update Dice (Sync Physics -> Visuals, pass time for shader animations)
+        this.rollController.update(time / 1000);
 
         // Render
         this.renderer.render(this.sceneManager.getScene(), this.sceneManager.getCamera());

@@ -28,6 +28,13 @@ export class PhysicsWorld {
         });
         this.world.addContactMaterial(this.diceGroundContact);
 
+        // Dice-to-Dice contact (more bouncy, less sticky)
+        const diceDiceContact = new CANNON.ContactMaterial(this.diceMaterial, this.diceMaterial, {
+            friction: 0.2,      // Low friction so they slide off each other
+            restitution: 0.6    // Higher bounce so they don't stick/lean
+        });
+        this.world.addContactMaterial(diceDiceContact);
+
         // Ground Plane Physics
         const groundBody = new CANNON.Body({
             mass: 0, // Static
@@ -89,7 +96,7 @@ export class PhysicsWorld {
         // No, we haven't defined dice-dice contact. Default is used.
     }
 
-    public updateBounds(width: number, depth: number) {
+    public updateBounds(width: number, depth: number, offsetX: number = 0, offsetZ: number = 0) {
         // Remove old walls
         this.walls.forEach(wall => this.world.removeBody(wall));
         this.walls = [];
@@ -99,20 +106,20 @@ export class PhysicsWorld {
         const thickness = 10;
         const height = 20;
 
-        const offsetX = halfWidth + (thickness / 2);
-        const offsetZ = halfDepth + (thickness / 2);
+        const wallOffsetX = halfWidth + (thickness / 2);
+        const wallOffsetZ = halfDepth + (thickness / 2);
 
         // Top/Bottom (Span X)
         const topBotWidth = width + (thickness * 2) + 20;
 
-        this.addWall(new CANNON.Vec3(0, 0, -offsetZ), new CANNON.Vec3(0, 0, 0), new CANNON.Vec3(topBotWidth, height, thickness)); // Top
-        this.addWall(new CANNON.Vec3(0, 0, offsetZ), new CANNON.Vec3(0, 0, 0), new CANNON.Vec3(topBotWidth, height, thickness));  // Bottom
+        this.addWall(new CANNON.Vec3(offsetX, 0, offsetZ - wallOffsetZ), new CANNON.Vec3(0, 0, 0), new CANNON.Vec3(topBotWidth, height, thickness)); // Top
+        this.addWall(new CANNON.Vec3(offsetX, 0, offsetZ + wallOffsetZ), new CANNON.Vec3(0, 0, 0), new CANNON.Vec3(topBotWidth, height, thickness));  // Bottom
 
         // Left/Right (Span Z)
         const sideLen = depth + (thickness * 2);
 
-        this.addWall(new CANNON.Vec3(-offsetX, 0, 0), new CANNON.Vec3(0, Math.PI / 2, 0), new CANNON.Vec3(sideLen, height, thickness)); // Left
-        this.addWall(new CANNON.Vec3(offsetX, 0, 0), new CANNON.Vec3(0, Math.PI / 2, 0), new CANNON.Vec3(sideLen, height, thickness));  // Right
+        this.addWall(new CANNON.Vec3(offsetX - wallOffsetX, 0, offsetZ), new CANNON.Vec3(0, Math.PI / 2, 0), new CANNON.Vec3(sideLen, height, thickness)); // Left
+        this.addWall(new CANNON.Vec3(offsetX + wallOffsetX, 0, offsetZ), new CANNON.Vec3(0, Math.PI / 2, 0), new CANNON.Vec3(sideLen, height, thickness));  // Right
     }
 
     private addWall(position: CANNON.Vec3, rotation: CANNON.Vec3, size: CANNON.Vec3) {

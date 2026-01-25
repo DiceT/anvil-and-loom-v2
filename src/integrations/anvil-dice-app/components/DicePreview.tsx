@@ -53,6 +53,14 @@ export const DicePreview: React.FC = () => {
             if (meshRef.current) {
                 meshRef.current.rotation.y += 0.01;
                 meshRef.current.rotation.x += 0.005;
+
+                // Update liquid shader time uniform
+                if (meshRef.current.userData.isLiquid && meshRef.current.userData.liquidMesh) {
+                    const liquidMat = meshRef.current.userData.liquidMesh.material as THREE.ShaderMaterial;
+                    if (liquidMat.uniforms && liquidMat.uniforms.time) {
+                        liquidMat.uniforms.time.value = (performance.now() / 1000) % 7200; // Loop every 2 hours to avoid float precision loss
+                    }
+                }
             }
             renderer.render(scene, camera);
             frameId = requestAnimationFrame(animate);

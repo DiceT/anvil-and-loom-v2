@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSettings } from '../store/SettingsContext';
 import { DicePreview } from './DicePreview';
+import { HexColorPicker } from './HexColorPicker';
 import type { SurfaceMaterial } from '../engine/types';
 
 
@@ -40,7 +41,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
             <div style={{
-                width: '800px', height: '600px', backgroundColor: '#222',
+                width: '1000px', height: '650px', backgroundColor: '#222',
                 borderRadius: '12px', border: '1px solid #444', display: 'flex', flexDirection: 'column',
                 boxShadow: '0 10px 30px rgba(0,0,0,0.5)', color: '#eee', fontFamily: 'sans-serif'
             }}>
@@ -101,12 +102,56 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         onChange={(e) => updateTheme({ material: e.target.value as any })}
                                         style={{ width: '100%', padding: '10px', background: '#333', border: '1px solid #555', color: 'white', borderRadius: '6px' }}
                                     >
-                                        <option value="plastic">Plastic</option>
-                                        <option value="metal">Metal</option>
-                                        <option value="wood">Wood</option>
-                                        <option value="glass">Glass</option>
+                                        <option value="plastic">Plastic Fantastic</option>
+                                        <option value="stone_master">Stone Master</option>
+                                        <option value="relic_stone">Relic Stone</option>
+                                        <option value="metal_master">Forged Metal</option>
+                                        <option value="arcane_master">Illuminated Heart</option>
+                                        <option value="glass">Pure Glass</option>
+                                        <option value="void_glass">Void Glass</option>
+                                        <option value="arcane_resin">Arcane Resin</option>
                                     </select>
                                 </div>
+
+                                {/* Shader Selection */}
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '8px', color: '#aaa' }}>Core Effect</label>
+                                    <select
+                                        value={settings.theme.shader || 'none'}
+                                        onChange={(e) => updateTheme({ shader: e.target.value as any })}
+                                        style={{ width: '100%', padding: '10px', background: '#333', border: '1px solid #555', color: 'white', borderRadius: '6px' }}
+                                    >
+                                        <option value="none">None</option>
+                                        <option value="liquid">Liquid Core</option>
+                                        <option value="singularity">Singularity</option>
+                                        <option value="flamecore">Flamecore</option>
+                                        <option value="vortex">Vortex</option>
+                                        <option value="nebula">Nebula</option>
+                                        <option value="caustic">Caustic Water</option>
+                                    </select>
+                                </div>
+
+                                {/* Shader Colors (Conditional) */}
+                                {(settings.theme.shader && settings.theme.shader !== 'none') && (
+                                    <>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '8px', color: '#aaa' }}>Effect Primary</label>
+                                            <HexColorPicker
+                                                value={settings.theme.shaderColor || '#ff0055'}
+                                                onChange={(c) => updateTheme({ shaderColor: c })}
+                                                showAlpha={false}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '8px', color: '#aaa' }}>Effect Secondary</label>
+                                            <HexColorPicker
+                                                value={settings.theme.shaderColorSecondary || '#00aaff'}
+                                                onChange={(c) => updateTheme({ shaderColorSecondary: c })}
+                                                showAlpha={false}
+                                            />
+                                        </div>
+                                    </>
+                                )}
 
                                 {/* Font Selection */}
                                 <div>
@@ -114,33 +159,65 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     <select
                                         value={settings.theme.font}
                                         onChange={(e) => updateTheme({ font: e.target.value })}
-                                        style={{ width: '100%', padding: '10px', background: '#333', border: '1px solid #555', color: 'white', borderRadius: '6px', fontFamily: settings.theme.font }}
+                                        style={{ width: '100%', padding: '10px', background: '#333', border: '1px solid #555', color: 'white', borderRadius: '6px', fontFamily: settings.theme.font, fontSize: '16px' }}
                                     >
-                                        <option value="Arial">Arial (Default)</option>
-                                        <option value="Cinzel">Cinzel</option>
-                                        <option value="Faculty Glyphic">Faculty Glyphic</option>
-                                        <option value="IM Fell English SC">IM Fell English SC</option>
-                                        <option value="Orbitron">Orbitron</option>
-                                        <option value="Oxanium">Oxanium</option>
-                                        <option value="Teko">Teko</option>
-                                        <option value="Unica One">Unica One</option>
-                                        <option value="Valkyrie">Valkyrie</option>
+                                        <option value="Arial" style={{ fontFamily: 'Arial' }}>Arial (Default)</option>
+                                        <option value="Asul" style={{ fontFamily: 'Asul' }}>Asul</option>
+                                        <option value="Atomic Age" style={{ fontFamily: 'Atomic Age' }}>Atomic Age</option>
+                                        <option value="Caesar Dressing" style={{ fontFamily: 'Caesar Dressing' }}>Caesar Dressing</option>
+                                        <option value="Gentium Book" style={{ fontFamily: 'Gentium Book' }}>Gentium Book</option>
+                                        <option value="Goblin" style={{ fontFamily: 'Goblin' }}>Goblin</option>
+                                        <option value="Josefin" style={{ fontFamily: 'Josefin' }}>Josefin</option>
+                                        <option value="Metamorphous" style={{ fontFamily: 'Metamorphous' }}>Metamorphous</option>
+                                        <option value="Orbitron" style={{ fontFamily: 'Orbitron' }}>Orbitron</option>
+                                        <option value="Stoke" style={{ fontFamily: 'Stoke' }}>Stoke</option>
                                     </select>
                                 </div>
 
                                 {/* Colors */}
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <div style={{ flex: 1 }}>
-                                        <label style={{ display: 'block', marginBottom: '8px', color: '#aaa', fontSize: '12px' }}>Dice Color</label>
-                                        <input type="color" value={settings.theme.diceColor} onChange={(e) => updateTheme({ diceColor: e.target.value })} style={{ width: '100%', height: '40px', cursor: 'pointer' }} />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <label style={{ display: 'block', marginBottom: '8px', color: '#aaa', fontSize: '12px' }}>Label Color</label>
-                                        <input type="color" value={settings.theme.labelColor} onChange={(e) => updateTheme({ labelColor: e.target.value })} style={{ width: '100%', height: '40px', cursor: 'pointer' }} />
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <label style={{ display: 'block', marginBottom: '8px', color: '#aaa', fontSize: '12px' }}>Outline</label>
-                                        <input type="color" value={settings.theme.outlineColor} onChange={(e) => updateTheme({ outlineColor: e.target.value })} style={{ width: '100%', height: '40px', cursor: 'pointer' }} />
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <HexColorPicker
+                                        label="Dice Color"
+                                        value={settings.theme.diceColor}
+                                        onChange={(val) => updateTheme({ diceColor: val })}
+                                        showAlpha={false}
+                                    />
+                                    <HexColorPicker
+                                        label="Label Color"
+                                        value={settings.theme.labelColor}
+                                        onChange={(val) => updateTheme({ labelColor: val })}
+                                        showAlpha={false}
+                                    />
+                                    <HexColorPicker
+                                        label="Outline"
+                                        value={settings.theme.outlineColor}
+                                        onChange={(val) => updateTheme({ outlineColor: val })}
+                                        showAlpha={false}
+                                    />
+                                </div>
+
+                                {/* Secondary Colors (for d66/d88 ones die) */}
+                                <div style={{ marginTop: '16px' }}>
+                                    <label style={{ display: 'block', marginBottom: '8px', color: '#888', fontSize: '11px' }}>Secondary Colors (d66/d88 ones die)</label>
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <HexColorPicker
+                                            label="Dice"
+                                            value={settings.theme.diceColorSecondary || settings.theme.diceColor}
+                                            onChange={(val) => updateTheme({ diceColorSecondary: val })}
+                                            showAlpha={false}
+                                        />
+                                        <HexColorPicker
+                                            label="Label"
+                                            value={settings.theme.labelColorSecondary || settings.theme.labelColor}
+                                            onChange={(val) => updateTheme({ labelColorSecondary: val })}
+                                            showAlpha={false}
+                                        />
+                                        <HexColorPicker
+                                            label="Outline"
+                                            value={settings.theme.outlineColorSecondary || settings.theme.outlineColor}
+                                            onChange={(val) => updateTheme({ outlineColorSecondary: val })}
+                                            showAlpha={false}
+                                        />
                                     </div>
                                 </div>
 
