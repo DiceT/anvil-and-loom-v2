@@ -122,20 +122,25 @@ export class DiceParser {
                 sides = 'd%';
                 type = 'd%';
             } else {
-                const s = parseInt(sidesStr);
-
-                if (s === 66) {
-                    sides = 66;
-                    type = 'd66';
-                } else if (s === 88) {
-                    sides = 88;
-                    type = 'd88';
-                } else if (s === 100) {
-                    sides = 100;
-                    type = 'd100';
+                if (sidesStr === 'river') {
+                    sides = 6;
+                    type = 'driver';
                 } else {
-                    sides = isNaN(s) ? 6 : s;
-                    type = `d${sides}`;
+                    const s = parseInt(sidesStr);
+
+                    if (s === 66) {
+                        sides = 66;
+                        type = 'd66';
+                    } else if (s === 88) {
+                        sides = 88;
+                        type = 'd88';
+                    } else if (s === 100) {
+                        sides = 100;
+                        type = 'd100';
+                    } else {
+                        sides = isNaN(s) ? 6 : s;
+                        type = `d${sides}`;
+                    }
                 }
             }
 

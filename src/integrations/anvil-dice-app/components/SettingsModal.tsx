@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSettings } from '../store/SettingsContext';
+import { useSettingsStore } from '../../../stores/useSettingsStore';
 import { DicePreview } from './DicePreview';
 import { HexColorPicker } from './HexColorPicker';
 import type { SurfaceMaterial } from '../engine/types';
@@ -25,7 +26,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     isAutoFit, setIsAutoFit, onUpdateBounds
 }) => {
     const { settings, updateTheme, updatePhysics, setSoundVolume, resetSettings } = useSettings();
-    const [activeTab, setActiveTab] = useState<'appearance' | 'behavior'>('appearance');
+    const { settings: globalSettings, updateDiceSettings } = useSettingsStore();
+    const [activeTab, setActiveTab] = useState<'appearance' | 'behavior' | 'special'>('appearance');
 
     if (!isOpen) return null;
 
@@ -72,6 +74,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             border: 'none', color: activeTab === 'behavior' ? 'white' : '#888', cursor: 'pointer', fontWeight: 'bold'
                         }}
                     >Behavior</button>
+                    <button
+                        onClick={() => setActiveTab('special')}
+                        style={{
+                            flex: 1, padding: '15px', background: activeTab === 'special' ? '#333' : 'transparent',
+                            border: 'none', color: activeTab === 'special' ? 'white' : '#888', cursor: 'pointer', fontWeight: 'bold'
+                        }}
+                    >Special</button>
                 </div>
 
                 {/* Content */}
@@ -356,6 +365,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 </div>
                             </div>
 
+                        </div>
+                    )}
+
+                    {activeTab === 'special' && (
+                        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 15px 0', color: 'white' }}>Special Dice Models</h3>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '15px', background: '#333', borderRadius: '8px', border: '1px solid #444' }}>
+                                    <div>
+                                        <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>River Pebble d6</div>
+                                        <div style={{ fontSize: '12px', color: '#888' }}>
+                                            Replaces standard <strong>d6</strong> with a 12-sided pebble model.
+                                            <br />
+                                            Faces are mapped 1-6 twice (e.g. 1 & 12 = 6).
+                                        </div>
+                                    </div>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={globalSettings.dice.enableRiverPebble}
+                                            onChange={(e) => updateDiceSettings({ enableRiverPebble: e.target.checked })}
+                                            style={{ transform: 'scale(1.5)', cursor: 'pointer' }}
+                                        />
+                                        <span style={{ color: globalSettings.dice.enableRiverPebble ? '#4a90e2' : '#888' }}>
+                                            {globalSettings.dice.enableRiverPebble ? 'Enabled' : 'Disabled'}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

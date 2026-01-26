@@ -10,6 +10,7 @@ export interface DiceSettings {
     surfaceType: SurfaceType;
     diceSet: DiceSetType;
     logToEntry: boolean; // Toggle for logging results to active entry
+    enableRiverPebble: boolean;
 }
 
 export const defaultDiceSettings: DiceSettings = {
@@ -19,6 +20,7 @@ export const defaultDiceSettings: DiceSettings = {
     surfaceType: 'felt',
     diceSet: 'chamfered',
     logToEntry: true, // Default to enabled
+    enableRiverPebble: false,
 };
 
 // Editor Settings

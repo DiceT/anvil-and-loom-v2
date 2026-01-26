@@ -1,4 +1,4 @@
-import { d as diceEngine } from "./index-CTdfhhBW.js";
+import { d as diceEngine, u as useSettingsStore } from "./index-Blugov4u.js";
 import "uuid";
 function parseDiceExpression(expression) {
   let normalized = expression.toLowerCase().replace(/\s/g, "");
@@ -26,7 +26,11 @@ async function rollDiceExpression(expression, options) {
   }
   try {
     if (diceEngine.getEngineCore()) {
-      const engineExpression = expression.replace(/d100/g, "d%");
+      let engineExpression = expression.replace(/d100/g, "d%");
+      const settings = useSettingsStore.getState().settings;
+      if (settings?.dice?.enableRiverPebble) {
+        engineExpression = engineExpression.replace(/d6(?!\d)/gi, "driver");
+      }
       const result = await diceEngine.roll(engineExpression);
       return {
         expression,

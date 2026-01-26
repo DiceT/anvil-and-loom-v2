@@ -91,6 +91,10 @@ export class EngineCore {
         AudioManager.getInstance().setVolume(settings.soundVolume);
     }
 
+    public setRiverPebble(enabled: boolean) {
+        this.rollController.setRiverPebble(enabled);
+    }
+
     public destroy() {
         this.stop();
         if (this.renderer.domElement.parentElement) {

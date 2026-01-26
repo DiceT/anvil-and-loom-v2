@@ -30,9 +30,14 @@ export class RollController {
     // Settings
     private currentTheme: DiceTheme = DEFAULT_THEME;
     private currentPhysics: PhysicsSettings = DEFAULT_PHYSICS;
+    private riverPebbleEnabled = false;
 
     // Callback for results
     public onRollComplete: ((result: RollResult) => void) | null = null;
+
+    public setRiverPebble(enabled: boolean) {
+        this.riverPebbleEnabled = enabled;
+    }
 
     private isRolling = false;
     private currentModifier = 0;
@@ -101,8 +106,10 @@ export class RollController {
                                     outlineColor: groupTheme.outlineColorSecondary || groupTheme.outlineColor
                                 }
                                 : groupTheme;
-                            this.spawnDie('d6', dieKey++, groupIndex, 'd66_tens', tensTheme);
-                            this.spawnDie('d6', dieKey++, groupIndex, 'd66_ones', onesTheme);
+
+                            const dieType = this.riverPebbleEnabled ? 'driver' : 'd6';
+                            this.spawnDie(dieType, dieKey++, groupIndex, 'd66_tens', tensTheme);
+                            this.spawnDie(dieType, dieKey++, groupIndex, 'd66_ones', onesTheme);
                         } else if (group.type === 'd88') {
                             // d88 = d8 (Tens) + d8 (Ones) with secondary colors
                             const tensTheme = { ...groupTheme };
@@ -117,7 +124,9 @@ export class RollController {
                             this.spawnDie('d8', dieKey++, groupIndex, 'd88_tens', tensTheme);
                             this.spawnDie('d8', dieKey++, groupIndex, 'd88_ones', onesTheme);
                         } else {
-                            this.spawnDie(group.type, dieKey++, groupIndex, group.type, groupTheme);
+                            let type = group.type;
+                            if (type === 'd6' && this.riverPebbleEnabled) type = 'driver';
+                            this.spawnDie(type, dieKey++, groupIndex, group.type, groupTheme);
                         }
                     }
                     groupIndex++;
@@ -153,8 +162,10 @@ export class RollController {
                                 outlineColor: this.currentTheme.outlineColorSecondary || this.currentTheme.outlineColor
                             }
                             : this.currentTheme;
-                        this.spawnDie('d6', dieKey++, groupIndex, 'd66_tens', this.currentTheme);
-                        this.spawnDie('d6', dieKey++, groupIndex, 'd66_ones', onesTheme);
+
+                        const dieType = this.riverPebbleEnabled ? 'driver' : 'd6';
+                        this.spawnDie(dieType, dieKey++, groupIndex, 'd66_tens', this.currentTheme);
+                        this.spawnDie(dieType, dieKey++, groupIndex, 'd66_ones', onesTheme);
                     } else if (group.type === 'd88') {
                         // d88 = d8 (Tens) + d8 (Ones) with secondary colors
                         const onesTheme = this.currentTheme.diceColorSecondary
@@ -168,7 +179,9 @@ export class RollController {
                         this.spawnDie('d8', dieKey++, groupIndex, 'd88_tens', this.currentTheme);
                         this.spawnDie('d8', dieKey++, groupIndex, 'd88_ones', onesTheme);
                     } else {
-                        this.spawnDie(group.type, dieKey++, groupIndex, group.type, this.currentTheme);
+                        let type = group.type;
+                        if (type === 'd6' && this.riverPebbleEnabled) type = 'driver';
+                        this.spawnDie(type, dieKey++, groupIndex, group.type, this.currentTheme);
                     }
                 }
             });

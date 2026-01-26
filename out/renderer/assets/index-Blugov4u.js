@@ -17460,8 +17460,9 @@ const defaultDiceSettings = {
   material: "plastic",
   surfaceType: "felt",
   diceSet: "chamfered",
-  logToEntry: true
+  logToEntry: true,
   // Default to enabled
+  enableRiverPebble: false
 };
 const defaultEditorSettings = {
   theme: "nord-dark",
@@ -55060,7 +55061,7 @@ const interpretAction = {
   execute: async (thread, context) => {
     try {
       const { interpretThread } = await __vitePreload(async () => {
-        const { interpretThread: interpretThread2 } = await import("./threadInterpreter-XtrKfnCy.js");
+        const { interpretThread: interpretThread2 } = await import("./threadInterpreter-BrcxIYHI.js");
         return { interpretThread: interpretThread2 };
       }, true ? [] : void 0, import.meta.url);
       const interpretation = await interpretThread(thread);
@@ -55645,7 +55646,7 @@ async function executeMacro(slot) {
 async function executeDiceMacro(slot) {
   if (!slot.diceExpression) return;
   const { rollDiceExpression } = await __vitePreload(async () => {
-    const { rollDiceExpression: rollDiceExpression2 } = await import("./diceEngine-ngwXoExT.js");
+    const { rollDiceExpression: rollDiceExpression2 } = await import("./diceEngine-DjOcDRVB.js");
     return { rollDiceExpression: rollDiceExpression2 };
   }, true ? [] : void 0, import.meta.url);
   await rollDiceExpression(slot.diceExpression);
@@ -100282,6 +100283,10 @@ class DiceForge {
     "14",
     "18"
   ];
+  // River Pebble d6: d12 geometry, faces mapped 1->6 twice.
+  // 1(6), 11(5), 7(1), 9(3), 10(4), 5(2), 8(2), 3(4), 4(3), 6(1), 2(5), 12(6)
+  // Based on standard order: [1, 11, 7, 9, 10, 5, 8, 3, 4, 6, 2, 12]
+  static DRIVER_LABELS = ["6", "5", "1", "3", "4", "2", "2", "4", "3", "1", "5", "6"];
   constructor() {
     this.diceColors = new DiceColors();
   }
@@ -100313,6 +100318,10 @@ class DiceForge {
       case "d12":
         geometry = this.getGeometry("d12", 0.9 * scale);
         baseLabels = DiceForge.D12_LABELS;
+        break;
+      case "driver":
+        geometry = this.getGeometry("d12", 0.9 * scale);
+        baseLabels = DiceForge.DRIVER_LABELS;
         break;
       case "d20":
         geometry = this.getGeometry("d20", 1 * scale);
@@ -100586,7 +100595,7 @@ class DiceForge {
           else if (type === "d20") angleDeg = -7.5;
           if (angleDeg !== 0) context.rotate(angleDeg * Math.PI / 180);
           let textStr = String(labelText);
-          if ((textStr === "6" || textStr === "9") && type !== "d6" && type !== "d8") textStr += ".";
+          if ((textStr === "6" || textStr === "9") && type !== "d6" && type !== "d8" && type !== "driver") textStr += ".";
           if (!["glass", "arcane_resin", "void_glass", "liquid_core", "liquid_singularity", "liquid_flamecore", "liquid_vortex", "liquid_nebula"].includes(theme.material)) context.strokeText(textStr, 0, 0);
           context.fillText(textStr, 0, 0);
         }
@@ -101164,19 +101173,24 @@ class DiceParser {
         sides = "d%";
         type = "d%";
       } else {
-        const s2 = parseInt(sidesStr);
-        if (s2 === 66) {
-          sides = 66;
-          type = "d66";
-        } else if (s2 === 88) {
-          sides = 88;
-          type = "d88";
-        } else if (s2 === 100) {
-          sides = 100;
-          type = "d100";
+        if (sidesStr === "river") {
+          sides = 6;
+          type = "driver";
         } else {
-          sides = isNaN(s2) ? 6 : s2;
-          type = `d${sides}`;
+          const s2 = parseInt(sidesStr);
+          if (s2 === 66) {
+            sides = 66;
+            type = "d66";
+          } else if (s2 === 88) {
+            sides = 88;
+            type = "d88";
+          } else if (s2 === 100) {
+            sides = 100;
+            type = "d100";
+          } else {
+            sides = isNaN(s2) ? 6 : s2;
+            type = `d${sides}`;
+          }
         }
       }
       result.groups.push({
@@ -101203,8 +101217,12 @@ class RollController {
   // Settings
   currentTheme = DEFAULT_THEME;
   currentPhysics = DEFAULT_PHYSICS;
+  riverPebbleEnabled = false;
   // Callback for results
   onRollComplete = null;
+  setRiverPebble(enabled) {
+    this.riverPebbleEnabled = enabled;
+  }
   isRolling = false;
   currentModifier = 0;
   currentNotation = "";
@@ -101253,8 +101271,9 @@ class RollController {
                 labelColor: groupTheme.labelColorSecondary || groupTheme.labelColor,
                 outlineColor: groupTheme.outlineColorSecondary || groupTheme.outlineColor
               } : groupTheme;
-              this.spawnDie("d6", dieKey++, groupIndex, "d66_tens", tensTheme);
-              this.spawnDie("d6", dieKey++, groupIndex, "d66_ones", onesTheme);
+              const dieType = this.riverPebbleEnabled ? "driver" : "d6";
+              this.spawnDie(dieType, dieKey++, groupIndex, "d66_tens", tensTheme);
+              this.spawnDie(dieType, dieKey++, groupIndex, "d66_ones", onesTheme);
             } else if (group.type === "d88") {
               const tensTheme = { ...groupTheme };
               const onesTheme = groupTheme.diceColorSecondary ? {
@@ -101266,7 +101285,9 @@ class RollController {
               this.spawnDie("d8", dieKey++, groupIndex, "d88_tens", tensTheme);
               this.spawnDie("d8", dieKey++, groupIndex, "d88_ones", onesTheme);
             } else {
-              this.spawnDie(group.type, dieKey++, groupIndex, group.type, groupTheme);
+              let type = group.type;
+              if (type === "d6" && this.riverPebbleEnabled) type = "driver";
+              this.spawnDie(type, dieKey++, groupIndex, group.type, groupTheme);
             }
           }
           groupIndex++;
@@ -101292,8 +101313,9 @@ class RollController {
               labelColor: this.currentTheme.labelColorSecondary || this.currentTheme.labelColor,
               outlineColor: this.currentTheme.outlineColorSecondary || this.currentTheme.outlineColor
             } : this.currentTheme;
-            this.spawnDie("d6", dieKey++, groupIndex, "d66_tens", this.currentTheme);
-            this.spawnDie("d6", dieKey++, groupIndex, "d66_ones", onesTheme);
+            const dieType = this.riverPebbleEnabled ? "driver" : "d6";
+            this.spawnDie(dieType, dieKey++, groupIndex, "d66_tens", this.currentTheme);
+            this.spawnDie(dieType, dieKey++, groupIndex, "d66_ones", onesTheme);
           } else if (group.type === "d88") {
             const onesTheme = this.currentTheme.diceColorSecondary ? {
               ...this.currentTheme,
@@ -101304,7 +101326,9 @@ class RollController {
             this.spawnDie("d8", dieKey++, groupIndex, "d88_tens", this.currentTheme);
             this.spawnDie("d8", dieKey++, groupIndex, "d88_ones", onesTheme);
           } else {
-            this.spawnDie(group.type, dieKey++, groupIndex, group.type, this.currentTheme);
+            let type = group.type;
+            if (type === "d6" && this.riverPebbleEnabled) type = "driver";
+            this.spawnDie(type, dieKey++, groupIndex, group.type, this.currentTheme);
           }
         }
       });
@@ -101830,6 +101854,9 @@ class EngineCore {
     this.physicsWorld.setSurface(settings.physics.surface);
     AudioManager.getInstance().setVolume(settings.soundVolume);
   }
+  setRiverPebble(enabled) {
+    this.rollController.setRiverPebble(enabled);
+  }
   destroy() {
     this.stop();
     if (this.renderer.domElement.parentElement) {
@@ -101862,7 +101889,17 @@ const SettingsProvider = ({ children }) => {
     const defaults = { theme: DEFAULT_THEME, physics: DEFAULT_PHYSICS, soundVolume: 0.5 };
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { ...defaults, ...parsed };
+      const mergedTheme = { ...defaults.theme, ...parsed.theme || {} };
+      if (!parsed.theme?.diceColorSecondary) mergedTheme.diceColorSecondary = mergedTheme.diceColor;
+      if (!parsed.theme?.labelColorSecondary) mergedTheme.labelColorSecondary = mergedTheme.labelColor;
+      if (!parsed.theme?.outlineColorSecondary) mergedTheme.outlineColorSecondary = mergedTheme.outlineColor;
+      const mergedPhysics = { ...defaults.physics, ...parsed.physics || {} };
+      return {
+        ...defaults,
+        ...parsed,
+        theme: mergedTheme,
+        physics: mergedPhysics
+      };
     }
     return defaults;
   });
@@ -102075,6 +102112,7 @@ const SettingsModal = ({
   onUpdateBounds
 }) => {
   const { settings, updateTheme, updatePhysics, setSoundVolume, resetSettings } = useSettings();
+  const { settings: globalSettings, updateDiceSettings } = useSettingsStore();
   const [activeTab, setActiveTab] = reactExports.useState("appearance");
   if (!isOpen) return null;
   const setSurface = (surface) => {
@@ -102150,6 +102188,22 @@ const SettingsModal = ({
             fontWeight: "bold"
           },
           children: "Behavior"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: () => setActiveTab("special"),
+          style: {
+            flex: 1,
+            padding: "15px",
+            background: activeTab === "special" ? "#333" : "transparent",
+            border: "none",
+            color: activeTab === "special" ? "white" : "#888",
+            cursor: "pointer",
+            fontWeight: "bold"
+          },
+          children: "Special"
         }
       )
     ] }),
@@ -102497,7 +102551,34 @@ const SettingsModal = ({
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: "12px", color: "#666", marginTop: "10px" }, children: "Defines the invisible walls around the dice." })
         ] })
-      ] })
+      ] }),
+      activeTab === "special" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: "100%", display: "flex", flexDirection: "column", gap: "30px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { style: { margin: "0 0 15px 0", color: "white" }, children: "Special Dice Models" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px", background: "#333", borderRadius: "8px", border: "1px solid #444" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontWeight: "bold", marginBottom: "5px" }, children: "River Pebble d6" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: "12px", color: "#888" }, children: [
+              "Replaces standard ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "d6" }),
+              " with a 12-sided pebble model.",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+              "Faces are mapped 1-6 twice (e.g. 1 & 12 = 6)."
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { style: { display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                type: "checkbox",
+                checked: globalSettings.dice.enableRiverPebble,
+                onChange: (e2) => updateDiceSettings({ enableRiverPebble: e2.target.checked }),
+                style: { transform: "scale(1.5)", cursor: "pointer" }
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: globalSettings.dice.enableRiverPebble ? "#4a90e2" : "#888" }, children: globalSettings.dice.enableRiverPebble ? "Enabled" : "Disabled" })
+          ] })
+        ] })
+      ] }) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "20px", borderTop: "1px solid #333", display: "flex", justifyContent: "flex-end", gap: "10px" }, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: resetSettings, style: { padding: "10px 20px", background: "transparent", border: "1px solid #555", color: "#aaa", borderRadius: "6px", cursor: "pointer" }, children: "Reset Defaults" }),
@@ -102507,11 +102588,13 @@ const SettingsModal = ({
 };
 const SettingsSync = ({ engine }) => {
   const { settings } = useSettings();
+  const { settings: globalSettings } = useSettingsStore();
   reactExports.useEffect(() => {
     if (engine) {
       engine.updateSettings(settings);
+      engine.setRiverPebble(globalSettings.dice.enableRiverPebble);
     }
-  }, [engine, settings]);
+  }, [engine, settings, globalSettings.dice.enableRiverPebble]);
   return null;
 };
 class DiceEngine {
@@ -102813,6 +102896,7 @@ function DiceTool() {
   const [expression, setExpression] = reactExports.useState("");
   const [error, setError] = reactExports.useState(null);
   const [advantageMode, setAdvantageMode] = reactExports.useState("none");
+  const { settings } = useSettingsStore();
   const [isSettingsOpen, setIsSettingsOpen] = reactExports.useState(false);
   const [boundsWidth, setBoundsWidth] = reactExports.useState(44);
   const [boundsDepth, setBoundsDepth] = reactExports.useState(28);
@@ -102863,7 +102947,11 @@ function DiceTool() {
     }
     try {
       setError(null);
-      await diceEngine.roll(expression);
+      let finalExpression = expression;
+      if (settings.dice.enableRiverPebble) {
+        finalExpression = finalExpression.replace(/d6(?!\d)/gi, "driver");
+      }
+      await diceEngine.roll(finalExpression);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to roll dice");
     }

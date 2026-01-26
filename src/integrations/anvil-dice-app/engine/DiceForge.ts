@@ -29,6 +29,11 @@ export class DiceForge {
         '12', '10', '8', '20', '2', '15', '17', '16', '14', '18'
     ];
 
+    // River Pebble d6: d12 geometry, faces mapped 1->6 twice.
+    // 1(6), 11(5), 7(1), 9(3), 10(4), 5(2), 8(2), 3(4), 4(3), 6(1), 2(5), 12(6)
+    // Based on standard order: [1, 11, 7, 9, 10, 5, 8, 3, 4, 6, 2, 12]
+    private static readonly DRIVER_LABELS = ['6', '5', '1', '3', '4', '2', '2', '4', '3', '1', '5', '6'];
+
     constructor() {
         this.diceColors = new DiceColors();
     }
@@ -64,6 +69,10 @@ export class DiceForge {
             case 'd12':
                 geometry = this.getGeometry('d12', 0.9 * scale);
                 baseLabels = DiceForge.D12_LABELS;
+                break;
+            case 'driver':
+                geometry = this.getGeometry('d12', 0.9 * scale);
+                baseLabels = DiceForge.DRIVER_LABELS;
                 break;
             case 'd20':
                 geometry = this.getGeometry('d20', 1.0 * scale);
@@ -391,7 +400,7 @@ export class DiceForge {
                     if (angleDeg !== 0) context.rotate(angleDeg * Math.PI / 180);
 
                     let textStr = String(labelText);
-                    if ((textStr === '6' || textStr === '9') && type !== 'd6' && type !== 'd8') textStr += '.';
+                    if ((textStr === '6' || textStr === '9') && type !== 'd6' && type !== 'd8' && type !== 'driver') textStr += '.';
 
                     if (!['glass', 'arcane_resin', 'void_glass', 'liquid_core', 'liquid_singularity', 'liquid_flamecore', 'liquid_vortex', 'liquid_nebula'].includes(theme.material)) context.strokeText(textStr, 0, 0);
                     context.fillText(textStr, 0, 0);

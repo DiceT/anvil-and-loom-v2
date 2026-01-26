@@ -21,6 +21,7 @@ import {
   TEXTURELIST,
   SettingsProvider
 } from '../../../integrations/anvil-dice-app';
+import { useSettingsStore } from '../../../stores/useSettingsStore';
 import { IconButton } from '../../ui/IconButton';
 
 type AdvantageMode = 'none' | 'advantage' | 'disadvantage';
@@ -29,6 +30,7 @@ export function DiceTool() {
   const [expression, setExpression] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [advantageMode, setAdvantageMode] = useState<AdvantageMode>('none');
+  const { settings } = useSettingsStore();
 
   // Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -100,7 +102,18 @@ export function DiceTool() {
 
     try {
       setError(null);
-      await diceEngine.roll(expression);
+
+      let finalExpression = expression;
+
+      // River Pebble Interception
+      if (settings.dice.enableRiverPebble) {
+        // Replace d6 with driver (which uses d12 model w/ 1-6 map)
+        // Use regex to avoid replacing d66
+        finalExpression = finalExpression.replace(/d6(?!\d)/gi, 'driver');
+        // d66 is preserved because 'd6' is followed by '6'
+      }
+
+      await diceEngine.roll(finalExpression);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to roll dice');
     }

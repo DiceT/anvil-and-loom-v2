@@ -1,5 +1,6 @@
 import { DiceRollResult, DiceOptions, RollResult } from './types';
 import { parseDiceExpression } from './diceParser';
+import { useSettingsStore } from '../../stores/useSettingsStore';
 
 import { diceEngine } from '../../integrations/anvil-dice-app';
 
@@ -26,7 +27,15 @@ export async function rollDiceExpression(
   try {
     if (diceEngine.getEngineCore()) {
       // Create a compatible expression for the 3D engine (e.g. d100 -> d%)
-      const engineExpression = expression.replace(/d100/g, 'd%');
+      let engineExpression = expression.replace(/d100/g, 'd%');
+
+      // River Pebble Interception (Global Check)
+      const settings = useSettingsStore.getState().settings;
+      if (settings?.dice?.enableRiverPebble) {
+        // Replace d6 (not d66/d60 stuff) with driver
+        engineExpression = engineExpression.replace(/d6(?!\d)/gi, 'driver');
+      }
+
       const result = await diceEngine.roll(engineExpression);
       return {
         expression,

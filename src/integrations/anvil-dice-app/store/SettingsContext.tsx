@@ -20,7 +20,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const defaults = { theme: DEFAULT_THEME, physics: DEFAULT_PHYSICS, soundVolume: 0.5 };
         if (saved) {
             const parsed = JSON.parse(saved);
-            return { ...defaults, ...parsed };
+
+            // Deep merge theme to ensure new properties are populated
+            const mergedTheme = { ...defaults.theme, ...(parsed.theme || {}) };
+
+            // Initialize missing secondary colors with the active primary colors (saved or default)
+            // This ensures they are explicit (decoupled) but start matching the user's setup.
+            if (!parsed.theme?.diceColorSecondary) mergedTheme.diceColorSecondary = mergedTheme.diceColor;
+            if (!parsed.theme?.labelColorSecondary) mergedTheme.labelColorSecondary = mergedTheme.labelColor;
+            if (!parsed.theme?.outlineColorSecondary) mergedTheme.outlineColorSecondary = mergedTheme.outlineColor;
+
+            const mergedPhysics = { ...defaults.physics, ...(parsed.physics || {}) };
+
+            return {
+                ...defaults,
+                ...parsed,
+                theme: mergedTheme,
+                physics: mergedPhysics
+            };
         }
         return defaults;
     });
