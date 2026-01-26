@@ -1,6 +1,6 @@
 import { useDrop, useDrag } from 'react-dnd'
 import { useMacroStore } from '../../stores/useMacroStore'
-import { MacroSlot as MacroSlotType } from '../../types/macro'
+import { MacroSlot as MacroSlotType, createTableMacro, createPanelMacro } from '../../types/macro'
 import { MacroSlotIcon } from './MacroSlotIcon'
 import { MacroSlotTooltip } from './MacroSlotTooltip'
 import { executeMacro } from '../../lib/macro/executeMacro'
@@ -112,9 +112,49 @@ export function MacroSlot({ slot, visualIndex }: MacroSlotProps) {
             }}
             onClick={handleClick}
             onContextMenu={handleContextMenu}
+            onDragStart={(e) => {
+                if (isEmpty) return;
+                // React-DnD handles the main drag. We validly append data for native targets.
+                e.dataTransfer.setData('application/anl+json', JSON.stringify({
+                    type: 'macro',
+                    id: slot.id,
+                    name: slot.label,
+                    macro: slot
+                }));
+                e.dataTransfer.effectAllowed = 'copyMove';
+            }}
+            onDragOver={(e) => {
+                if (e.dataTransfer.types.includes('application/anl+json')) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                }
+            }}
+            onDrop={(e) => {
+                const data = e.dataTransfer.getData('application/anl+json');
+                if (data) {
+                    try {
+                        const item = JSON.parse(data);
+                        e.preventDefault();
+                        if (item.type === 'table') {
+                            const newMacro = createTableMacro(slot.index, item.id, item.name);
+                            setSlot(slot.index, newMacro);
+                        } else if (item.type === 'panel') {
+                            // Helper to guess path/title if not fully provided, though logic usually provides it
+                            // For now assume item has what we need, or fallback
+                            const path = item.path || item.id;
+                            const title = item.name;
+                            const newMacro = createPanelMacro(slot.index, item.id, path, title);
+                            setSlot(slot.index, newMacro);
+                        }
+                    } catch (err) {
+                        console.error('Failed to parse dropped macro data', err);
+                    }
+                }
+            }}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             className={`${baseStyles} ${stateStyles} ${dropStyles} ${dragStyles}`}
+            {...((!isEmpty) ? { draggable: true } : {})}
         >
             {/* Keyboard shortcut indicator */}
             <span className="absolute top-1 left-1.5 text-[10px] text-type-tertiary font-mono">

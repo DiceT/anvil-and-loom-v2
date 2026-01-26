@@ -1,5 +1,9 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import remarkWikiLink from 'remark-wiki-link';
 import { Thread } from '../../types/thread';
+import { WikiLink } from '../tapestry/WikiLink';
 
 interface ThreadContentProps {
     thread: Thread;
@@ -32,7 +36,7 @@ export function ThreadContent({ thread, isExpanded }: ThreadContentProps) {
                                 <span className="text-type-tertiary mr-2">Rolls:</span>
                                 {thread.meta.dice.breakdown.map((roll, i) => (
                                     <span key={i} className={roll.kept ? 'font-bold text-type-primary' : 'text-type-tertiary'}>
-                                        {roll.value}{i < thread.meta.dice!.breakdown.length - 1 ? ', ' : ''}
+                                        {roll.value}{i < (thread.meta?.dice?.breakdown?.length || 0) - 1 ? ', ' : ''}
                                     </span>
                                 ))}
                             </div>
@@ -50,17 +54,22 @@ export function ThreadContent({ thread, isExpanded }: ThreadContentProps) {
                 {/* Regular Content / Description */}
                 {thread.content && (
                     <div className="prose prose-invert prose-xs max-w-none text-type-secondary">
-                        {thread.content}
+                        <ReactMarkdown
+                            remarkPlugins={[
+                                remarkGfm,
+                                [remarkWikiLink, { hrefTemplate: (permalink: string) => `wiki:${permalink}` }]
+                            ]}
+                            components={{
+                                a: ({ node, ...props }) => <WikiLink {...props} />
+                            }}
+                        >
+                            {thread.content}
+                        </ReactMarkdown>
                     </div>
                 )}
 
-                {/* Weave Metadata */}
-                {thread.meta?.weave && (
-                    <div className="mt-2 pt-2 border-t border-border/50 text-xs">
-                        <span className="text-type-tertiary">Table: </span>
-                        <span className="text-type-secondary">{thread.meta.weave.tableName}</span>
-                    </div>
-                )}
+                {/* Weave Metadata - REMOVED as per user request (redundant with header) */}
+
             </div>
         </div>
     );

@@ -70,7 +70,7 @@ export const CURRENT_SCHEMA_VERSION = 1;
 // ============================================================================
 
 /** Result type discriminator for TableRow */
-export type ResultType = 'text' | 'table' | 'object';
+export type ResultType = 'text' | 'table' | 'panel' | 'aspect' | 'domain' | 'macro';
 
 /** Reference to another table by tag */
 export interface TableReference {

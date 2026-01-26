@@ -28,22 +28,22 @@ let currentTapestryPath: string | null = null;
 const tableCache = new Map<string, Table>();
 
 /**
- * Get the .weave directory path for the current Tapestry
+ * Get the directory path for a specific namespace (e.g., .weave or .environment)
  */
-function getWeaveDirPath(): string {
+function getNamespaceDirPath(namespace: '.weave' | '.environment'): string {
     if (!currentTapestryPath) {
         throw new Error('No Tapestry path set. Call weave:setTapestryPath first.');
     }
-    return path.join(currentTapestryPath, '.weave');
+    return path.join(currentTapestryPath, namespace);
 }
 
 /**
- * Ensure the .weave directory exists
+ * Ensure the directory exists
  */
-async function ensureWeaveDir(): Promise<string> {
-    const weaveDir = getWeaveDirPath();
-    await fs.mkdir(weaveDir, { recursive: true });
-    return weaveDir;
+async function ensureNamespaceDir(namespace: '.weave' | '.environment'): Promise<string> {
+    const dir = getNamespaceDirPath(namespace);
+    await fs.mkdir(dir, { recursive: true });
+    return dir;
 }
 
 /**
@@ -106,45 +106,46 @@ async function getUniqueFilePath(dir: string, name: string, tableId: string): Pr
 }
 
 /**
- * Read all table files from the .weave directory
+ * Recursively read files from a directory
  */
-async function readTableFiles(): Promise<Table[]> {
+async function getFilesRecursive(dir: string): Promise<string[]> {
+    const dirents = await fs.readdir(dir, { withFileTypes: true });
+    const files = await Promise.all(dirents.map(async (dirent) => {
+        const res = path.join(dir, dirent.name);
+        return dirent.isDirectory() ? getFilesRecursive(res) : res;
+    }));
+    return files.flat();
+}
+
+/**
+ * Read all table files from a specific directory (recursive)
+ */
+async function readTableFiles(namespace: '.weave' | '.environment'): Promise<Table[]> {
     try {
-        const weaveDir = getWeaveDirPath();
-        const entries = await fs.readdir(weaveDir, { withFileTypes: true });
+        const dir = getNamespaceDirPath(namespace);
+        const filePaths = await getFilesRecursive(dir);
+
         const tables: Table[] = [];
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
 
-        for (const entry of entries) {
-            if (entry.isFile() && entry.name.endsWith('.json')) {
-                const oldPath = path.join(weaveDir, entry.name);
+        for (const filePath of filePaths) {
+            if (filePath.endsWith('.json')) {
+                const fileName = path.basename(filePath);
                 try {
-                    const data = await fs.readFile(oldPath, 'utf-8');
+                    const data = await fs.readFile(filePath, 'utf-8');
                     const table = JSON.parse(data) as Table;
 
-                    let currentPath = oldPath;
+                    let currentPath = filePath;
 
-                    // MIGRATION: If filename is UUID, rename it to Human Readable
-                    if (uuidRegex.test(entry.name)) {
-                        const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
-                        if (newPath !== oldPath) {
-                            try {
-                                await fs.rename(oldPath, newPath);
-                                currentPath = newPath;
-                            } catch (err) {
-                                console.error(`Failed to migrate table ${entry.name}`, err);
-                            }
-                        }
-                    }
+                    // MIGRATION: If filename is UUID, rename it to Human Readable (Flat migration only for now)
+                    // Note: We skip complex migration inside subfolders to avoid chaos, only migrate root files if needed
+                    // For now, simplicity: just read
 
-                    // Update sourcePath
                     table.sourcePath = currentPath;
-
-                    // Cache the table
                     tableCache.set(table.id, table);
                     tables.push(table);
                 } catch (error) {
-                    console.error(`Failed to read table file ${entry.name}:`, error);
+                    console.error(`Failed to read table file ${fileName}:`, error);
                 }
             }
         }
@@ -152,7 +153,6 @@ async function readTableFiles(): Promise<Table[]> {
         return tables;
     } catch (error: any) {
         if (error.code === 'ENOENT') {
-            // .weave directory doesn't exist yet
             return [];
         }
         throw error;
@@ -162,20 +162,42 @@ async function readTableFiles(): Promise<Table[]> {
 /**
  * Write a table to its file
  */
-async function writeTableFile(table: Table): Promise<void> {
-    const weaveDir = await ensureWeaveDir();
+async function writeTableFile(table: Table, namespace: '.weave' | '.environment'): Promise<void> {
+    const rootDir = await ensureNamespaceDir(namespace);
+
+    let targetDir = rootDir;
+
+    // Handle subdirectories for Environment
+    if (namespace === '.environment' && table.category) {
+        if (table.category.startsWith('Aspect - ')) {
+            const aspectName = table.category.replace('Aspect - ', '').trim();
+            targetDir = path.join(rootDir, 'Aspects', sanitizeFilename(aspectName));
+        } else if (table.category.startsWith('Domain - ')) {
+            const domainName = table.category.replace('Domain - ', '').trim();
+            targetDir = path.join(rootDir, 'Domains', sanitizeFilename(domainName));
+        }
+    }
+
+    await fs.mkdir(targetDir, { recursive: true });
 
     // Calculate new path based on Name
-    const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
+    const newPath = await getUniqueFilePath(targetDir, table.name, table.id);
 
-    // If sourcePath exists and is different, remove the old file (Rename)
-    if (table.sourcePath && table.sourcePath !== newPath) {
+    // CRITICAL FIX: Use the CACHED sourcePath to identify the file to delete.
+    // The frontend's table.sourcePath might be stale during rapid edits/renames.
+    // The cache knows where we last wrote this specific ID.
+    const cachedTable = tableCache.get(table.id);
+    const oldPath = cachedTable?.sourcePath || table.sourcePath;
+
+    // If we have an old path and it's different, remove the old file (Rename/Move)
+    if (oldPath && oldPath !== newPath) {
         try {
-            // Only delete if the old path actually exists
-            await fs.access(table.sourcePath);
-            await fs.unlink(table.sourcePath);
+            await fs.access(oldPath);
+            await fs.unlink(oldPath);
+            // console.log(`[writeTableFile] Renamed/Moved: Deleted old file ${oldPath}`);
         } catch (e) {
-            // Ignore (maybe file didn't exist or we can't delete it)
+            // Ignore (file might already be gone)
+            // console.warn(`[writeTableFile] Failed to delete old file ${oldPath}`, e);
         }
     }
 
@@ -293,8 +315,9 @@ export function registerWeaveHandlers() {
             tableCache.clear();
             currentTapestryPath = tapestryPath;
 
-            // Ensure .weave directory exists
-            await ensureWeaveDir();
+            // Ensure directories exist
+            await ensureNamespaceDir('.weave');
+            await ensureNamespaceDir('.environment');
 
             return { success: true };
         } catch (error: any) {
@@ -304,6 +327,8 @@ export function registerWeaveHandlers() {
             };
         }
     });
+
+    // --- WEAVE HANDLERS ---
 
     // Get all tables from the current Tapestry's .weave folder
     ipcMain.handle('weave:getTables', async (): Promise<WeaveTableListResponse> => {
@@ -315,7 +340,7 @@ export function registerWeaveHandlers() {
                 };
             }
 
-            const tables = await readTableFiles();
+            const tables = await readTableFiles('.weave');
             return { tables };
         } catch (error: any) {
             return {
@@ -333,22 +358,30 @@ export function registerWeaveHandlers() {
 
             // If not in cache, try loading from disk
             if (!table) {
-                const weaveDir = getWeaveDirPath();
-                const filePath = path.join(weaveDir, `${tableId}.json`);
+                const weaveDir = getNamespaceDirPath('.weave');
+                let filePath = path.join(weaveDir, `${tableId}.json`);
 
                 try {
+                    // Try .weave first
                     const data = await fs.readFile(filePath, 'utf-8');
                     table = JSON.parse(data) as Table;
                     table.sourcePath = filePath;
                     tableCache.set(tableId, table);
-                } catch (error: any) {
-                    if (error.code === 'ENOENT') {
+                } catch (weaveError: any) {
+                    // If not in .weave, try .environment
+                    const envDir = getNamespaceDirPath('.environment');
+                    filePath = path.join(envDir, `${tableId}.json`);
+                    try {
+                        const data = await fs.readFile(filePath, 'utf-8');
+                        table = JSON.parse(data) as Table;
+                        table.sourcePath = filePath;
+                        tableCache.set(tableId, table);
+                    } catch (envError: any) {
                         return {
                             table: null,
-                            error: `Table with ID ${tableId} not found`,
+                            error: `Table with ID ${tableId} not found in .weave or .environment`,
                         };
                     }
-                    throw error;
                 }
             }
 
@@ -381,8 +414,40 @@ export function registerWeaveHandlers() {
                 table.schemaVersion = 1;
             }
 
-            // Save to disk
-            await writeTableFile(table);
+            // INTELLIGENT SAVE: Check where the table belongs
+            // If it has a sourcePath pointing to .environment, OR if we find it in the environment directory, save there.
+            let namespace: '.weave' | '.environment' = '.weave'; // Default
+
+            // 1. Check strict Categories (Aspects/Domains are ALWAYS environment)
+            if (table.category) {
+                if (table.category.startsWith('Aspect - ') ||
+                    table.category.startsWith('Domain - ') ||
+                    table.category === 'Environment') {
+                    namespace = '.environment';
+                }
+            }
+
+            // 2. Check sourcePath (Trust existing location if it's explicitly environment)
+            // Check both incoming path AND cached path immediately
+            const pathToCheck = table.sourcePath || findTableById(table.id)?.sourcePath;
+            if (pathToCheck && (pathToCheck.includes('.environment') || pathToCheck.includes(path.sep + '.environment'))) {
+                namespace = '.environment';
+            }
+
+            // 3. Last check: If no path/category match, check if ID exists in Environment
+            // (Already covered by using cached path above, but keeping for safety checks on ID lookups if paths fail)
+            if (namespace === '.weave') {
+                const cached = findTableById(table.id);
+                if (cached && (
+                    cached.category === 'Environment' ||
+                    cached.category?.startsWith('Aspect - ') ||
+                    cached.category?.startsWith('Domain - ')
+                )) {
+                    namespace = '.environment';
+                }
+            }
+
+            await writeTableFile(table, namespace);
 
             return { success: true, table };
         } catch (error: any) {
@@ -445,6 +510,48 @@ export function registerWeaveHandlers() {
                 result: null,
                 error: error?.message ?? 'Failed to roll table',
             };
+        }
+    });
+    // --- ENVIRONMENT HANDLERS ---
+
+    ipcMain.handle('environment:getTables', async (): Promise<WeaveTableListResponse> => {
+        try {
+            if (!currentTapestryPath) {
+                return {
+                    tables: [],
+                    error: 'No Tapestry path set.',
+                };
+            }
+            const tables = await readTableFiles('.environment');
+            return { tables };
+        } catch (error: any) {
+            return {
+                tables: [],
+                error: error?.message ?? 'Failed to load environment tables',
+            };
+        }
+    });
+
+    ipcMain.handle('environment:saveTable', async (_event, table: Table): Promise<WeaveSaveTableResponse> => {
+        try {
+            if (!currentTapestryPath) return { success: false, error: 'No Tapestry path set.' };
+            if (!table.id) table.id = uuidv4();
+            if (!table.schemaVersion) table.schemaVersion = 1;
+
+            await writeTableFile(table, '.environment');
+            return { success: true, table };
+        } catch (error: any) {
+            return { success: false, error: error?.message ?? 'Failed to save environment table' };
+        }
+    });
+
+    ipcMain.handle('environment:deleteTable', async (_event, tableId: string): Promise<WeaveDeleteTableResponse> => {
+        try {
+            if (!currentTapestryPath) return { success: false, error: 'No Tapestry path set.' };
+            await deleteTableFile(tableId);
+            return { success: true };
+        } catch (error: any) {
+            return { success: false, error: error?.message ?? 'Failed to delete table' };
         }
     });
 }

@@ -36,6 +36,11 @@ electron.contextBridge.exposeInMainWorld("electron", {
     // Rolling
     rollTable: (tableId, seed) => electron.ipcRenderer.invoke("weave:rollTable", tableId, seed)
   },
+  environment: {
+    getTables: () => electron.ipcRenderer.invoke("environment:getTables"),
+    saveTable: (table) => electron.ipcRenderer.invoke("environment:saveTable", table),
+    deleteTable: (tableId) => electron.ipcRenderer.invoke("environment:deleteTable", tableId)
+  },
   ipcRenderer: {
     invoke: (channel, ...args) => electron.ipcRenderer.invoke(channel, ...args)
   },

@@ -128,15 +128,28 @@ export function DraggableTableItem({
           itemRef.current = node;
         }}
         style={style}
-        className={`group flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
-          isSelected
-            ? 'bg-purple-900/30 text-purple-200'
-            : 'hover:bg-slate-800/50 text-slate-300'
-        }`}
+        className={`group flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors select-none ${isSelected
+          ? 'bg-purple-900/30 text-purple-200'
+          : 'hover:bg-slate-800/50 text-slate-300'
+          }`}
         onClick={onClick}
         onContextMenu={handleContextMenu}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        draggable={true}
+        onDragStart={(e) => {
+          // Native drag for dropping onto Result inputs
+          e.dataTransfer.setData('text/plain', table.name); // Fallback
+          e.dataTransfer.setData('application/anl+json', JSON.stringify({
+            type: 'table',
+            id: table.id,
+            name: table.name,
+            category
+          }));
+          e.dataTransfer.effectAllowed = 'copy';
+          // Note: dnd-kit handle stops propagation for its own events, 
+          // so this only fires when dragging the ROW background, not the handle.
+        }}
       >
         {/* Drag Handle */}
         <div

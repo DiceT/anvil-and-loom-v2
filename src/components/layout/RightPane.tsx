@@ -3,6 +3,7 @@ import { ThreadsFullPane } from '../results/ThreadsFullPane';
 import { GlobalLastThread } from '../results/GlobalLastThread';
 import { Stitchboard } from '../stitches/Stitchboard';
 import { WeavePanel } from '../weave/WeavePanel';
+import { EnvironmentFileTree } from '../environment/EnvironmentFileTree';
 import { useToolStore } from '../../stores/useToolStore';
 
 export function RightPane() {
@@ -18,6 +19,8 @@ export function RightPane() {
         return <Stitchboard />;
       case 'weave':
         return <WeavePanel />;
+      case 'environment':
+        return <EnvironmentFileTree />;
       default:
         return null;
     }

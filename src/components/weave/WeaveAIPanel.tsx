@@ -190,6 +190,7 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
   /**
    * Handle Fill - add more rows to existing table
    * Uses target count approach (total rows desired)
+   * Overwrites empty rows if available
    */
   const handleFill = async () => {
     if (!table) return;
@@ -198,27 +199,90 @@ The items should reflect their probability - rare rolls deserve rare outcomes!`;
     setLastResult(null);
 
     try {
-      const existingRows = table.tableData.map(row =>
-        typeof row.result === 'string' ? row.result : JSON.stringify(row.result)
-      );
-      const result = await weaveAIService.fillTable(table.name, table.description, existingRows, fillCount);
+      // 1. Filter out empty rows for context (so AI doesn't see 50 empty strings)
+      const meaningfulRows = table.tableData
+        .filter(row => {
+          if (!row.result) return false;
+          if (typeof row.result === 'string' && !row.result.trim()) return false;
+          if (typeof row.result === 'object' && Object.keys(row.result).length === 0) return false; // Empty object
+          // Checks for empty tag object if applicable, though usually result is string or {tag: ''}
+          if (typeof row.result === 'object' && 'tag' in row.result && !row.result.tag) return false;
+          return true;
+        })
+        .map(row =>
+          typeof row.result === 'string' ? row.result : JSON.stringify(row.result)
+        );
 
-      // Add new rows to table
-      const newRows: TableRow[] = result.rows.map(row => ({
-        floor: row.floor,
-        ceiling: row.ceiling,
-        weight: 1,
-        resultType: 'text' as const,
-        result: row.result,
-      }));
+      const result = await weaveAIService.fillTable(table.name, table.description, meaningfulRows, fillCount);
+
+      const generatedRows = result.rows;
+      let currentIndex = 0;
+
+      // 2. Merge into existing empty rows first
+      const updatedTableData = table.tableData.map(row => {
+        // If we still have generated rows and this row is "empty"
+        const isEmpty = !row.result ||
+          (typeof row.result === 'string' && !row.result.trim()) ||
+          (typeof row.result === 'object' && Object.keys(row.result).length === 0) ||
+          (typeof row.result === 'object' && 'tag' in row.result && !row.result.tag);
+
+        if (isEmpty && currentIndex < generatedRows.length) {
+          const genRow = generatedRows[currentIndex++];
+          return {
+            ...row,
+            result: genRow.result,
+            // Keep existing weights/floors if they exist, or update if we want AI control. 
+            // Usually we just want to fill the content.
+          };
+        }
+        return row;
+      });
+
+      // 3. Append remaining generated rows if any
+      const newRows: TableRow[] = [];
+      while (currentIndex < generatedRows.length) {
+        const genRow = generatedRows[currentIndex++];
+        newRows.push({
+          floor: genRow.floor, // These floors might need adjustment if we are appending
+          ceiling: genRow.ceiling,
+          weight: 1,
+          resultType: 'text' as const,
+          result: genRow.result,
+        });
+      }
+
+      // If we appended, we might need to fix floors/ceilings. 
+      // But usually fillTable returns correct floors for the *whole* set? 
+      // Or just the new ones? The service usually returns "N new rows".
+      // If we matched them to existing empty slots, floors are fine. 
+      // If we append, we need to ensure floors continue correctly.
+
+      let finalTableData = [...updatedTableData, ...newRows];
+
+      // Auto-renumber if we appended (simple check)
+      if (newRows.length > 0) {
+        const lastRow = updatedTableData[updatedTableData.length - 1];
+        let startFloor = lastRow ? lastRow.ceiling + 1 : 1;
+
+        finalTableData = [...updatedTableData];
+
+        newRows.forEach(row => {
+          finalTableData.push({
+            ...row,
+            floor: startFloor,
+            ceiling: startFloor // Simplistic weight 1
+          });
+          startFloor++;
+        });
+      }
 
       const filledTable: Table = {
         ...table,
-        tableData: [...table.tableData, ...newRows],
+        tableData: finalTableData,
       };
 
       onTableUpdated?.(filledTable);
-      setLastResult(`Added ${newRows.length} rows`);
+      setLastResult(`Added ${generatedRows.length} rows`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fill table');
     } finally {

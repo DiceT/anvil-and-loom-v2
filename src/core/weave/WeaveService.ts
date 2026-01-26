@@ -46,7 +46,11 @@ export class WeaveService {
      * Save a table (create or update)
      */
     static async saveTable(table: Table): Promise<WeaveSaveTableResponse> {
-        return await window.electron.weave.saveTable(table);
+        const response = await window.electron.weave.saveTable(table);
+        if (response.success && response.table) {
+            window.dispatchEvent(new CustomEvent('weave:table-saved', { detail: response.table }));
+        }
+        return response;
     }
 
     /**

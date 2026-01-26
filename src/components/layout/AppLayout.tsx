@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, FolderTree, Tag, Bookmark, Dices, List, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, PlayCircle, StopCircle, Infinity } from 'lucide-react';
+import { FolderTree, Tag, Bookmark, Dices, List, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, Infinity, Mountain } from 'lucide-react';
 import { TopBar } from './TopBar';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
@@ -13,9 +13,10 @@ import { useLeftPaneStore, type LeftPaneMode } from '../../stores/useLeftPaneSto
 import { usePaneStore } from '../../stores/usePaneStore';
 import { useToolStore, type RightPaneMode } from '../../stores/useToolStore';
 import { GlobalDialogManager } from '../ui/GlobalDialogManager';
-import { useSessionStore } from '../../stores/useSessionStore';
+
 import { useMacroShortcuts } from '../../hooks/useMacroShortcuts';
 import { DiceOverlay } from '../overlays/DiceOverlay';
+import { TheRing } from '../tools/TheRing';
 
 export function AppLayout() {
   useMacroShortcuts();
@@ -23,6 +24,7 @@ export function AppLayout() {
   const { isLeftPaneCollapsed, leftPaneMode, setLeftPaneMode } = useLeftPaneStore();
   const { isRightPaneCollapsed, leftPaneWidth, setLeftPaneWidth, rightPaneWidth, setRightPaneWidth } = usePaneStore();
   const { rightPaneMode, setRightPaneMode } = useToolStore();
+  const isRingOpen = useToolStore((state) => state.isRingOpen);
 
   const [isDraggingLeft, setIsDraggingLeft] = useState(false);
   const [isDraggingRight, setIsDraggingRight] = useState(false);
@@ -38,6 +40,7 @@ export function AppLayout() {
     { mode: 'stitchboard', icon: List, label: 'Stitchboard' },
     { mode: 'results', icon: List, label: 'Results' },
     { mode: 'weave', icon: Infinity, label: 'Weave' },
+    { mode: 'environment', icon: Mountain, label: 'Environment' },
   ];
 
   // Show TapestryManager if no tapestry is active
@@ -197,6 +200,7 @@ export function AppLayout() {
       {/* Global Dialogs */}
       <GlobalDialogManager />
       <DiceOverlay />
+      <TheRing visible={isRingOpen} onClose={() => useToolStore.getState().toggleRing()} />
     </div>
   );
 }

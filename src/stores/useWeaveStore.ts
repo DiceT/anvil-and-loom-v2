@@ -277,6 +277,16 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
       }
 
       // Update tables in store
+      // CRITICAL: Only add to Weave Store if it belongs to Weave namespace
+      // If the backend saved it to .environment (indicated by sourcePath), do NOT add it here.
+      // (The Environment Store will pick it up via event listener).
+
+      const isEnvironmentTable = response.table?.sourcePath?.includes('.environment');
+      if (isEnvironmentTable) {
+        set({ isLoading: false });
+        return;
+      }
+
       const { tables } = get();
       const exists = tables.some(t => t.id === table.id);
 

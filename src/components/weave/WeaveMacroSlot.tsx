@@ -13,7 +13,7 @@ import { WeaveMacroTooltip } from './WeaveMacroTooltip';
 import type { Table } from '../../types/weave';
 
 interface WeaveMacroSlotProps {
-  slot: { tables: string[] };
+  slot: any; // Type 'any' to specific handling of tables vs other macro types
   slotIndex: number;
   tables: Table[]; // All available tables to resolve IDs
   onRoll: (slotIndex: number) => void;
@@ -28,9 +28,10 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
 
   // Get actual table objects for this slot
   const slotTables = React.useMemo(() => {
+    if (!slot.tables) return [];
     return slot.tables
-      .map(tableId => tables.find(t => t.id === tableId))
-      .filter((t): t is Table => t !== undefined);
+      .map((tableId: string) => tables.find(t => t.id === tableId))
+      .filter((t: any): t is Table => t !== undefined);
   }, [slot.tables, tables]);
 
   // Drop zone for dragging tables to this slot
@@ -90,12 +91,24 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
         onMouseLeave={handleMouseLeave}
         className={`
           relative h-16 rounded-lg border-2 transition-all
-          ${slotTables.length > 0
+          ${slotTables.length > 0 || (slot.type && slot.type !== 'empty')
             ? 'bg-amethyst/10 border-amethyst/30 hover:border-amethyst hover:bg-amethyst/20 cursor-pointer'
             : 'bg-canvas-surface border-border hover:border-border-active'
           }
           ${isOver && slotTables.length < 4 ? 'border-amethyst bg-amethyst/20' : ''}
         `}
+        draggable={!!slot.type && slot.type !== 'empty'}
+        onDragStart={(e) => {
+          e.stopPropagation();
+          e.dataTransfer.setData('text/plain', slot.label || 'Macro');
+          // Pass full macro object for TableEditor to consume
+          e.dataTransfer.setData('application/anl+json', JSON.stringify({
+            type: 'macro',
+            id: slot.id,
+            macro: slot
+          }));
+          e.dataTransfer.effectAllowed = 'copy';
+        }}
         onClick={handleRoll}
         role="button"
         tabIndex={0}

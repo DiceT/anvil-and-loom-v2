@@ -45,15 +45,20 @@ export interface ElectronAPI {
   weave: {
     // Tapestry path management
     setTapestryPath: (path: string) => Promise<WeaveSetTapestryPathResponse>;
-    
+
     // Table management
     getTables: () => Promise<WeaveTableListResponse>;
     getTable: (tableId: string) => Promise<WeaveTableResponse>;
     saveTable: (table: Table) => Promise<WeaveSaveTableResponse>;
     deleteTable: (tableId: string) => Promise<WeaveDeleteTableResponse>;
-    
+
     // Rolling
-    rollTable: (tableId: string, seed?: string) => Promise<WeaveRollResponse>;
+    rollTable: (tableId: string, seed?: string) => Promise<{ result: RollResult | null; error?: string }>;
+  };
+  environment: {
+    getTables: () => Promise<WeaveTableListResponse>;
+    saveTable: (table: Table) => Promise<WeaveSaveTableResponse>;
+    deleteTable: (tableId: string) => Promise<WeaveDeleteTableResponse>;
   };
   ipcRenderer: {
     invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;

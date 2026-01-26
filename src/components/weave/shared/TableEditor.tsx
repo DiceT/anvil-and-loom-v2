@@ -20,9 +20,8 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { Table, TableRow, TableSchema, ResultType } from '../../../types/weave';
+import type { Table, TableRow, ResultType } from '../../../types/weave';
 import { QuickImportModal } from './QuickImportModal';
-import { SchemaEditor } from './SchemaEditor';
 import { downloadMarkdown } from './MarkdownExporter';
 import './TableEditor.css';
 
@@ -32,12 +31,14 @@ interface TableEditorProps {
 }
 
 // Sortable Row Component
-function SortableRow({ row, rowIndex, updateRow, deleteRow, handleKeyDown }: {
+function SortableRow({ row, rowIndex, updateRow, deleteRow, handleKeyDown, dragOverCell, setDragOverCell }: {
     row: TableRow;
     rowIndex: number;
     updateRow: (rowIndex: number, updates: Partial<TableRow>) => void;
     deleteRow: (rowIndex: number) => void;
     handleKeyDown: (e: React.KeyboardEvent, rowIndex: number) => void;
+    dragOverCell: { row: number, type: 'result' } | null;
+    setDragOverCell: (state: { row: number, type: 'result' } | null) => void;
 }) {
     const {
         attributes,
@@ -101,28 +102,148 @@ function SortableRow({ row, rowIndex, updateRow, deleteRow, handleKeyDown }: {
                 />
             </div>
 
-            <div className="cell cell-result">
-                {row.resultType === 'text' ? (
+            <div
+                className={`cell cell-result ${dragOverCell?.row === rowIndex ? 'bg-amethyst/20 ring-2 ring-amethyst ring-inset' : ''}`}
+                onDragEnter={() => setDragOverCell({ row: rowIndex, type: 'result' })}
+                onDragLeave={(e) => {
+                    // Only clear if we really left the cell (not entered a child)
+                    if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) {
+                        setDragOverCell(null);
+                    }
+                }}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer.dropEffect = 'copy';
+                }}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOverCell(null);
+                    const data = e.dataTransfer.getData('application/anl+json');
+                    if (data) {
+                        try {
+                            const item = JSON.parse(data);
+                            // Support Panel type explicitly
+                            if (['table', 'aspect', 'domain', 'macro', 'panel'].includes(item.type)) {
+                                let resultValue: any = '';
+                                if (item.type === 'macro') {
+                                    const macro = item.macro;
+                                    if (macro.type === 'oracle') {
+                                        resultValue = macro.oracleName || 'Oracle';
+                                    } else if (macro.type === 'table') {
+                                        resultValue = macro.tableName || 'Table';
+                                    } else {
+                                        resultValue = macro.label || 'Macro';
+                                    }
+                                    if (macro.oracleTableNames && Array.isArray(macro.oracleTableNames)) {
+                                        resultValue = macro.oracleTableNames.join(' + ');
+                                    }
+                                } else {
+                                    resultValue = { tag: item.name };
+                                }
+
+                                updateRow(rowIndex, {
+                                    resultType: item.type as ResultType,
+                                    result: resultValue
+                                });
+                            }
+                        } catch (err) {
+                            console.error('Failed to parse drop data', err);
+                        }
+                    }
+                }}
+            >
+                {row.resultType === 'text' || row.resultType === 'macro' ? (
                     <input
                         type="text"
                         className="input-result"
                         value={typeof row.result === 'string' ? row.result : ''}
-                        placeholder="Enter result..."
+                        placeholder={row.resultType === 'macro' ? "Macro Description" : "Enter result..."}
                         onChange={(e) => updateRow(rowIndex, { result: e.target.value })}
                         onKeyDown={(e) => handleKeyDown(e, rowIndex)}
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragOverCell(null);
+                            // Re-trigger drop logic on parent or handle here?
+                            // Simpler to just copy the logic or let it bubble?
+                            // Inputs STOP bubbling for valid drops (text).
+                            // So we must handle it here manually or invoke a shared handler.
+                            // Let's invoke the shared handler logic by faking the event or extracting logic.
+                            // Actually, let's just copy the logic for now or rely on bubbling if we preventDefault?
+                            // If we preventDefault on dragover, it allows drop.
+                            // If we preventDefault on drop, does it bubble?
+                            // Yes, unless stopPropagation is called.
+                            // BUT text inputs naturally consume drops.
+                            // Let's explicitly manually trigger the drop logic.
+
+                            // Better: Let's extract the drop handler.
+                            const data = e.dataTransfer.getData('application/anl+json');
+                            if (data) {
+                                try {
+                                    const item = JSON.parse(data);
+                                    if (['table', 'aspect', 'domain', 'macro', 'panel'].includes(item.type)) {
+                                        let resultValue: any = '';
+                                        if (item.type === 'macro') {
+                                            const macro = item.macro;
+                                            if (macro.type === 'oracle') {
+                                                resultValue = macro.oracleName || 'Oracle';
+                                            } else if (macro.type === 'table') {
+                                                resultValue = macro.tableName || 'Table';
+                                            } else {
+                                                resultValue = macro.label || 'Macro';
+                                            }
+                                            if (macro.oracleTableNames && Array.isArray(macro.oracleTableNames)) {
+                                                resultValue = macro.oracleTableNames.join(' + ');
+                                            }
+                                        } else {
+                                            resultValue = { tag: item.name };
+                                        }
+                                        updateRow(rowIndex, {
+                                            resultType: item.type as ResultType,
+                                            result: resultValue
+                                        });
+                                    }
+                                } catch (err) { }
+                            }
+                        }}
                     />
-                ) : row.resultType === 'table' ? (
+                ) : row.resultType === 'table' || row.resultType === 'aspect' || row.resultType === 'domain' || row.resultType === 'panel' ? (
                     <input
                         type="text"
-                        className="input-result input-tag"
-                        value={typeof row.result === 'object' && 'tag' in row.result ? (row.result.tag as string) : ''}
-                        placeholder="Enter tag..."
+                        className={`input-result input-tag ${row.resultType === 'aspect' ? 'text-teal-400' : row.resultType === 'domain' ? 'text-amber-400' : row.resultType === 'panel' ? 'text-sky-400' : ''}`}
+                        value={typeof row.result === 'object' && 'tag' in row.result ? (row.result.tag as string) : typeof row.result === 'string' ? row.result : ''}
+                        placeholder={`Enter ${row.resultType} name...`}
                         onChange={(e) => updateRow(rowIndex, { result: { tag: e.target.value } })}
                         onKeyDown={(e) => handleKeyDown(e, rowIndex)}
+                        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragOverCell(null);
+                            const data = e.dataTransfer.getData('application/anl+json');
+                            if (data) {
+                                try {
+                                    const item = JSON.parse(data);
+                                    if (['table', 'aspect', 'domain', 'macro', 'panel'].includes(item.type)) {
+                                        let resultValue: any = '';
+                                        if (item.type === 'macro') {
+                                            const macro = item.macro;
+                                            if (macro.type === 'oracle') { resultValue = macro.oracleName || 'Oracle'; }
+                                            else if (macro.type === 'table') { resultValue = macro.tableName || 'Table'; }
+                                            else { resultValue = macro.label || 'Macro'; }
+                                            if (macro.oracleTableNames && Array.isArray(macro.oracleTableNames)) { resultValue = macro.oracleTableNames.join(' + '); }
+                                        } else { resultValue = { tag: item.name }; }
+                                        updateRow(rowIndex, { resultType: item.type as ResultType, result: resultValue });
+                                    }
+                                } catch (err) { }
+                            }
+                        }}
                     />
                 ) : (
                     <textarea
-                        className="input-result input-object"
+                        className="input-result input-panel"
                         value={typeof row.result === 'object' ? JSON.stringify(row.result, null, 2) : '{}'}
                         placeholder='{"key": "value"}'
                         onChange={(e) => {
@@ -134,6 +255,41 @@ function SortableRow({ row, rowIndex, updateRow, deleteRow, handleKeyDown }: {
                             }
                         }}
                         onKeyDown={(e) => handleKeyDown(e, rowIndex)}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.dataTransfer.dropEffect = 'copy';
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragOverCell(null);
+                            const data = e.dataTransfer.getData('application/anl+json');
+                            if (data) {
+                                try {
+                                    const item = JSON.parse(data);
+                                    if (['table', 'aspect', 'domain', 'macro', 'panel'].includes(item.type)) {
+                                        let resultValue: any = '';
+                                        if (item.type === 'macro') {
+                                            const macro = item.macro;
+                                            if (macro.type === 'oracle') {
+                                                resultValue = macro.oracleName || 'Oracle';
+                                            } else if (macro.type === 'table') {
+                                                resultValue = macro.tableName || 'Table';
+                                            } else {
+                                                resultValue = macro.label || 'Macro';
+                                            }
+                                            if (macro.oracleTableNames && Array.isArray(macro.oracleTableNames)) {
+                                                resultValue = macro.oracleTableNames.join(' + ');
+                                            }
+                                        } else {
+                                            resultValue = { tag: item.name };
+                                        }
+                                        updateRow(rowIndex, { resultType: item.type as ResultType, result: resultValue });
+                                    }
+                                } catch (err) { }
+                            }
+                        }}
                     />
                 )}
             </div>
@@ -145,14 +301,17 @@ function SortableRow({ row, rowIndex, updateRow, deleteRow, handleKeyDown }: {
                     onChange={(e) => {
                         const newType = e.target.value as ResultType;
                         let newResult: TableRow['result'] = '';
-                        if (newType === 'table') newResult = { tag: '' };
-                        if (newType === 'object') newResult = {};
+                        if (newType === 'table' || newType === 'aspect' || newType === 'domain') newResult = { tag: '' };
+                        if (newType === 'panel') newResult = {};
                         updateRow(rowIndex, { resultType: newType, result: newResult });
                     }}
                 >
                     <option value="text">Text</option>
                     <option value="table">Table</option>
-                    <option value="object">Object</option>
+                    <option value="aspect">Aspect</option>
+                    <option value="domain">Domain</option>
+                    <option value="macro">Macro</option>
+                    <option value="panel">Panel</option>
                 </select>
             </div>
 
@@ -174,8 +333,8 @@ function SortableRow({ row, rowIndex, updateRow, deleteRow, handleKeyDown }: {
 
 export function TableEditor({ table, onUpdate }: TableEditorProps) {
     const [showSettings, setShowSettings] = useState(false);
-    const [showSchema, setShowSchema] = useState(false);
     const [showImport, setShowImport] = useState(false);
+    const [dragOverCell, setDragOverCell] = useState<{ row: number, type: 'result' } | null>(null);
 
     // Drag-and-drop sensors
     const sensors = useSensors(
@@ -360,11 +519,6 @@ export function TableEditor({ table, onUpdate }: TableEditorProps) {
         onUpdate({ ...table, tableData: newTableData, maxRoll: suggestedMax });
     };
 
-    const handleSchemaSave = (schema: TableSchema | undefined) => {
-        onUpdate({ ...table, schema });
-        setShowSchema(false);
-    };
-
     return (
         <div className="table-editor">
             {/* Settings Panel */}
@@ -378,16 +532,6 @@ export function TableEditor({ table, onUpdate }: TableEditorProps) {
                         <path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.5 2.5l1.4 1.4M10.1 10.1l1.4 1.4M2.5 11.5l1.4-1.4M10.1 3.9l1.4-1.4" stroke="currentColor" strokeLinecap="round" />
                     </svg>
                     Table Settings
-                </button>
-
-                <button
-                    className={`settings-toggle ${showSchema ? 'active' : ''}`}
-                    onClick={() => setShowSchema(!showSchema)}
-                >
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-                        <path d="M2 4h10M2 7h10M2 10h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                    Object Schema
                 </button>
 
                 {showSettings && (
@@ -474,15 +618,6 @@ export function TableEditor({ table, onUpdate }: TableEditorProps) {
                         </div>
                     </div>
                 )}
-
-                {showSchema && (
-                    <div className="settings-panel">
-                        <SchemaEditor
-                            schema={table.schema}
-                            onSave={handleSchemaSave}
-                        />
-                    </div>
-                )}
             </div>
 
             {/* Table Header */}
@@ -514,6 +649,8 @@ export function TableEditor({ table, onUpdate }: TableEditorProps) {
                                 updateRow={updateRow}
                                 deleteRow={deleteRow}
                                 handleKeyDown={handleKeyDown}
+                                dragOverCell={dragOverCell}
+                                setDragOverCell={setDragOverCell}
                             />
                         ))}
                     </div>

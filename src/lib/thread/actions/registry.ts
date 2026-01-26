@@ -7,6 +7,8 @@ import { interpretAction } from './interpret';
 import { createClockAction } from './createClock';
 import { createTrackAction } from './createTrack';
 
+import { openAspectOrDomainAction, runMacroAction, rollTableAction } from './weaveActions';
+
 /** All registered actions */
 const ACTIONS: ThreadAction[] = [
     // Interpret category
@@ -15,6 +17,11 @@ const ACTIONS: ThreadAction[] = [
     // Defer category
     createClockAction,
     createTrackAction,
+
+    // Weave Actions
+    openAspectOrDomainAction,
+    runMacroAction,
+    rollTableAction,
 
     // Add more as implemented
 ];

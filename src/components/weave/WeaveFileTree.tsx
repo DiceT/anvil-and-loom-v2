@@ -121,9 +121,21 @@ function DraggableTableItem({ table, onClick, onContextMenu, onQuickRoll, select
         onClick(e);
       }}
       onContextMenu={(e) => onContextMenu(e, table)}
+      draggable="true"
+      onDragStart={(e) => {
+        e.stopPropagation(); // Prevent dnd-kit from interfering?
+        e.dataTransfer.setData('text/plain', table.name); // Fallback
+        e.dataTransfer.setData('application/anl+json', JSON.stringify({
+          type: 'table',
+          id: table.id,
+          name: table.name,
+          category: table.category
+        }));
+        e.dataTransfer.effectAllowed = 'copy';
+      }}
     >
       {/* Drag handle */}
-      <div className="table-drag-handle" {...attributes} {...listeners}>
+      < div className="table-drag-handle" {...attributes} {...listeners}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
           <circle cx="2" cy="3" r="1" />
           <circle cx="2" cy="7" r="1" />
@@ -132,7 +144,7 @@ function DraggableTableItem({ table, onClick, onContextMenu, onQuickRoll, select
           <circle cx="6" cy="7" r="1" />
           <circle cx="6" cy="11" r="1" />
         </svg>
-      </div>
+      </div >
 
       <svg className="table-icon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
         <rect x="1" y="2" width="12" height="10" rx="1" stroke="currentColor" fill="none" />
@@ -140,16 +152,20 @@ function DraggableTableItem({ table, onClick, onContextMenu, onQuickRoll, select
         <line x1="5" y1="5" x2="5" y2="12" stroke="currentColor" />
       </svg>
       <span className="table-name">{table.name}</span>
-      {validationStatus && !validationStatus.isRollable && (
-        <span className="validation-badge validation-badge-red" title="Not rollable">
-          ⚠️
-        </span>
-      )}
-      {validationStatus && validationStatus.isRollable && validationStatus.hasWarnings && (
-        <span className="validation-badge validation-badge-yellow" title="Has warnings">
-          ⚡
-        </span>
-      )}
+      {
+        validationStatus && !validationStatus.isRollable && (
+          <span className="validation-badge validation-badge-red" title="Not rollable">
+            ⚠️
+          </span>
+        )
+      }
+      {
+        validationStatus && validationStatus.isRollable && validationStatus.hasWarnings && (
+          <span className="validation-badge validation-badge-yellow" title="Has warnings">
+            ⚡
+          </span>
+        )
+      }
       <button
         className="btn-quick-roll"
         onClick={(e) => onQuickRoll(table, e)}
@@ -157,7 +173,7 @@ function DraggableTableItem({ table, onClick, onContextMenu, onQuickRoll, select
       >
         🎲
       </button>
-    </div>
+    </div >
   );
 }
 
@@ -656,9 +672,10 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
                     })}
                 </ul>
               </SortableContext>
-            </div>
-          ))}
-        </div>
+            </div >
+          ))
+          }
+        </div >
       </DndContext >
 
       {

@@ -54,27 +54,34 @@ async function executeTableMacro(slot: MacroSlot): Promise<void> {
     if (!slot.tableId) return
 
     const { useWeaveStore } = await import('../../stores/useWeaveStore')
-    // Pass silent=true to prevent duplicate thread creation
-    const result = await useWeaveStore.getState().rollTable(slot.tableId, undefined, true)
+    const { logWeaveRoll } = await import('../../core/weave/weaveRollLogger')
+
+    const store = useWeaveStore.getState();
+    let table = store.tables.find(t => t.id === slot.tableId);
+
+    if (!table) {
+        // Try loading if not in store
+        const { WeaveService } = await import('../../core/weave/WeaveService');
+        try {
+            table = await WeaveService.loadTable(slot.tableId!);
+        } catch (err) {
+            console.warn(`[Macro] Failed to load table: ${slot.tableId}`, err);
+            return;
+        }
+    }
+
+    if (!table) {
+        console.warn(`[Macro] Table load returned null: ${slot.tableId}`);
+        return;
+    }
+
+    // Pass silent=true to prevent internal duplication if any, but mainly we want the Result object
+    const result = await store.rollTable(table.id, undefined, true)
 
     if (!result) return
 
-    // Handle result value which can be string or object
-    const resultText = typeof result.result === 'string'
-        ? result.result
-        : JSON.stringify(result.result);
-
-    logThread({
-        header: `Table: ${slot.tableName}`,
-        result: resultText,
-        content: `Rolled on ${slot.tableName}`,
-        source: 'weave',
-        meta: {
-            tableId: slot.tableId,
-            tableName: slot.tableName,
-            rolls: result.rolls,
-        },
-    })
+    // Use the central Weave Logger to ensure consistent formatting, Metadata, and Action Buttons
+    await logWeaveRoll(table.name, table, result);
 }
 
 async function executePanelMacro(slot: MacroSlot): Promise<void> {

@@ -811,16 +811,16 @@ class TokenResolver {
 }
 let currentTapestryPath = null;
 const tableCache = /* @__PURE__ */ new Map();
-function getWeaveDirPath() {
+function getNamespaceDirPath(namespace) {
   if (!currentTapestryPath) {
     throw new Error("No Tapestry path set. Call weave:setTapestryPath first.");
   }
-  return path__namespace.join(currentTapestryPath, ".weave");
+  return path__namespace.join(currentTapestryPath, namespace);
 }
-async function ensureWeaveDir() {
-  const weaveDir = getWeaveDirPath();
-  await fs__namespace.mkdir(weaveDir, { recursive: true });
-  return weaveDir;
+async function ensureNamespaceDir(namespace) {
+  const dir = getNamespaceDirPath(namespace);
+  await fs__namespace.mkdir(dir, { recursive: true });
+  return dir;
 }
 function sanitizeFilename(name) {
   return name.replace(/[<>:"/\\|?*]/g, "-").replace(/\s+/g, " ").trim().slice(0, 64);
@@ -862,35 +862,32 @@ async function getUniqueFilePath(dir, name, tableId) {
     }
   }
 }
-async function readTableFiles() {
+async function getFilesRecursive(dir) {
+  const dirents = await fs__namespace.readdir(dir, { withFileTypes: true });
+  const files = await Promise.all(dirents.map(async (dirent) => {
+    const res = path__namespace.join(dir, dirent.name);
+    return dirent.isDirectory() ? getFilesRecursive(res) : res;
+  }));
+  return files.flat();
+}
+async function readTableFiles(namespace) {
   try {
-    const weaveDir = getWeaveDirPath();
-    const entries = await fs__namespace.readdir(weaveDir, { withFileTypes: true });
+    const dir = getNamespaceDirPath(namespace);
+    const filePaths = await getFilesRecursive(dir);
     const tables = [];
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
-    for (const entry of entries) {
-      if (entry.isFile() && entry.name.endsWith(".json")) {
-        const oldPath = path__namespace.join(weaveDir, entry.name);
+    for (const filePath of filePaths) {
+      if (filePath.endsWith(".json")) {
+        const fileName = path__namespace.basename(filePath);
         try {
-          const data = await fs__namespace.readFile(oldPath, "utf-8");
+          const data = await fs__namespace.readFile(filePath, "utf-8");
           const table = JSON.parse(data);
-          let currentPath = oldPath;
-          if (uuidRegex.test(entry.name)) {
-            const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
-            if (newPath !== oldPath) {
-              try {
-                await fs__namespace.rename(oldPath, newPath);
-                currentPath = newPath;
-              } catch (err) {
-                console.error(`Failed to migrate table ${entry.name}`, err);
-              }
-            }
-          }
+          let currentPath = filePath;
           table.sourcePath = currentPath;
           tableCache.set(table.id, table);
           tables.push(table);
         } catch (error) {
-          console.error(`Failed to read table file ${entry.name}:`, error);
+          console.error(`Failed to read table file ${fileName}:`, error);
         }
       }
     }
@@ -902,13 +899,26 @@ async function readTableFiles() {
     throw error;
   }
 }
-async function writeTableFile(table) {
-  const weaveDir = await ensureWeaveDir();
-  const newPath = await getUniqueFilePath(weaveDir, table.name, table.id);
-  if (table.sourcePath && table.sourcePath !== newPath) {
+async function writeTableFile(table, namespace) {
+  const rootDir = await ensureNamespaceDir(namespace);
+  let targetDir = rootDir;
+  if (namespace === ".environment" && table.category) {
+    if (table.category.startsWith("Aspect - ")) {
+      const aspectName = table.category.replace("Aspect - ", "").trim();
+      targetDir = path__namespace.join(rootDir, "Aspects", sanitizeFilename(aspectName));
+    } else if (table.category.startsWith("Domain - ")) {
+      const domainName = table.category.replace("Domain - ", "").trim();
+      targetDir = path__namespace.join(rootDir, "Domains", sanitizeFilename(domainName));
+    }
+  }
+  await fs__namespace.mkdir(targetDir, { recursive: true });
+  const newPath = await getUniqueFilePath(targetDir, table.name, table.id);
+  const cachedTable = tableCache.get(table.id);
+  const oldPath = cachedTable?.sourcePath || table.sourcePath;
+  if (oldPath && oldPath !== newPath) {
     try {
-      await fs__namespace.access(table.sourcePath);
-      await fs__namespace.unlink(table.sourcePath);
+      await fs__namespace.access(oldPath);
+      await fs__namespace.unlink(oldPath);
     } catch (e) {
     }
   }
@@ -984,7 +994,8 @@ function registerWeaveHandlers() {
       await fs__namespace.access(tapestryPath);
       tableCache.clear();
       currentTapestryPath = tapestryPath;
-      await ensureWeaveDir();
+      await ensureNamespaceDir(".weave");
+      await ensureNamespaceDir(".environment");
       return { success: true };
     } catch (error) {
       return {
@@ -1001,7 +1012,7 @@ function registerWeaveHandlers() {
           error: "No Tapestry path set. Call weave:setTapestryPath first."
         };
       }
-      const tables = await readTableFiles();
+      const tables = await readTableFiles(".weave");
       return { tables };
     } catch (error) {
       return {
@@ -1014,21 +1025,27 @@ function registerWeaveHandlers() {
     try {
       let table = findTableById(tableId);
       if (!table) {
-        const weaveDir = getWeaveDirPath();
-        const filePath = path__namespace.join(weaveDir, `${tableId}.json`);
+        const weaveDir = getNamespaceDirPath(".weave");
+        let filePath = path__namespace.join(weaveDir, `${tableId}.json`);
         try {
           const data = await fs__namespace.readFile(filePath, "utf-8");
           table = JSON.parse(data);
           table.sourcePath = filePath;
           tableCache.set(tableId, table);
-        } catch (error) {
-          if (error.code === "ENOENT") {
+        } catch (weaveError) {
+          const envDir = getNamespaceDirPath(".environment");
+          filePath = path__namespace.join(envDir, `${tableId}.json`);
+          try {
+            const data = await fs__namespace.readFile(filePath, "utf-8");
+            table = JSON.parse(data);
+            table.sourcePath = filePath;
+            tableCache.set(tableId, table);
+          } catch (envError) {
             return {
               table: null,
-              error: `Table with ID ${tableId} not found`
+              error: `Table with ID ${tableId} not found in .weave or .environment`
             };
           }
-          throw error;
         }
       }
       return { table };
@@ -1053,7 +1070,23 @@ function registerWeaveHandlers() {
       if (!table.schemaVersion) {
         table.schemaVersion = 1;
       }
-      await writeTableFile(table);
+      let namespace = ".weave";
+      if (table.category) {
+        if (table.category.startsWith("Aspect - ") || table.category.startsWith("Domain - ") || table.category === "Environment") {
+          namespace = ".environment";
+        }
+      }
+      const pathToCheck = table.sourcePath || findTableById(table.id)?.sourcePath;
+      if (pathToCheck && (pathToCheck.includes(".environment") || pathToCheck.includes(path__namespace.sep + ".environment"))) {
+        namespace = ".environment";
+      }
+      if (namespace === ".weave") {
+        const cached = findTableById(table.id);
+        if (cached && (cached.category === "Environment" || cached.category?.startsWith("Aspect - ") || cached.category?.startsWith("Domain - "))) {
+          namespace = ".environment";
+        }
+      }
+      await writeTableFile(table, namespace);
       return { success: true, table };
     } catch (error) {
       return {
@@ -1105,6 +1138,43 @@ function registerWeaveHandlers() {
         result: null,
         error: error?.message ?? "Failed to roll table"
       };
+    }
+  });
+  electron.ipcMain.handle("environment:getTables", async () => {
+    try {
+      if (!currentTapestryPath) {
+        return {
+          tables: [],
+          error: "No Tapestry path set."
+        };
+      }
+      const tables = await readTableFiles(".environment");
+      return { tables };
+    } catch (error) {
+      return {
+        tables: [],
+        error: error?.message ?? "Failed to load environment tables"
+      };
+    }
+  });
+  electron.ipcMain.handle("environment:saveTable", async (_event, table) => {
+    try {
+      if (!currentTapestryPath) return { success: false, error: "No Tapestry path set." };
+      if (!table.id) table.id = uuid.v4();
+      if (!table.schemaVersion) table.schemaVersion = 1;
+      await writeTableFile(table, ".environment");
+      return { success: true, table };
+    } catch (error) {
+      return { success: false, error: error?.message ?? "Failed to save environment table" };
+    }
+  });
+  electron.ipcMain.handle("environment:deleteTable", async (_event, tableId) => {
+    try {
+      if (!currentTapestryPath) return { success: false, error: "No Tapestry path set." };
+      await deleteTableFile(tableId);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error?.message ?? "Failed to delete table" };
     }
   });
 }

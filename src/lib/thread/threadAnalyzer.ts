@@ -41,21 +41,32 @@ export function analyzeThread(thread: Thread): ThreadAnalysis {
     const tableRefs = extractTableRefs(thread);
     const entityRefs = extractEntityRefs(thread);
 
+    // Filter out transitional results for standard endpoint actions
+    const weaveMeta = thread.meta?.weave as any;
+    const resultType = weaveMeta?.resultType;
+    const isTransitional = ['aspect', 'domain', 'macro', 'table'].includes(resultType);
+
     return {
         // Can interpret if it's a roll/oracle result without accepted interpretation
+        // AND purely if it is NOT a transitional result (Aspect/Domain/Macro/Table)
         canInterpret:
             ['roll', 'oracle'].includes(thread.type) &&
-            !thread.aiInterpretations?.some(i => i.status === 'accepted'),
+            !thread.aiInterpretations?.some(i => i.status === 'accepted') &&
+            !isTransitional,
 
         // Can create clock if no clock exists and it's a consequence
+        // AND purely if it is NOT a transitional result
         canCreateClock:
             !thread.clock &&
-            thread.intent === 'consequence',
+            thread.intent === 'consequence' &&
+            !isTransitional,
 
         // Can create track if no track exists and it's a consequence
+        // AND purely if it is NOT a transitional result
         canCreateTrack:
             !thread.track &&
-            thread.intent === 'consequence',
+            thread.intent === 'consequence' &&
+            !isTransitional,
 
         // Tables found in content
         rollableTables: tableRefs,
