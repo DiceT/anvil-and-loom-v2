@@ -48,5 +48,10 @@ electron.contextBridge.exposeInMainWorld("electron", {
     saveLayout: (layout) => electron.ipcRenderer.invoke("settings:saveLayout", layout),
     loadLayout: () => electron.ipcRenderer.invoke("settings:loadLayout"),
     resetLayout: () => electron.ipcRenderer.invoke("settings:resetLayout")
+  },
+  dmChat: {
+    loadChats: (tapestryId) => electron.ipcRenderer.invoke("dmChat:loadChats", tapestryId),
+    saveChat: (tapestryId, chat) => electron.ipcRenderer.invoke("dmChat:saveChat", tapestryId, chat),
+    deleteChat: (tapestryId, chatId) => electron.ipcRenderer.invoke("dmChat:deleteChat", tapestryId, chatId)
   }
 });

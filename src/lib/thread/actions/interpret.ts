@@ -23,19 +23,50 @@ export const interpretAction: ThreadAction = {
             const { interpretThread } = await import('../../../core/ai/threadInterpreter');
             const interpretation = await interpretThread(thread);
 
+            // Parse the interpretation content
+            // Expected format:
+            // **Content:** ...
+            // **Result:** ...
+            const text = interpretation.content;
+            let content = '';
+            let result = text; // Default to full text if parsing fails
+
+            // Simple parser for standard format
+            // Simple parser for standard format
+            // Matches "**Content:**" or "Content:" keys
+            const contentMatch = text.match(/(?:\*\*|## |^)?Content:(?:\*\*)?\s*([\s\S]*?)(?=(?:\*\*|## |^)?Result:|$)/i);
+            const resultMatch = text.match(/(?:\*\*|## |^)?Result:(?:\*\*)?\s*([\s\S]*)/i);
+
+            if (contentMatch) {
+                content = contentMatch[1].trim();
+            }
+            if (resultMatch) {
+                result = resultMatch[1].trim();
+            }
+
+            // Fallback if parsing didn't split well but we have text
+            if (!content && !resultMatch) {
+                result = text;
+            }
+
             // Create interpretation Thread
             const interpretationThread = createThread({
                 type: 'ai_text',
                 source: 'ai',
                 intent: 'consequence',
-                header: `Interpretation: ${interpretation.personaName}`,
-                summary: interpretation.content,
+                header: `Interpret: ${interpretation.personaName}`, // User Request: "Interpret: GM Persona Name"
+                summary: result,       // Result section goes to summary
+                result: result,        // Legacy compatibility: Populate result with summary text
+                content: content,      // Content section goes to content
                 parentThreadId: thread.id,
-                // createdBy is defaulted to 'system' in createThread, override if needed?
-                // Actually createThread defaults createdBy to 'system', but here it is AI.
-            });
+            } as any);
             // Override createdBy
             interpretationThread.createdBy = 'ai';
+
+            // Persist the interpretation record on the thread itself (for history/context)
+            // Note: The caller (ThreadEngine) usually handles adding the new thread, 
+            // but we might want to update the original thread's metadata too if we were modifying it.
+            // But here we are returning a NEW thread card as per the action contract.
 
             return [interpretationThread];
         } catch (error) {

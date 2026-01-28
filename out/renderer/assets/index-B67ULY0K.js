@@ -54767,20 +54767,37 @@ function ClockRenderer({ segments, filled, onClick, size = 48 }) {
   ] });
 }
 function ThreadActions({ thread, actions, onAction }) {
+  const [executingId, setExecutingId] = reactExports.useState(null);
   if (!actions || actions.length === 0) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-2 py-1.5 border-t border-slate-700 bg-slate-900/50 flex flex-wrap gap-1", children: actions.map((action) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "button",
-    {
-      onClick: () => onAction(action),
-      title: action.description,
-      className: "flex items-center gap-1.5 px-2 py-1 text-xs rounded hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors",
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(action.icon, { className: "w-3 h-3" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: action.label })
-      ]
-    },
-    action.id
-  )) });
+  const handleAction = async (action) => {
+    if (executingId) return;
+    try {
+      setExecutingId(action.id);
+      await onAction(action);
+    } catch (error) {
+      console.error("Action execution failed:", error);
+    } finally {
+      setExecutingId(null);
+    }
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-2 py-1.5 border-t border-slate-700 bg-slate-900/50 flex flex-wrap gap-1", children: actions.map((action) => {
+    const isExecuting = executingId === action.id;
+    const Icon2 = isExecuting ? LoaderCircle : action.icon;
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        onClick: () => handleAction(action),
+        title: action.description,
+        disabled: !!executingId,
+        className: `flex items-center gap-1.5 px-2 py-1 text-xs rounded transition-colors ${executingId ? "text-slate-600 cursor-not-allowed" : "hover:bg-slate-700 text-slate-400 hover:text-slate-200"} ${isExecuting ? "text-blue-400" : ""}`,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Icon2, { className: `w-3 h-3 ${isExecuting ? "animate-spin" : ""}` }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: action.label })
+        ]
+      },
+      action.id
+    );
+  }) });
 }
 function ThreadCard$1({
   thread,
@@ -54796,7 +54813,7 @@ function ThreadCard$1({
   const [isExpanded, setIsExpanded] = reactExports.useState(defaultExpanded);
   const handleAction = (action) => {
     if (onAction) {
-      onAction(action, thread);
+      return onAction(action, thread);
     }
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-canvas-panel border border-border rounded-lg overflow-hidden flex flex-col my-2 shadow-sm hover:border-border-active transition-colors", children: [
@@ -55061,19 +55078,37 @@ const interpretAction = {
   execute: async (thread, context) => {
     try {
       const { interpretThread } = await __vitePreload(async () => {
-        const { interpretThread: interpretThread2 } = await import("./threadInterpreter-BrcxIYHI.js");
+        const { interpretThread: interpretThread2 } = await import("./threadInterpreter-7GS2Tqa1.js");
         return { interpretThread: interpretThread2 };
       }, true ? [] : void 0, import.meta.url);
       const interpretation = await interpretThread(thread);
+      const text2 = interpretation.content;
+      let content2 = "";
+      let result = text2;
+      const contentMatch = text2.match(/(?:\*\*|## |^)?Content:(?:\*\*)?\s*([\s\S]*?)(?=(?:\*\*|## |^)?Result:|$)/i);
+      const resultMatch = text2.match(/(?:\*\*|## |^)?Result:(?:\*\*)?\s*([\s\S]*)/i);
+      if (contentMatch) {
+        content2 = contentMatch[1].trim();
+      }
+      if (resultMatch) {
+        result = resultMatch[1].trim();
+      }
+      if (!content2 && !resultMatch) {
+        result = text2;
+      }
       const interpretationThread = createThread$1({
         type: "ai_text",
         source: "ai",
         intent: "consequence",
-        header: `Interpretation: ${interpretation.personaName}`,
-        summary: interpretation.content,
+        header: `Interpret: ${interpretation.personaName}`,
+        // User Request: "Interpret: GM Persona Name"
+        summary: result,
+        // Result section goes to summary
+        result,
+        // Legacy compatibility: Populate result with summary text
+        content: content2,
+        // Content section goes to content
         parentThreadId: thread.id
-        // createdBy is defaulted to 'system' in createThread, override if needed?
-        // Actually createThread defaults createdBy to 'system', but here it is AI.
       });
       interpretationThread.createdBy = "ai";
       return [interpretationThread];
@@ -55646,7 +55681,7 @@ async function executeMacro(slot) {
 async function executeDiceMacro(slot) {
   if (!slot.diceExpression) return;
   const { rollDiceExpression } = await __vitePreload(async () => {
-    const { rollDiceExpression: rollDiceExpression2 } = await import("./diceEngine-DjOcDRVB.js");
+    const { rollDiceExpression: rollDiceExpression2 } = await import("./diceEngine-CVybGYOP.js");
     return { rollDiceExpression: rollDiceExpression2 };
   }, true ? [] : void 0, import.meta.url);
   await rollDiceExpression(slot.diceExpression);
@@ -56249,7 +56284,8 @@ function MarkdownViewer({ markdown, onInterpretThread }) {
                                 if (newThread.source === "track") type = "system";
                                 const panelThread = createPanelThread(
                                   type,
-                                  newThread.source,
+                                  newThread.header || newThread.source,
+                                  // Fix: Use header for display title
                                   newThread.summary,
                                   {
                                     ...newThread.meta,
@@ -105706,6 +105742,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 );
 export {
   UNIVERSAL_GM_INSTRUCTIONS as U,
+  useAiStore as a,
   callAi as c,
   diceEngine as d,
   getPersonaDefault as g,

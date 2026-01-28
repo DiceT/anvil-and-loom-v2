@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useThreadsStore } from '../../stores/useThreadsStore';
-import { ThreadCard } from './ThreadCard';
+import { ThreadCard } from '../thread/ThreadCard';
+
 
 export function ThreadsHistory() {
   const threads = useThreadsStore((state) => state.threads);
@@ -32,8 +33,13 @@ export function ThreadsHistory() {
         <div className="flex-1 flex flex-col justify-end">
           <div className="space-y-2">
             {/* Show oldest to newest, excluding the last result */}
-            {historyCards.map((card) => (
-              <ThreadCard key={card.id} card={card} defaultExpanded={false} />
+            {historyCards.map((thread) => (
+              <ThreadCard
+                key={thread.id}
+                thread={thread}
+                mode="history"
+                defaultExpanded={false}
+              />
             ))}
           </div>
         </div>

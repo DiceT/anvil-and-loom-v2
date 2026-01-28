@@ -1,0 +1,1866 @@
+{
+  "category": "Aspect",
+  "name": "Profane",
+  "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+  "tables": [
+    {
+      "sourcePath": "forge",
+      "category": "Aspect",
+      "name": "Objectives",
+      "tags": [
+        "aspect",
+        "objective"
+      ],
+      "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "Restore a defiled shrine to its original sanctity."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Expose the merchants profiting from sacred relics."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "Retrieve a holy artifact repurposed as a mundane tool."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Prevent a festival from turning into a mockery of ancient rites."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "Uncover the truth behind a corrupted ancestral tradition."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Sabotage the commercialization of a once-holy grove."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Protect remnants of pure faith from further desecration."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Investigate whispers of twisted laws in an old courthouse."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Reclaim symbols of honor now used in vulgar displays."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Challenge a leader who twists sacred vows for personal gain."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Purify a spring tainted by industrial runoff."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Document the decline of revered customs into base entertainment."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Rescue texts of ancient wisdom from being sold as curios."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Confront guardians who have betrayed their sacred oaths."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Rebuild a cracked monument to forgotten heroes."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Interrupt a ritual that perverts holy symbols for dark ends."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Gather allies to resist the profaning of communal lands."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Trace the source of mockery in defaced holy murals."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Safeguard a lineage's honor from slanderous revisions."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Dismantle a market built over burial grounds."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "Seek forgiveness for unintentional acts of desecration."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Expose hidden dealings that corrupt temple finances."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Recover a profaned idol from a tavern's decor."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Challenge traditions warped by greed and neglect."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Purify air fouled by factories on sacred hills."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Investigate festivals that mock ancient deities."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Reclaim land from those who felled holy trees for profit."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Confront elders who commercialize spiritual practices."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Restore dignity to a site used for illicit gatherings."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Unravel the curse from a twisted holy relic."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Protect pilgrims from exploitative guides at defiled sites."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Document profane alterations to historical texts."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Sabotage auctions of sacred artifacts as novelties."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Seek out hermits guarding untainted traditions."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Interrupt the perversion of marriage rites into spectacles."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Rebuild faith in a community scarred by betrayal."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "Trace origins of laws now enforced with cruelty."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Gather evidence against those defiling natural sanctuaries."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Rescue animals from sacrificial altars turned slaughterhouses."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "Challenge the repurposing of temples as warehouses."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Purify soil desecrated by toxic waste on holy ground."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Expose the ridicule of prophetic visions in street plays."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Reclaim heirlooms from pawnshops dealing in relics."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Confront artists who mock divine imagery for profit."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Restore a bridge once a pilgrimage path, now a toll road."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Investigate the twisting of oaths into binding contracts."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Safeguard forgotten graves from urban expansion."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "Dismantle barriers around profaned natural wonders."
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "ACTION + THEME"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Objectives",
+      "summary": "Profane — Objectives"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Aspect",
+      "name": "Atmosphere",
+      "tags": [
+        "aspect"
+      ],
+      "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 1,
+          "result": "The air hangs heavy with the scent of incense mixed with rotting refuse."
+        },
+        {
+          "floor": 2,
+          "ceiling": 2,
+          "result": "Faint echoes of forgotten chants mingle with coarse laughter."
+        },
+        {
+          "floor": 3,
+          "ceiling": 3,
+          "result": "Shadows twist unnaturally around cracked stone altars."
+        },
+        {
+          "floor": 4,
+          "ceiling": 4,
+          "result": "A chill wind carries whispers of ancient curses."
+        },
+        {
+          "floor": 5,
+          "ceiling": 5,
+          "result": "The ground feels sticky underfoot, stained by spilled offerings."
+        },
+        {
+          "floor": 6,
+          "ceiling": 6,
+          "result": "Dim light filters through grimy stained glass, casting mocking patterns."
+        },
+        {
+          "floor": 7,
+          "ceiling": 7,
+          "result": "The atmosphere thickens with the tang of commercial greed."
+        },
+        {
+          "floor": 8,
+          "ceiling": 8,
+          "result": "Echoes of sacred bells now toll for profane auctions."
+        },
+        {
+          "floor": 9,
+          "ceiling": 9,
+          "result": "A pervasive odor of cheap ale overwhelms floral tributes."
+        },
+        {
+          "floor": 10,
+          "ceiling": 10,
+          "result": "Sunlight mocks the faded glory of desecrated murals."
+        },
+        {
+          "floor": 11,
+          "ceiling": 11,
+          "result": "Humidity clings like regret to weathered idols."
+        },
+        {
+          "floor": 12,
+          "ceiling": 12,
+          "result": "Distant shouts of haggling drown out solemn hymns."
+        },
+        {
+          "floor": 13,
+          "ceiling": 13,
+          "result": "The air buzzes with flies swarming over abandoned relics."
+        },
+        {
+          "floor": 14,
+          "ceiling": 14,
+          "result": "A stifling heat rises from fires burning holy texts."
+        },
+        {
+          "floor": 15,
+          "ceiling": 15,
+          "result": "Gentle breezes rustle chains binding sacred trees."
+        },
+        {
+          "floor": 16,
+          "ceiling": 16,
+          "result": "The silence breaks with the crack of whips on festival grounds."
+        },
+        {
+          "floor": 17,
+          "ceiling": 17,
+          "result": "Sour smoke from illicit trades curls around temple pillars."
+        },
+        {
+          "floor": 18,
+          "ceiling": 18,
+          "result": "Twilight deepens the gloom of repurposed sanctuaries."
+        },
+        {
+          "floor": 19,
+          "ceiling": 19,
+          "result": "A metallic taste lingers from bloodied ceremonial blades."
+        },
+        {
+          "floor": 20,
+          "ceiling": 20,
+          "result": "Muffled sobs echo in halls turned to marketplaces."
+        },
+        {
+          "floor": 21,
+          "ceiling": 21,
+          "result": "The fog conceals graffiti on venerable monuments."
+        },
+        {
+          "floor": 22,
+          "ceiling": 22,
+          "result": "Warmth of communal fires mocks isolated despair."
+        },
+        {
+          "floor": 23,
+          "ceiling": 23,
+          "result": "Pungent herbs mask the decay of ancestral bones."
+        },
+        {
+          "floor": 24,
+          "ceiling": 24,
+          "result": "Rhythmic drumming signals cruel games on holy days."
+        },
+        {
+          "floor": 25,
+          "ceiling": 25,
+          "result": "A dry dust chokes the air in lumbered groves."
+        },
+        {
+          "floor": 26,
+          "ceiling": 26,
+          "result": "Starlight reveals twisted symbols etched in mud."
+        },
+        {
+          "floor": 27,
+          "ceiling": 27,
+          "result": "The humidity amplifies the stench of commercialized rituals."
+        },
+        {
+          "floor": 28,
+          "ceiling": 28,
+          "result": "Whispers of betrayal weave through the cool night air."
+        },
+        {
+          "floor": 29,
+          "ceiling": 29,
+          "result": "Flickering torchlight dances on defaced statues."
+        },
+        {
+          "floor": 30,
+          "ceiling": 30,
+          "result": "A bitter cold seeps from cracked marble floors."
+        },
+        {
+          "floor": 31,
+          "ceiling": 31,
+          "result": "Laughter rings hollow in once-revered chambers."
+        },
+        {
+          "floor": 32,
+          "ceiling": 32,
+          "result": "The scent of overripe fruit mingles with sacred oils."
+        },
+        {
+          "floor": 33,
+          "ceiling": 33,
+          "result": "Gentle rain washes away remnants of purity."
+        },
+        {
+          "floor": 34,
+          "ceiling": 34,
+          "result": "Echoes of mockery rebound off ancient walls."
+        },
+        {
+          "floor": 35,
+          "ceiling": 35,
+          "result": "A thick haze obscures profaned icons."
+        },
+        {
+          "floor": 36,
+          "ceiling": 36,
+          "result": "Warm gusts carry the sound of bartering over heirlooms."
+        },
+        {
+          "floor": 37,
+          "ceiling": 37,
+          "result": "The air vibrates with suppressed rage."
+        },
+        {
+          "floor": 38,
+          "ceiling": 38,
+          "result": "Faint glows illuminate repurposed altars as stalls."
+        },
+        {
+          "floor": 39,
+          "ceiling": 39,
+          "result": "A musty odor pervades forgotten crypts turned storerooms."
+        },
+        {
+          "floor": 40,
+          "ceiling": 40,
+          "result": "Dusk brings a melancholy hush over twisted traditions."
+        },
+        {
+          "floor": 41,
+          "ceiling": 41,
+          "result": "The tang of rust from chained relics fills the nostrils."
+        },
+        {
+          "floor": 42,
+          "ceiling": 42,
+          "result": "Murmurs of discontent ripple through crowded shrines."
+        },
+        {
+          "floor": 43,
+          "ceiling": 43,
+          "result": "A sultry heat envelops bodies in debauched revelry."
+        },
+        {
+          "floor": 44,
+          "ceiling": 44,
+          "result": "Crisp autumn leaves crunch under sacrilegious feet."
+        },
+        {
+          "floor": 45,
+          "ceiling": 45,
+          "result": "The atmosphere pulses with uneasy anticipation."
+        },
+        {
+          "floor": 46,
+          "ceiling": 46,
+          "result": "Smoky vapors rise from fires of burned effigies."
+        },
+        {
+          "floor": 47,
+          "ceiling": 47,
+          "result": "A serene quiet belies underlying corruption."
+        },
+        {
+          "floor": 48,
+          "ceiling": 48,
+          "result": "Piquant spices disguise the rot of defiled offerings."
+        },
+        {
+          "floor": 49,
+          "ceiling": 49,
+          "result": "Moonlight casts eerie shadows on commercialized grounds."
+        },
+        {
+          "floor": 50,
+          "ceiling": 50,
+          "result": "The chill of isolation grips the heart in mocked sanctity."
+        },
+        {
+          "floor": 51,
+          "ceiling": 51,
+          "result": "Echoes of profane oaths shatter the peace."
+        },
+        {
+          "floor": 52,
+          "ceiling": 52,
+          "result": "A floral perfume clashes with the reek of decay."
+        },
+        {
+          "floor": 53,
+          "ceiling": 53,
+          "result": "Gentle waves lap at shores littered with sacred debris."
+        },
+        {
+          "floor": 54,
+          "ceiling": 54,
+          "result": "The air shimmers with heat from illicit forges in temples."
+        },
+        {
+          "floor": 55,
+          "ceiling": 55,
+          "result": "Whispers of ancient laws now broken fill the void."
+        },
+        {
+          "floor": 56,
+          "ceiling": 56,
+          "result": "A damp mist clings to graffiti-covered obelisks."
+        },
+        {
+          "floor": 57,
+          "ceiling": 57,
+          "result": "Faint music of revelry mocks solemn processions."
+        },
+        {
+          "floor": 58,
+          "ceiling": 58,
+          "result": "The scent of wax from candles on profane altars lingers."
+        },
+        {
+          "floor": 59,
+          "ceiling": 59,
+          "result": "Twilight hues paint desecrated landscapes in irony."
+        },
+        {
+          "floor": 60,
+          "ceiling": 60,
+          "result": "A biting wind scatters ashes of holy pyres."
+        },
+        {
+          "floor": 61,
+          "ceiling": 61,
+          "result": "Muffled cries echo in halls of twisted justice."
+        },
+        {
+          "floor": 62,
+          "ceiling": 62,
+          "result": "The atmosphere weighs with the burden of forgotten vows."
+        },
+        {
+          "floor": 63,
+          "ceiling": 63,
+          "result": "Sour fermentation odors waft from sacred vineyards turned breweries."
+        },
+        {
+          "floor": 64,
+          "ceiling": 64,
+          "result": "Starlit skies mock the dimming of faith's light."
+        },
+        {
+          "floor": 65,
+          "ceiling": 65,
+          "result": "A pervasive dampness seeps into cracked foundations."
+        },
+        {
+          "floor": 66,
+          "ceiling": 66,
+          "result": "Raucous cheers drown out whispers of piety."
+        },
+        {
+          "floor": 67,
+          "ceiling": 67,
+          "result": "The air crackles with static from stormed sanctuaries."
+        },
+        {
+          "floor": 68,
+          "ceiling": 68,
+          "result": "Gentle snowfall covers profaned symbols in white mockery."
+        },
+        {
+          "floor": 69,
+          "ceiling": 69,
+          "result": "Echoes of bartered relics resonate through empty vaults."
+        },
+        {
+          "floor": 70,
+          "ceiling": 70,
+          "result": "A thick smog from industrial fires chokes holy peaks."
+        },
+        {
+          "floor": 71,
+          "ceiling": 71,
+          "result": "Warm sunlight exposes the grime on once-pure facades."
+        },
+        {
+          "floor": 72,
+          "ceiling": 72,
+          "result": "The scent of blood money taints the breeze."
+        },
+        {
+          "floor": 73,
+          "ceiling": 73,
+          "result": "Murmurs of scandal weave through the humid air."
+        },
+        {
+          "floor": 74,
+          "ceiling": 74,
+          "result": "A cool draft carries the dust of crumbled idols."
+        },
+        {
+          "floor": 75,
+          "ceiling": 75,
+          "result": "Laughter bubbles up from cruel parodies of rites."
+        },
+        {
+          "floor": 76,
+          "ceiling": 76,
+          "result": "The atmosphere hums with illicit transactions."
+        },
+        {
+          "floor": 77,
+          "ceiling": 77,
+          "result": "Faint aromas of sanctity clash with vulgar stenches."
+        },
+        {
+          "floor": 78,
+          "ceiling": 78,
+          "result": "Dusk envelops the scene in a veil of unease."
+        },
+        {
+          "floor": 79,
+          "ceiling": 79,
+          "result": "A metallic clang echoes from repurposed forges."
+        },
+        {
+          "floor": 80,
+          "ceiling": 80,
+          "result": "Whispers of heresy float on the evening mist."
+        },
+        {
+          "floor": 81,
+          "ceiling": 81,
+          "result": "The air thickens with the weight of commercial sacrilege."
+        },
+        {
+          "floor": 82,
+          "ceiling": 82,
+          "result": "Gentle rains erode inscriptions of ancient laws."
+        },
+        {
+          "floor": 83,
+          "ceiling": 83,
+          "result": "Echoes of mockery linger in the still night."
+        },
+        {
+          "floor": 84,
+          "ceiling": 84,
+          "result": "A pungent smoke from defiled hearths fills the lungs."
+        },
+        {
+          "floor": 85,
+          "ceiling": 85,
+          "result": "Moonbeams highlight cracks in revered monoliths."
+        },
+        {
+          "floor": 86,
+          "ceiling": 86,
+          "result": "The chill of abandonment permeates the space."
+        },
+        {
+          "floor": 87,
+          "ceiling": 87,
+          "result": "Rhythmic chants twist into profane songs."
+        },
+        {
+          "floor": 88,
+          "ceiling": 88,
+          "result": "A musty fog obscures paths once walked in reverence."
+        },
+        {
+          "floor": 89,
+          "ceiling": 89,
+          "result": "Warm breezes carry scents of overindulgence."
+        },
+        {
+          "floor": 90,
+          "ceiling": 90,
+          "result": "The atmosphere pulses with hidden malice."
+        },
+        {
+          "floor": 91,
+          "ceiling": 91,
+          "result": "Faint glows from lanterns on twisted altars flicker."
+        },
+        {
+          "floor": 92,
+          "ceiling": 92,
+          "result": "Sour winds whip through lumbered sacred woods."
+        },
+        {
+          "floor": 93,
+          "ceiling": 93,
+          "result": "Twilight shadows elongate over mocked traditions."
+        },
+        {
+          "floor": 94,
+          "ceiling": 94,
+          "result": "A damp chill seeps from walls of repurposed cloisters."
+        },
+        {
+          "floor": 95,
+          "ceiling": 95,
+          "result": "Muffled haggling drowns sacred silences."
+        },
+        {
+          "floor": 96,
+          "ceiling": 96,
+          "result": "The scent of decay underlies floral disguises."
+        },
+        {
+          "floor": 97,
+          "ceiling": 97,
+          "result": "ACTION + THEME"
+        },
+        {
+          "floor": 98,
+          "ceiling": 98,
+          "result": "Starlight twinkles on shards of broken relics."
+        },
+        {
+          "floor": 99,
+          "ceiling": 99,
+          "result": "ROLL TWICE"
+        },
+        {
+          "floor": 100,
+          "ceiling": 100,
+          "result": "Echoes of cruel jests rebound in hallowed halls."
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Atmosphere",
+      "summary": "Profane — Atmosphere"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Aspect",
+      "name": "Manifestations",
+      "tags": [
+        "aspect"
+      ],
+      "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "Sacred relics sold as trinkets in a bustling market stall."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Ancient temple bells rung to signal tavern closing times."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "Holy water fonts filled with cheap ale for rowdy celebrations."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Venerated icons painted over with crude caricatures."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "Ancestral burial grounds plowed for farmland."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Forbidden rites performed openly as street theater."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Symbols of purity etched with vulgar inscriptions."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Once-hallowed groves stripped bare for firewood."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Ritual chants twisted into bawdy drinking songs."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Divine effigies used as scarecrows in crop fields."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Sacred vows mocked in satirical plays."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Temple altars repurposed as gambling tables."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Holy days observed with gluttonous feasts and debauchery."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Consecrated grounds turned into refuse dumps."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Priestly robes worn as costumes for masquerades."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Mystical artifacts pawned for petty debts."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Sanctified oils used to grease wagon wheels."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Revered scriptures recited as jests in brothels."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Enchanted springs polluted with industrial waste."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Eternal flames fueled by discarded trash."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "Sacred oaths broken for personal gain in contracts."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Monastic cells converted into storage for contraband."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Divine prophecies interpreted as stock market tips."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Holy symbols branded onto livestock."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Ritual daggers dulled for kitchen use."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Ancestral spirits invoked for trivial curses."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Temple mosaics shattered for road paving stones."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Sacred dances performed in seedy dance halls."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Vows of silence broken with gossip and slander."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Consecrated bread sold as street food snacks."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Mystical runes carved into tavern bar tops."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Holy pilgrimages rerouted through commercial districts."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Divine visions exploited for fortune-telling scams."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Sacred texts bound into cheap novels."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Ritual incense burned to mask foul odors."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Enlightened teachings commodified as self-help pamphlets."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "Temple guardians bribed for illicit access."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Sacred groves logged for luxury furniture."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Holy relics fragmented and sold as souvenirs."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "Ritual baths used for laundering dirty linens."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Divine mandates twisted into legal loopholes."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Ancestral altars cluttered with mundane clutter."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Sacred flames extinguished for safety regulations."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Mystical herbs harvested for recreational drugs."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Holy icons defaced with political slogans."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Ritual drums beaten for marching band parades."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Consecrated stones quarried for building material."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "CONNECTION WEB"
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "ACTION + THEME"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Manifestations",
+      "summary": "Profane — Manifestations"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Aspect",
+      "name": "Discoveries",
+      "tags": [
+        "aspect"
+      ],
+      "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "A shattered altar stone repurposed as a butcher's block, stained with old blood."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Faded holy scriptures used as wrapping paper in a nearby market stall."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "A sacred spring now a dumping ground for alchemical waste, bubbling unnaturally."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Desecrated relics hawked by a sly merchant in tattered robes."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "An ancient temple bell melted down into crude gambling tokens."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Twisted effigies of forgotten gods dangling from tavern signs."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "A profaned burial mound excavated for cheap building materials."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Corrupted prayer beads strung with bones of the faithful."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "A holy grove logged for timber, stumps carved with mocking graffiti."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Defiled vestments worn by street performers in satirical plays."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "A once-sacred flame now fueling a blacksmith's forge of ill repute."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Broken statues of saints toppled into a muddy crossroads."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Commercialized festival masks depicting deities in lewd poses."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "A tainted reliquary box filled with counterfeit coins."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Ancestral tombs raided and sold as novelty curios."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Mocking caricatures of holy symbols etched on tavern walls."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "A profaned chalice used as a beggar's cup in the slums."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Despoiled manuscripts auctioned off to the highest bidder."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Sacred oaks felled and turned into gallows for public executions."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Corrupted icons peddled as lucky charms by charlatans."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "A defiled shrine converted into a roadside brothel."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Twisted prayer wheels spinning with heretical inscriptions."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Holy water fonts now brimming with foul, stagnant liquor."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Repurposed cathedral stones built into a gambler's den."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Mocked effigies paraded in crude carnivals of excess."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "A profaned crypt turned warehouse for smuggled goods."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Desecrated banners fluttering from merchant carts."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Sacred texts rewritten with bawdy limericks and jests."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "A tainted amulet worn by a corrupt official for irony."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Broken reliquaries scattered in a junk dealer's yard."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Commercialized pilgrimage routes lined with souvenir stands."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Defiled altars hosting underground fighting rings."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Twisted votive candles melted into grotesque shapes."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Holy ground plowed for profane crops of addictive herbs."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Repurposed monastic cells as cheap lodging for vagrants."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Mocking graffiti over ancient runes of protection."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "A profaned idol smashed and sold as gravel for paths."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Despoiled prayer mats used as doormats in seedy inns."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Sacred vessels filled with illicit brews at festivals."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "Corrupted scrolls bundled with trash in alleyways."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "A defiled sanctuary now a haven for thieves and cutthroats."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Twisted saintly relics traded like common trinkets."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Holy symbols inverted and branded on livestock."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Repurposed abbey ruins as a black market bazaar."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Mocked devotional art hung in bawdy houses."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "A profaned well echoing with whispered blasphemies."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Desecrated tombs emptied for bone-meal fertilizer."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "CONNECTION WEB"
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "DESCRIPTOR + FOCUS"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Discoveries",
+      "summary": "Profane — Discoveries"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Aspect",
+      "name": "Banes",
+      "tags": [
+        "aspect"
+      ],
+      "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "A swarm of rats nesting in a desecrated altar, carrying a virulent plague."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "Thick vines of thorny briars choke the paths to forgotten shrines, drawing blood from intruders."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "Echoes of mocking laughter from unseen sources erode sanity over time."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Corrupted holy water burns like acid when it touches bare skin."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "Guardian statues animate with hostile intent, their eyes glowing with profane energy."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "A miasma of foul odors induces nausea and disorientation in visitors."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Shifting illusions of sacred symbols lead travelers into deadly pitfalls."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Bands of opportunistic looters ambush those exploring the ruins."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Cursed relics whisper temptations that incite self-destructive behavior."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "Overgrown roots from commercialized groves trip and ensnare feet."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Profane graffiti on walls triggers explosive runes when read aloud."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "Swindlers posing as pilgrims peddle poisoned elixirs as holy remedies."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Defiled graves release restless spirits that drain life force."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Commercial noise from nearby markets drowns out cries for help."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Twisted effigies come alive at night, strangling sleepers with silken cords."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "Polluted sacred springs cause hallucinations and madness."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Mocking caricatures of deities curse onlookers with misfortune."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Exploited ancestral bones form skeletal warriors that rise to defend their despoilers."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "Repurposed temple bells toll erratically, summoning storms of debris."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Heresy enforcers patrol the area, branding dissenters with hot irons."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "Cracked holy icons shatter into shards that embed in flesh."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "Commercialized festivals mask ritual sacrifices under festive guises."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Defiled oaths bind souls to eternal servitude in twisted forms."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Lumber from sacred groves forms barriers that regenerate when cut."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Symbols of law twisted into traps that ensnare the unwary."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Cruel games on holy days involve forced participation with lethal stakes."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Mocked traditions invoke curses that weaken resolve and strength."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "Repurposed relics emit radiation that sickens over prolonged exposure."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Stockyards in shrines house beasts that break free and rampage."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Ancestral spirits, enraged by defilement, possess and control the living."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Commercial vendors sell cursed amulets that invite demonic possession."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Twisted purity rites cleanse with fire that scars and maims."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Defiled manuscripts release ink elementals that blind readers."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Holy days turned cruel spawn mobs that hunt for sport."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "Cracked symbols bleed a corrosive ichor that erodes armor and skin."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Repurposed groves harbor venomous insects in unnatural swarms."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "Mocked faith icons induce paralyzing doubt in believers."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Commercial exploitation awakens earth elementals that cause quakes."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Defiled altars summon shadows that sap warmth and vitality."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "Twisted traditions enforce blood oaths that drain lifeblood."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Sacred sites turned markets hide assassins in the crowds."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Profane repurposing corrupts magic, causing spells to backfire."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Ancestral groves logged release toxic spores that choke lungs."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Holy symbols mocked trigger avalanches of rubble."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Cruel excuses on feast days lead to public executions."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "Defiled purity wells up as geysers of scalding mud."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Repurposed temples echo with screams that shatter glass and eardrums."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "Mocked laws bind intruders in illusory chains."
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "DESCRIPTOR + FOCUS"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Banes",
+      "summary": "Profane — Banes"
+    },
+    {
+      "sourcePath": "forge",
+      "category": "Aspect",
+      "name": "Boons",
+      "tags": [
+        "aspect"
+      ],
+      "description": "Profaned covers anything once sacred, honored, or pure that has been twisted, commercialized, or outright defiled. Shrines turned into stockyards, ancestral groves cut for lumber, holy days turned to excuses for cruelty—all of these fall under this Aspect. Symbols of faith, law, or tradition still linger, but they’re cracked, mocked, or repurposed in unsettling ways. In a Profaned environment, reverence and disgust walk the same roads, and nothing noble is safe from being dragged through the mud.",
+      "headers": [
+        "Roll",
+        "Result"
+      ],
+      "tableData": [
+        {
+          "floor": 1,
+          "ceiling": 2,
+          "result": "A hidden cache of ancient coins buried under a defiled shrine's floorboards."
+        },
+        {
+          "floor": 3,
+          "ceiling": 4,
+          "result": "An opportunistic scavenger sharing maps of safe routes through corrupted lands."
+        },
+        {
+          "floor": 5,
+          "ceiling": 6,
+          "result": "A twisted idol that grants fleeting visions of forgotten lore when touched."
+        },
+        {
+          "floor": 7,
+          "ceiling": 8,
+          "result": "Discarded holy texts repurposed as fuel, revealing hidden marginalia with secrets."
+        },
+        {
+          "floor": 9,
+          "ceiling": 10,
+          "result": "A cynical ex-priest offering guidance in exchange for minor favors."
+        },
+        {
+          "floor": 11,
+          "ceiling": 12,
+          "result": "Profaned grove yielding rare herbs twisted into potent alchemical ingredients."
+        },
+        {
+          "floor": 13,
+          "ceiling": 14,
+          "result": "Mocked festival masks that disguise the wearer from hostile eyes."
+        },
+        {
+          "floor": 15,
+          "ceiling": 16,
+          "result": "Cracked altar stone providing sturdy material for improvised tools or weapons."
+        },
+        {
+          "floor": 17,
+          "ceiling": 18,
+          "result": "Repurposed temple bells that can be rung to summon neutral wildlife."
+        },
+        {
+          "floor": 19,
+          "ceiling": 20,
+          "result": "A defiled spring whose waters heal minor ailments despite their foul taste."
+        },
+        {
+          "floor": 21,
+          "ceiling": 22,
+          "result": "Forgotten votive offerings scattered amid rubble, including valuable gems."
+        },
+        {
+          "floor": 23,
+          "ceiling": 24,
+          "result": "An abandoned pilgrim's cart laden with preserved supplies and trade goods."
+        },
+        {
+          "floor": 25,
+          "ceiling": 26,
+          "result": "Twisted ancestral totem that wards off lesser curses when carried."
+        },
+        {
+          "floor": 27,
+          "ceiling": 28,
+          "result": "Commercialized holy site attracting merchants with exotic wares for sale."
+        },
+        {
+          "floor": 29,
+          "ceiling": 30,
+          "result": "Desecrated monument inscribed with clues to nearby hidden treasures."
+        },
+        {
+          "floor": 31,
+          "ceiling": 32,
+          "result": "A mocking caricature of a deity that amuses locals into sharing gossip."
+        },
+        {
+          "floor": 33,
+          "ceiling": 34,
+          "result": "Repurposed sacred vestments offering camouflage in urban decay."
+        },
+        {
+          "floor": 35,
+          "ceiling": 36,
+          "result": "Profaned burial ground exposing durable bones for crafting purposes."
+        },
+        {
+          "floor": 37,
+          "ceiling": 38,
+          "result": "A fallen icon's fragments that can be traded for favors from outcasts."
+        },
+        {
+          "floor": 39,
+          "ceiling": 40,
+          "result": "Twisted holiday tradition providing cover for clandestine meetings."
+        },
+        {
+          "floor": 41,
+          "ceiling": 42,
+          "result": "Defiled library shelves holding overlooked scrolls of practical knowledge."
+        },
+        {
+          "floor": 43,
+          "ceiling": 44,
+          "result": "An irreverent bard performing songs that reveal historical truths."
+        },
+        {
+          "floor": 45,
+          "ceiling": 46,
+          "result": "Commercial stall in a former sanctum selling enchanted trinkets cheaply."
+        },
+        {
+          "floor": 47,
+          "ceiling": 48,
+          "result": "Crumbled sacred wall revealing a concealed vault with relics inside."
+        },
+        {
+          "floor": 49,
+          "ceiling": 50,
+          "result": "Mocked ritual site where echoes grant brief auditory insights."
+        },
+        {
+          "floor": 51,
+          "ceiling": 52,
+          "result": "Repurposed holy symbols that function as keys to ancient locks."
+        },
+        {
+          "floor": 53,
+          "ceiling": 54,
+          "result": "Profaned orchard bearing fruit that enhances endurance temporarily."
+        },
+        {
+          "floor": 55,
+          "ceiling": 56,
+          "result": "A disillusioned acolyte teaching forbidden but useful incantations."
+        },
+        {
+          "floor": 57,
+          "ceiling": 58,
+          "result": "Desecrated fountain whose coins can be fished out for minor wealth."
+        },
+        {
+          "floor": 59,
+          "ceiling": 60,
+          "result": "Twisted effigy that attracts sympathetic spirits for minor aid."
+        },
+        {
+          "floor": 61,
+          "ceiling": 62,
+          "result": "Abandoned shrine storeroom stocked with preserved rations and tools."
+        },
+        {
+          "floor": 63,
+          "ceiling": 64,
+          "result": "Mocking graffiti on temple walls decoding into a treasure map."
+        },
+        {
+          "floor": 65,
+          "ceiling": 66,
+          "result": "Commercialized pilgrimage route lined with helpful informants."
+        },
+        {
+          "floor": 67,
+          "ceiling": 68,
+          "result": "Defiled grove's lumber providing strong wood for repairs or building."
+        },
+        {
+          "floor": 69,
+          "ceiling": 70,
+          "result": "A sarcastic oracle dispensing cryptic but accurate advice."
+        },
+        {
+          "floor": 71,
+          "ceiling": 72,
+          "result": "Repurposed altar cloth serving as a durable makeshift bandage."
+        },
+        {
+          "floor": 73,
+          "ceiling": 74,
+          "result": "Profaned monument's shadow hiding a safe resting spot from patrols."
+        },
+        {
+          "floor": 75,
+          "ceiling": 76,
+          "result": "Twisted festival games offering prizes of practical utility."
+        },
+        {
+          "floor": 77,
+          "ceiling": 78,
+          "result": "Desecrated crypt yielding ancient armor in salvageable condition."
+        },
+        {
+          "floor": 79,
+          "ceiling": 80,
+          "result": "An opportunistic thief sharing techniques for bypassing profane traps."
+        },
+        {
+          "floor": 81,
+          "ceiling": 82,
+          "result": "Mocked holy day parade providing distraction for stealthy actions."
+        },
+        {
+          "floor": 83,
+          "ceiling": 84,
+          "result": "Commercialized sacred spring bottling water with restorative properties."
+        },
+        {
+          "floor": 85,
+          "ceiling": 86,
+          "result": "Cracked idol eye gem that can be used as a focusing lens for light."
+        },
+        {
+          "floor": 87,
+          "ceiling": 88,
+          "result": "Repurposed vestry holding forgotten maps of underground passages."
+        },
+        {
+          "floor": 89,
+          "ceiling": 90,
+          "result": "Profaned ancestral site revealing buried heirlooms of value."
+        },
+        {
+          "floor": 91,
+          "ceiling": 92,
+          "result": "A jaded guardian spirit offering protection in exchange for mockery."
+        },
+        {
+          "floor": 93,
+          "ceiling": 94,
+          "result": "Twisted ritual paraphernalia adaptable into survival gear."
+        },
+        {
+          "floor": 95,
+          "ceiling": 96,
+          "result": "Defiled temple garden growing vegetables amid the weeds."
+        },
+        {
+          "floor": 97,
+          "ceiling": 98,
+          "result": "DESCRIPTOR + FOCUS"
+        },
+        {
+          "floor": 99,
+          "ceiling": 100,
+          "result": "ROLL TWICE"
+        }
+      ],
+      "maxRoll": 100,
+      "oracle_type": "Boons",
+      "summary": "Profane — Boons"
+    }
+  ]
+}

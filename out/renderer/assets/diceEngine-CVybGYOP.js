@@ -1,4 +1,4 @@
-import { d as diceEngine, u as useSettingsStore } from "./index-Blugov4u.js";
+import { d as diceEngine, u as useSettingsStore } from "./index-B67ULY0K.js";
 import "uuid";
 function parseDiceExpression(expression) {
   let normalized = expression.toLowerCase().replace(/\s/g, "");

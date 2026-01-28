@@ -5,10 +5,10 @@
  * Tables are stored in the .weave folder within each Tapestry.
  */
 
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type {
     Table,
     WeaveTableListResponse,
@@ -26,6 +26,24 @@ let currentTapestryPath: string | null = null;
 
 // Cache for tables to avoid repeated file reads
 const tableCache = new Map<string, Table>();
+
+// Namespace for deterministic IDs (Standard UUID for URL namespace)
+const STANDARD_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+
+/**
+ * Get the path to the standard tables directory
+ * Handles both development (src/data/environments) and production (resources/data/environments)
+ */
+function getStandardTablesPath(): string {
+    if (app.isPackaged) {
+        // Production: resources/data/environments
+        return path.join(process.resourcesPath, 'data', 'environments');
+    } else {
+        // Development: src/data/environments
+        // Use process.cwd() which points to project root in dev mode (electron-vite)
+        return path.join(process.cwd(), 'src', 'data', 'environments');
+    }
+}
 
 /**
  * Get the directory path for a specific namespace (e.g., .weave or .environment)
@@ -109,41 +127,88 @@ async function getUniqueFilePath(dir: string, name: string, tableId: string): Pr
  * Recursively read files from a directory
  */
 async function getFilesRecursive(dir: string): Promise<string[]> {
-    const dirents = await fs.readdir(dir, { withFileTypes: true });
-    const files = await Promise.all(dirents.map(async (dirent) => {
-        const res = path.join(dir, dirent.name);
-        return dirent.isDirectory() ? getFilesRecursive(res) : res;
-    }));
-    return files.flat();
+    try {
+        const dirents = await fs.readdir(dir, { withFileTypes: true });
+        const files = await Promise.all(dirents.map(async (dirent) => {
+            const res = path.join(dir, dirent.name);
+            return dirent.isDirectory() ? getFilesRecursive(res) : res;
+        }));
+        return files.flat();
+    } catch (err) {
+        // console.warn(`[getFilesRecursive] Failed to read ${dir}:`, err);
+        return [];
+    }
 }
 
 /**
  * Read all table files from a specific directory (recursive)
  */
-async function readTableFiles(namespace: '.weave' | '.environment'): Promise<Table[]> {
+async function readTableFiles(dirPath: string): Promise<Table[]> {
     try {
-        const dir = getNamespaceDirPath(namespace);
-        const filePaths = await getFilesRecursive(dir);
+        const filePaths = await getFilesRecursive(dirPath);
 
         const tables: Table[] = [];
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
 
         for (const filePath of filePaths) {
             if (filePath.endsWith('.json')) {
                 const fileName = path.basename(filePath);
                 try {
                     const data = await fs.readFile(filePath, 'utf-8');
-                    const table = JSON.parse(data) as Table;
+                    let parsed: any;
+                    try {
+                        parsed = JSON.parse(data);
+                    } catch (e) {
+                        console.error(`Failed to parse JSON for ${fileName}`, e);
+                        continue;
+                    }
 
-                    let currentPath = filePath;
+                    // Handle disparate formats:
+                    // 1. Array of Tables (e.g. blighted.json)
+                    // 2. Object with "tables" array (e.g. profane.json)
+                    // 3. Single Table object
+                    let tableList: Table[] = [];
 
-                    // MIGRATION: If filename is UUID, rename it to Human Readable (Flat migration only for now)
-                    // Note: We skip complex migration inside subfolders to avoid chaos, only migrate root files if needed
-                    // For now, simplicity: just read
+                    if (Array.isArray(parsed)) {
+                        tableList = parsed;
+                    } else if (parsed && typeof parsed === 'object') {
+                        if (Array.isArray(parsed.tables)) {
+                            tableList = parsed.tables;
+                        } else {
+                            // Assuming single table
+                            tableList = [parsed];
+                        }
+                    }
 
-                    table.sourcePath = currentPath;
-                    tableCache.set(table.id, table);
-                    tables.push(table);
+                    for (const table of tableList) {
+                        // FIX: Infer Category from File Path for Standard Tables
+                        // Files are in .../aspect/blighted.json or .../domain/catacombs.json
+                        // We want Category to be "Aspect - Blighted" or "Domain - Catacombs"
+
+                        // use path.sep to handle cross-platform separators
+                        const parentDir = path.dirname(filePath).split(path.sep).pop()?.toLowerCase();
+                        const baseName = path.basename(filePath, '.json');
+                        const groupName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+
+                        if (parentDir === 'aspect' || parentDir === 'aspects') {
+                            table.category = `Aspect - ${groupName}`;
+                        } else if (parentDir === 'domain' || parentDir === 'domains') {
+                            table.category = `Domain - ${groupName}`;
+                        }
+
+                        // FIX: Ensure ID exists. Standard tables (Array) might not have IDs.
+                        // Generate deterministic ID based on Name + Category to allow persistence/overriding.
+                        if (!table.id) {
+                            const uniqueString = `${table.category || ''}:${table.name}`;
+                            table.id = uuidv5(uniqueString, STANDARD_NAMESPACE);
+                        }
+
+                        // Ensure sourcePath is set to the file we read it from
+                        // (Note unless overriding, standard tables in arrays map to the same file)
+                        table.sourcePath = filePath;
+
+                        tableCache.set(table.id, table);
+                        tables.push(table);
+                    }
                 } catch (error) {
                     console.error(`Failed to read table file ${fileName}:`, error);
                 }
@@ -153,6 +218,7 @@ async function readTableFiles(namespace: '.weave' | '.environment'): Promise<Tab
         return tables;
     } catch (error: any) {
         if (error.code === 'ENOENT') {
+            console.warn(`[readTableFiles] Directory not found: ${dirPath}`);
             return [];
         }
         throw error;
@@ -192,12 +258,16 @@ async function writeTableFile(table: Table, namespace: '.weave' | '.environment'
     // If we have an old path and it's different, remove the old file (Rename/Move)
     if (oldPath && oldPath !== newPath) {
         try {
-            await fs.access(oldPath);
-            await fs.unlink(oldPath);
-            // console.log(`[writeTableFile] Renamed/Moved: Deleted old file ${oldPath}`);
+            // Only try to delete if it's in a user writable location
+            // Standard tables will have paths like '.../src/data/...' or '.../resources/...'
+            // User tables have '.../.environment/...' or '.../.weave/...'
+            // We can check if it starts with the current tapestry path
+            if (currentTapestryPath && oldPath.startsWith(currentTapestryPath)) {
+                await fs.access(oldPath);
+                await fs.unlink(oldPath);
+            }
         } catch (e) {
-            // Ignore (file might already be gone)
-            // console.warn(`[writeTableFile] Failed to delete old file ${oldPath}`, e);
+            // Ignore (file might already be gone or read-only)
         }
     }
 
@@ -215,14 +285,17 @@ async function deleteTableFile(tableId: string): Promise<void> {
     const table = tableCache.get(tableId);
     if (table && table.sourcePath) {
         try {
-            await fs.unlink(table.sourcePath);
+            // Only allow deleting user tables
+            if (currentTapestryPath && table.sourcePath.startsWith(currentTapestryPath)) {
+                await fs.unlink(table.sourcePath);
+            } else {
+                throw new Error('Cannot delete standard tables');
+            }
         } catch (error: any) {
             if (error.code !== 'ENOENT') {
                 throw error;
             }
         }
-    } else {
-        // Fallback or retry? cache should be populated.
     }
     tableCache.delete(tableId);
 }
@@ -239,7 +312,7 @@ function findTableById(tableId: string): Table | null {
  */
 function findTableByTag(tag: string): Table | null {
     for (const table of tableCache.values()) {
-        if (table.tags.includes(tag)) {
+        if (table.tags && Array.isArray(table.tags) && table.tags.includes(tag)) {
             return table;
         }
     }
@@ -340,7 +413,7 @@ export function registerWeaveHandlers() {
                 };
             }
 
-            const tables = await readTableFiles('.weave');
+            const tables = await readTableFiles(getNamespaceDirPath('.weave'));
             return { tables };
         } catch (error: any) {
             return {
@@ -358,17 +431,17 @@ export function registerWeaveHandlers() {
 
             // If not in cache, try loading from disk
             if (!table) {
+                // Check .weave
                 const weaveDir = getNamespaceDirPath('.weave');
                 let filePath = path.join(weaveDir, `${tableId}.json`);
 
                 try {
-                    // Try .weave first
                     const data = await fs.readFile(filePath, 'utf-8');
                     table = JSON.parse(data) as Table;
                     table.sourcePath = filePath;
                     tableCache.set(tableId, table);
-                } catch (weaveError: any) {
-                    // If not in .weave, try .environment
+                } catch {
+                    // Check .environment
                     const envDir = getNamespaceDirPath('.environment');
                     filePath = path.join(envDir, `${tableId}.json`);
                     try {
@@ -376,10 +449,18 @@ export function registerWeaveHandlers() {
                         table = JSON.parse(data) as Table;
                         table.sourcePath = filePath;
                         tableCache.set(tableId, table);
-                    } catch (envError: any) {
+                    } catch {
+                        // Check Standard tables
+                        // We might not know the exact path without scanning, but we shouldn't rely on getTable(id)
+                        // for discovery usually. However, if cache was cleared, we might need it.
+                        // Ideally we should reload all tables if we're desperate, or scan recursively.
+                        // For now, fail if not in cache or direct known paths.
+                        // Actually, let's try reading all standard tables into cache if we miss?
+                        // That's heavy.
+                        // Let's assume the frontend calls getTables first.
                         return {
                             table: null,
-                            error: `Table with ID ${tableId} not found in .weave or .environment`,
+                            error: `Table with ID ${tableId} not found`,
                         };
                     }
                 }
@@ -447,6 +528,9 @@ export function registerWeaveHandlers() {
                 }
             }
 
+            // If modifying a Standard table, we MUST save it to the User's .environment folder
+            // This happens automatically since writeTableFile writes to `getNamespaceDirPath(namespace)`
+            // which is the User's workspace.
             await writeTableFile(table, namespace);
 
             return { success: true, table };
@@ -489,8 +573,12 @@ export function registerWeaveHandlers() {
                 };
             }
 
-            const table = findTableById(tableId);
+            let table = findTableById(tableId);
+
+            // If checking a standard table that hasn't been loaded yet
             if (!table) {
+                // Try to reload tables to find it? Or simple fail?
+                // Since getTables is usually called at startup, it should be in cache.
                 return {
                     result: null,
                     error: `Table with ID ${tableId} not found`,
@@ -522,8 +610,33 @@ export function registerWeaveHandlers() {
                     error: 'No Tapestry path set.',
                 };
             }
-            const tables = await readTableFiles('.environment');
-            return { tables };
+
+            // 1. Read User Tables (.environment)
+            const userTables = await readTableFiles(getNamespaceDirPath('.environment'));
+
+            // 2. Read Standard Tables
+            const standardTablesPath = getStandardTablesPath();
+            const standardTables = await readTableFiles(standardTablesPath);
+
+            // 3. Merge: User tables act as overrides for Standard tables with same ID
+            const tableMap = new Map<string, Table>();
+
+            // Load standard first
+            for (const t of standardTables) {
+                tableMap.set(t.id, t);
+            }
+
+            // Overwrite with user tables
+            for (const t of userTables) {
+                tableMap.set(t.id, t);
+            }
+
+            // Update cache with FINAL list
+            for (const t of tableMap.values()) {
+                tableCache.set(t.id, t);
+            }
+
+            return { tables: Array.from(tableMap.values()) };
         } catch (error: any) {
             return {
                 tables: [],

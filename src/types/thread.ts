@@ -85,7 +85,7 @@ export interface ThreadTrack {
     name: string;
     segments: number;
     filled: number;
-    difficulty?: 'troublesome' | 'dangerous' | 'formidable' | 'extreme' | 'epic';
+    difficulty?: 'standard' | 'troublesome' | 'dangerous' | 'formidable' | 'extreme' | 'epic';
     linkedPanelId?: string;
 }
 

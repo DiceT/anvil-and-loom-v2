@@ -6,7 +6,7 @@
  * Supports drag-and-drop to add tables to the slot.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dices, X, Plus } from 'lucide-react';
 import { useDroppable } from '@dnd-kit/core';
 import { WeaveMacroTooltip } from './WeaveMacroTooltip';
@@ -51,7 +51,7 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
     setDroppableRef(node);
   };
 
-  const handleMouseEnter = (e: React.MouseEvent) => {
+  const handleMouseEnter = () => {
     if (slotTables.length === 0) return;
 
     const rect = slotRef.current?.getBoundingClientRect();
@@ -109,6 +109,24 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
           }));
           e.dataTransfer.effectAllowed = 'copy';
         }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          const data = e.dataTransfer.getData('application/anl+json');
+          if (data) {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === 'table') {
+                onDrop(slotIndex, parsed.id);
+              }
+            } catch (err) {
+              console.error('Failed to parse drop data', err);
+            }
+          }
+        }}
         onClick={handleRoll}
         role="button"
         tabIndex={0}
@@ -131,7 +149,7 @@ export function WeaveMacroSlot({ slot, slotIndex, tables, onRoll, onClear, onDro
 
               {/* Die Types */}
               <div className="flex items-center gap-1 text-xs text-type-tertiary mt-1">
-                {slotTables.slice(0, 3).map((table, idx) => (
+                {slotTables.slice(0, 3).map((table: Table, idx: number) => (
                   <span key={table.id}>
                     {getDieTypeText(table.maxRoll)}
                     {idx < Math.min(slotTables.length, 3) - 1 && '·'}

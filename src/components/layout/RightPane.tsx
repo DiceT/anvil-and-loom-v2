@@ -4,6 +4,7 @@ import { GlobalLastThread } from '../results/GlobalLastThread';
 import { Stitchboard } from '../stitches/Stitchboard';
 import { WeavePanel } from '../weave/WeavePanel';
 import { EnvironmentFileTree } from '../environment/EnvironmentFileTree';
+import { DmChatPanel } from '../dm-chat/DmChatPanel';
 import { useToolStore } from '../../stores/useToolStore';
 
 export function RightPane() {
@@ -21,6 +22,8 @@ export function RightPane() {
         return <WeavePanel />;
       case 'environment':
         return <EnvironmentFileTree />;
+      case 'dm-chat':
+        return <DmChatPanel />;
       default:
         return null;
     }

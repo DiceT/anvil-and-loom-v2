@@ -17,7 +17,7 @@ const categoryConfig: Record<EntryCategory, { label: string; color: string }> = 
 };
 
 export function CategoryBadge({ category }: CategoryBadgeProps) {
-    const config = categoryConfig[category];
+    const config = categoryConfig[category] || categoryConfig['other'];
 
     return (
         <span

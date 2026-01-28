@@ -4,6 +4,14 @@
 	"description": "A story-first TTRPG engine for journaling, dice, and narrative management",
 	"author": "Anvil & Loom Team",
 	"main": "out/main/main.cjs",
+	"build": {
+		"extraResources": [
+			{
+				"from": "src/data/environments",
+				"to": "data/environments"
+			}
+		]
+	},
 	"type": "module",
 	"scripts": {
 		"dev": "electron-vite dev",

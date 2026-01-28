@@ -576,54 +576,55 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
         onChange={handleImportFile}
       />
 
-      <div className="file-tree-search">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search tables..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button
-            className="btn-clear-search"
-            onClick={() => setSearchQuery('')}
-            title="Clear search"
-          >
-            ✕
-          </button>
-        )}
-      </div>
-
-      {isCreatingFolder && (
-        <div className="px-2 py-2 bg-canvas-panel border-b border-border">
-          <input
-            autoFocus
-            type="text"
-            className="w-full px-2 py-1.5 bg-canvas border border-border rounded text-type-primary text-sm focus:outline-none focus:ring-1 focus:ring-amethyst"
-            placeholder="New Folder Name..."
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const val = e.currentTarget.value.trim();
-                if (val) {
-                  createCategory(val);
-                }
-                setIsCreatingFolder(false);
-              } else if (e.key === 'Escape') {
-                setIsCreatingFolder(false);
-              }
-            }}
-            onBlur={() => setIsCreatingFolder(false)}
-          />
-        </div>
-      )}
-
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
+        <div className="file-tree-search">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search tables..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              className="btn-clear-search"
+              onClick={() => setSearchQuery('')}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {isCreatingFolder && (
+          <div className="px-2 py-2 bg-canvas-panel border-b border-border">
+            <input
+              autoFocus
+              type="text"
+              className="w-full px-2 py-1.5 bg-canvas border border-border rounded text-type-primary text-sm focus:outline-none focus:ring-1 focus:ring-amethyst"
+              placeholder="New Folder Name..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const val = e.currentTarget.value.trim();
+                  if (val) {
+                    createCategory(val);
+                  }
+                  setIsCreatingFolder(false);
+                } else if (e.key === 'Escape') {
+                  setIsCreatingFolder(false);
+                }
+              }}
+              onBlur={() => setIsCreatingFolder(false)}
+            />
+          </div>
+        )}
+
+        {/* DragOverlay moved out of content div */}
         <DragOverlay>
           {activeId ? (
             <div className="drag-preview">
@@ -676,7 +677,7 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
           ))
           }
         </div >
-      </DndContext >
+      </DndContext>
 
       {
         searchQuery && Object.keys(filteredGrouped).length === 0 && (

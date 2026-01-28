@@ -811,6 +811,14 @@ class TokenResolver {
 }
 let currentTapestryPath = null;
 const tableCache = /* @__PURE__ */ new Map();
+const STANDARD_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+function getStandardTablesPath() {
+  if (electron.app.isPackaged) {
+    return path__namespace.join(process.resourcesPath, "data", "environments");
+  } else {
+    return path__namespace.join(process.cwd(), "src", "data", "environments");
+  }
+}
 function getNamespaceDirPath(namespace) {
   if (!currentTapestryPath) {
     throw new Error("No Tapestry path set. Call weave:setTapestryPath first.");
@@ -863,29 +871,60 @@ async function getUniqueFilePath(dir, name, tableId) {
   }
 }
 async function getFilesRecursive(dir) {
-  const dirents = await fs__namespace.readdir(dir, { withFileTypes: true });
-  const files = await Promise.all(dirents.map(async (dirent) => {
-    const res = path__namespace.join(dir, dirent.name);
-    return dirent.isDirectory() ? getFilesRecursive(res) : res;
-  }));
-  return files.flat();
-}
-async function readTableFiles(namespace) {
   try {
-    const dir = getNamespaceDirPath(namespace);
-    const filePaths = await getFilesRecursive(dir);
+    const dirents = await fs__namespace.readdir(dir, { withFileTypes: true });
+    const files = await Promise.all(dirents.map(async (dirent) => {
+      const res = path__namespace.join(dir, dirent.name);
+      return dirent.isDirectory() ? getFilesRecursive(res) : res;
+    }));
+    return files.flat();
+  } catch (err) {
+    return [];
+  }
+}
+async function readTableFiles(dirPath) {
+  try {
+    const filePaths = await getFilesRecursive(dirPath);
     const tables = [];
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.json$/i;
     for (const filePath of filePaths) {
       if (filePath.endsWith(".json")) {
         const fileName = path__namespace.basename(filePath);
         try {
           const data = await fs__namespace.readFile(filePath, "utf-8");
-          const table = JSON.parse(data);
-          let currentPath = filePath;
-          table.sourcePath = currentPath;
-          tableCache.set(table.id, table);
-          tables.push(table);
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch (e) {
+            console.error(`Failed to parse JSON for ${fileName}`, e);
+            continue;
+          }
+          let tableList = [];
+          if (Array.isArray(parsed)) {
+            tableList = parsed;
+          } else if (parsed && typeof parsed === "object") {
+            if (Array.isArray(parsed.tables)) {
+              tableList = parsed.tables;
+            } else {
+              tableList = [parsed];
+            }
+          }
+          for (const table of tableList) {
+            const parentDir = path__namespace.dirname(filePath).split(path__namespace.sep).pop()?.toLowerCase();
+            const baseName = path__namespace.basename(filePath, ".json");
+            const groupName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+            if (parentDir === "aspect" || parentDir === "aspects") {
+              table.category = `Aspect - ${groupName}`;
+            } else if (parentDir === "domain" || parentDir === "domains") {
+              table.category = `Domain - ${groupName}`;
+            }
+            if (!table.id) {
+              const uniqueString = `${table.category || ""}:${table.name}`;
+              table.id = uuid.v5(uniqueString, STANDARD_NAMESPACE);
+            }
+            table.sourcePath = filePath;
+            tableCache.set(table.id, table);
+            tables.push(table);
+          }
         } catch (error) {
           console.error(`Failed to read table file ${fileName}:`, error);
         }
@@ -894,6 +933,7 @@ async function readTableFiles(namespace) {
     return tables;
   } catch (error) {
     if (error.code === "ENOENT") {
+      console.warn(`[readTableFiles] Directory not found: ${dirPath}`);
       return [];
     }
     throw error;
@@ -917,8 +957,10 @@ async function writeTableFile(table, namespace) {
   const oldPath = cachedTable?.sourcePath || table.sourcePath;
   if (oldPath && oldPath !== newPath) {
     try {
-      await fs__namespace.access(oldPath);
-      await fs__namespace.unlink(oldPath);
+      if (currentTapestryPath && oldPath.startsWith(currentTapestryPath)) {
+        await fs__namespace.access(oldPath);
+        await fs__namespace.unlink(oldPath);
+      }
     } catch (e) {
     }
   }
@@ -930,7 +972,11 @@ async function deleteTableFile(tableId) {
   const table = tableCache.get(tableId);
   if (table && table.sourcePath) {
     try {
-      await fs__namespace.unlink(table.sourcePath);
+      if (currentTapestryPath && table.sourcePath.startsWith(currentTapestryPath)) {
+        await fs__namespace.unlink(table.sourcePath);
+      } else {
+        throw new Error("Cannot delete standard tables");
+      }
     } catch (error) {
       if (error.code !== "ENOENT") {
         throw error;
@@ -944,7 +990,7 @@ function findTableById(tableId) {
 }
 function findTableByTag(tag) {
   for (const table of tableCache.values()) {
-    if (table.tags.includes(tag)) {
+    if (table.tags && Array.isArray(table.tags) && table.tags.includes(tag)) {
       return table;
     }
   }
@@ -1012,7 +1058,7 @@ function registerWeaveHandlers() {
           error: "No Tapestry path set. Call weave:setTapestryPath first."
         };
       }
-      const tables = await readTableFiles(".weave");
+      const tables = await readTableFiles(getNamespaceDirPath(".weave"));
       return { tables };
     } catch (error) {
       return {
@@ -1032,7 +1078,7 @@ function registerWeaveHandlers() {
           table = JSON.parse(data);
           table.sourcePath = filePath;
           tableCache.set(tableId, table);
-        } catch (weaveError) {
+        } catch {
           const envDir = getNamespaceDirPath(".environment");
           filePath = path__namespace.join(envDir, `${tableId}.json`);
           try {
@@ -1040,10 +1086,10 @@ function registerWeaveHandlers() {
             table = JSON.parse(data);
             table.sourcePath = filePath;
             tableCache.set(tableId, table);
-          } catch (envError) {
+          } catch {
             return {
               table: null,
-              error: `Table with ID ${tableId} not found in .weave or .environment`
+              error: `Table with ID ${tableId} not found`
             };
           }
         }
@@ -1120,7 +1166,7 @@ function registerWeaveHandlers() {
           error: "No Tapestry path set. Call weave:setTapestryPath first."
         };
       }
-      const table = findTableById(tableId);
+      let table = findTableById(tableId);
       if (!table) {
         return {
           result: null,
@@ -1148,8 +1194,20 @@ function registerWeaveHandlers() {
           error: "No Tapestry path set."
         };
       }
-      const tables = await readTableFiles(".environment");
-      return { tables };
+      const userTables = await readTableFiles(getNamespaceDirPath(".environment"));
+      const standardTablesPath = getStandardTablesPath();
+      const standardTables = await readTableFiles(standardTablesPath);
+      const tableMap = /* @__PURE__ */ new Map();
+      for (const t of standardTables) {
+        tableMap.set(t.id, t);
+      }
+      for (const t of userTables) {
+        tableMap.set(t.id, t);
+      }
+      for (const t of tableMap.values()) {
+        tableCache.set(t.id, t);
+      }
+      return { tables: Array.from(tableMap.values()) };
     } catch (error) {
       return {
         tables: [],
@@ -1177,6 +1235,66 @@ function registerWeaveHandlers() {
       return { success: false, error: error?.message ?? "Failed to delete table" };
     }
   });
+}
+function registerDmChatHandlers() {
+  electron.ipcMain.handle("dmChat:loadChats", async (event, tapestryId) => {
+    const tapestryPath = await getTapestryPath(tapestryId);
+    if (!tapestryPath) return [];
+    const chatsDir = path__namespace.join(tapestryPath, ".ai-history");
+    try {
+      await fs__namespace.mkdir(chatsDir, { recursive: true });
+      const files = await fs__namespace.readdir(chatsDir);
+      const chatFiles = files.filter((f) => f.endsWith(".json"));
+      const chats = [];
+      for (const file of chatFiles) {
+        const content = await fs__namespace.readFile(path__namespace.join(chatsDir, file), "utf-8");
+        chats.push(JSON.parse(content));
+      }
+      chats.sort(
+        (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+      return chats;
+    } catch (error) {
+      console.error("Failed to load chats:", error);
+      return [];
+    }
+  });
+  electron.ipcMain.handle("dmChat:saveChat", async (event, tapestryId, chat) => {
+    console.log("[IPC] dmChat:saveChat called", { tapestryId, chatId: chat.id });
+    const tapestryPath = await getTapestryPath(tapestryId);
+    if (!tapestryPath) {
+      console.error("[IPC] dmChat:saveChat: Tapestry path not found for ID:", tapestryId);
+      return false;
+    }
+    const chatsDir = path__namespace.join(tapestryPath, ".ai-history");
+    try {
+      await fs__namespace.mkdir(chatsDir, { recursive: true });
+      const filePath = path__namespace.join(chatsDir, `${chat.id}.json`);
+      await fs__namespace.writeFile(filePath, JSON.stringify(chat, null, 2));
+      console.log("[IPC] dmChat:saveChat: Saved to", filePath);
+      return true;
+    } catch (error) {
+      console.error("[IPC] Failed to save chat:", error);
+      return false;
+    }
+  });
+  electron.ipcMain.handle("dmChat:deleteChat", async (event, tapestryId, chatId) => {
+    const tapestryPath = await getTapestryPath(tapestryId);
+    if (!tapestryPath) return false;
+    const filePath = path__namespace.join(tapestryPath, ".ai-history", `${chatId}.json`);
+    try {
+      await fs__namespace.unlink(filePath);
+      return true;
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+      return false;
+    }
+  });
+}
+async function getTapestryPath(tapestryId) {
+  const registry = await readRegistry();
+  const tapestry = registry.tapestries.find((t) => t.id === tapestryId);
+  return tapestry ? tapestry.path : null;
 }
 electron.protocol.registerSchemesAsPrivileged([
   { scheme: "media", privileges: { secure: true, supportFetchAPI: true, standard: true, bypassCSP: true, stream: true } }
@@ -1212,6 +1330,7 @@ electron.app.whenReady().then(() => {
   setupSettingsHandlers();
   registerTapestryHandlers();
   registerWeaveHandlers();
+  registerDmChatHandlers();
   electron.protocol.handle("media", async (request) => {
     try {
       const parsedUrl = new URL(request.url);

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useThreadsStore } from '../../stores/useThreadsStore';
-import { ThreadCard } from './ThreadCard';
+import { ThreadCard } from '../thread/ThreadCard';
 
 export function ThreadsFullPane() {
   const threads = useThreadsStore((state) => state.threads);
@@ -29,8 +29,8 @@ export function ThreadsFullPane() {
       ) : (
         <div ref={scrollRef} className="flex-1 overflow-y-auto app-scroll">
           <div className="space-y-2">
-            {allThreadsCards.map((card) => (
-              <ThreadCard key={card.id} card={card} defaultExpanded={false} />
+            {allThreadsCards.map((thread) => (
+              <ThreadCard key={thread.id} thread={thread} mode="history" defaultExpanded={false} />
             ))}
           </div>
         </div>

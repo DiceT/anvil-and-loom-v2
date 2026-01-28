@@ -4,94 +4,14 @@
  * Functions to convert legacy thread types to the new Unified Thread model.
  */
 
-import { Thread as LegacyThread } from '../../core/results/types';
 import { PanelThreadModel } from '../../types/tapestry';
 import {
     Thread,
     ThreadType,
-    ThreadSource,
-    ThreadIntent,
-    ThreadVisibility
+    ThreadSource
 } from '../../types/thread';
 
-/**
- * Converts a Legacy Thread (from Thread History) to new Thread
- */
-export function legacyThreadToThread(legacy: LegacyThread): Thread {
-    let type: ThreadType = 'system';
-    let source: ThreadSource = 'system';
 
-    // Map Source/Type
-    switch (legacy.source) {
-        case 'dice':
-            type = 'roll';
-            source = 'dice';
-            break;
-        case 'weave':
-            type = 'oracle';
-            source = 'weave';
-            break;
-        case 'interpretation':
-            type = 'ai_text';
-            source = 'ai';
-            break;
-        case 'user':
-            type = 'user';
-            source = 'user';
-            break;
-        default:
-            if (legacy.header?.toLowerCase().includes('roll')) {
-                type = 'roll';
-                source = 'dice';
-            }
-            break;
-    }
-
-    // Explicit check for embedded data (Legacy objects often store these directly or in meta)
-    if ((legacy as any).clock || legacy.meta?.clock) source = 'clock';
-    if ((legacy as any).track || legacy.meta?.track) source = 'track';
-
-    // Fix lowercase headers or ALL CAPS 'DICE'
-    let header = legacy.header || 'Thread';
-    if (source === 'dice') {
-        header = header.replace(/^DICE/i, 'Dice');
-    } else if (source === 'clock') {
-        const clock = (legacy as any).clock || legacy.meta?.clock;
-        const filled = clock?.filled || 0;
-        const segments = clock?.segments || 4;
-        header = `Clock ${filled}/${segments}`;
-    } else if (source === 'track') {
-        const track = (legacy as any).track || legacy.meta?.track;
-        const filled = track?.filled || 0;
-        const boxes = Math.floor(filled / 4);
-        header = `Track ${boxes}/10`;
-    }
-
-    // Construct new Thread
-    return {
-        id: legacy.id,
-        timestamp: legacy.timestamp,
-
-        type,
-        intent: 'consequence', // Default assumption for history items
-        source,
-        visibility: 'visible',
-
-        header,
-        summary: legacy.result, // Legacy 'result' is the summary
-        content: legacy.content,
-
-        meta: legacy.meta ? { ...legacy.meta } : undefined,
-
-        // Preserve new unified fields if they exist in the "legacy" object
-        // (This happens when we store a new Thread in the old store/type)
-        clock: (legacy as any).clock,
-        track: (legacy as any).track,
-        aiInterpretations: (legacy as any).aiInterpretations,
-
-        createdBy: legacy.source === 'user' ? 'user' : 'system',
-    };
-}
 
 /**
  * Converts a Panel Thread (Milkdow embedded) to new Thread
@@ -107,6 +27,7 @@ export function panelThreadToThread(panelThread: PanelThreadModel): Thread {
             source = 'dice';
             break;
         case 'ai':
+        case 'ai_text' as any:
         case 'interpretation':
             type = 'ai_text';
             source = 'ai';
@@ -176,7 +97,7 @@ export function panelThreadToThread(panelThread: PanelThreadModel): Thread {
             dice: panelThread.payload?.dice || (panelThread.payload && (panelThread.payload.breakdown || panelThread.payload.total !== undefined) ? panelThread.payload : undefined),
         },
 
-        aiInterpretations: panelThread.aiInterpretations?.map((i, idx) => ({
+        aiInterpretations: panelThread.aiInterpretations?.map((i: any, idx: number) => ({
             id: (i as any).id || `ai_interp_${idx}_${Date.now()}`, // Fallback ID
             personaId: i.personaId,
             personaName: i.personaName,

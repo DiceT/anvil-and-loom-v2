@@ -6,7 +6,7 @@ export const threadCardNode = $node('threadCard', () => ({
     isolating: true,
     attrs: {
         threadId: $nodeAttr(''),
-        threadData: $nodeAttr(null), // Store full Thread object
+        threadData: $nodeAttr('null'), // Store full Thread object
     },
     parseDOM: [{
         tag: 'div[data-thread-card]',

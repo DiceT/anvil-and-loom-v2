@@ -115,7 +115,7 @@ export function MarkdownViewer({ markdown, onInterpretThread }: MarkdownViewerPr
 
                                                                         const panelThread = createPanelThread(
                                                                             type,
-                                                                            newThread.source,
+                                                                            newThread.header || newThread.source, // Fix: Use header for display title
                                                                             newThread.summary,
                                                                             {
                                                                                 ...newThread.meta,

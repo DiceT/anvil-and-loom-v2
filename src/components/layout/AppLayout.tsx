@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FolderTree, Tag, Bookmark, Dices, List, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, Infinity, Mountain } from 'lucide-react';
+import { FolderTree, Tag, Bookmark, Dices, List, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, Infinity, Mountain, MessageSquare } from 'lucide-react';
 import { TopBar } from './TopBar';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
@@ -41,6 +41,7 @@ export function AppLayout() {
     { mode: 'results', icon: List, label: 'Results' },
     { mode: 'weave', icon: Infinity, label: 'Weave' },
     { mode: 'environment', icon: Mountain, label: 'Environment' },
+    { mode: 'dm-chat', icon: MessageSquare, label: 'DM Chat' },
   ];
 
   // Show TapestryManager if no tapestry is active

@@ -60,4 +60,9 @@ contextBridge.exposeInMainWorld('electron', {
     loadLayout: () => ipcRenderer.invoke('settings:loadLayout'),
     resetLayout: () => ipcRenderer.invoke('settings:resetLayout'),
   },
+  dmChat: {
+    loadChats: (tapestryId: string) => ipcRenderer.invoke('dmChat:loadChats', tapestryId),
+    saveChat: (tapestryId: string, chat: any) => ipcRenderer.invoke('dmChat:saveChat', tapestryId, chat),
+    deleteChat: (tapestryId: string, chatId: string) => ipcRenderer.invoke('dmChat:deleteChat', tapestryId, chatId),
+  },
 });

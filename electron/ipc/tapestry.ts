@@ -43,7 +43,7 @@ async function writeJsonFile(filePath: string, data: unknown): Promise<void> {
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
-async function readRegistry(): Promise<TapestryRegistry> {
+export async function readRegistry(): Promise<TapestryRegistry> {
     const filePath = getRegistryFilePath();
     return readJsonFile<TapestryRegistry>(filePath, { tapestries: [] });
 }

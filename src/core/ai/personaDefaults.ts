@@ -221,6 +221,8 @@ export function getPersonaDefault(id: GmPersonaId): GmPersonaConfig {
     return PERSONA_DEFAULTS[id];
 }
 
+export const getPersonaById = getPersonaDefault;
+
 /**
  * Get all available personas
  */

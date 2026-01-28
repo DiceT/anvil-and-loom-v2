@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Thread } from '../core/results/types';
+import { Thread } from '../types/thread';
 
 interface ThreadsStore {
   threads: Thread[];
@@ -9,11 +9,7 @@ interface ThreadsStore {
   loadThreads: (threads: Thread[]) => void;
   updateThread: (id: string, updates: Partial<Thread>) => void;
 
-  // Backwards-compatible accessors using older "cards" naming
-  cards: Thread[];
-  addCard: (card: Thread) => void;
-  clearCards: () => void;
-  loadCards: (cards: Thread[]) => void;
+  // Cleaned: Legacy 'cards' alias removed.
 }
 
 export const useThreadsStore = create<ThreadsStore>()(
@@ -24,40 +20,26 @@ export const useThreadsStore = create<ThreadsStore>()(
       addThread: (thread) =>
         set((state) => ({
           threads: [...state.threads, thread],
-          cards: [...state.threads, thread],
         })),
 
       clearThreads: () =>
-        set({ threads: [], cards: [] }),
+        set({ threads: [] }),
 
       loadThreads: (threads) =>
-        set({ threads, cards: threads }),
+        set({ threads }),
 
       updateThread: (id, updates) => set((state) => {
         const newThreads = state.threads.map(t =>
           t.id === id ? { ...t, ...updates } : t
         );
         return {
-          threads: newThreads,
-          cards: newThreads
+          threads: newThreads
         };
       }),
-
-      // Legacy card-based API, backed by threads
-      cards: [],
-
-      addCard: (card) => set((state) => ({
-        threads: [...state.threads, card],
-        cards: [...state.threads, card],
-      })),
-
-      clearCards: () => set({ threads: [], cards: [] }),
-
-      loadCards: (cards) => set({ threads: cards, cards }),
     }),
     {
       name: 'anvil-loom-thread-history',
-      version: 1,
+      version: 2, // Bump version to invalidate old legacy cache if needed
     }
   )
 );

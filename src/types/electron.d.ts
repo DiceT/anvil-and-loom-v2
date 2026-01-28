@@ -16,6 +16,7 @@ import type {
   WeaveRollResponse,
   WeaveSetTapestryPathResponse,
 } from './weave';
+import type { Chat } from './dmChat';
 
 export interface ElectronAPI {
   tapestry: {
@@ -67,6 +68,11 @@ export interface ElectronAPI {
     saveLayout: (layout: any) => Promise<{ success: boolean; error?: string }>;
     loadLayout: () => Promise<any>;
     resetLayout: () => Promise<{ success: boolean }>;
+  };
+  dmChat: {
+    loadChats: (tapestryId: string) => Promise<Chat[]>;
+    saveChat: (tapestryId: string, chat: Chat) => Promise<boolean>;
+    deleteChat: (tapestryId: string, chatId: string) => Promise<boolean>;
   };
 }
 

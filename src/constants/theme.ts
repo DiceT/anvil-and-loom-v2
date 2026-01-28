@@ -1,13 +1,13 @@
 export const ThreadColors: Record<string, string> = {
-    dice: '#d4a574',        // Gold
-    interpretation: '#9d8cca', // Amethyst (Oracle)
-    ai: '#c77dba',          // Ruby
-    user: '#f0e6d3',        // Ivory (Voice/User)
-    chat: '#f0e6d3',        // Ivory (Legacy)
-    system: '#6b9edd',      // Sapphire (System/Links)
-    weave: '#9d8cca',       // Amethyst (Weave)
-    clock: '#a67c52',       // Antique Bronze (Time)
-    track: '#7ec9a2',       // Jade (Progress)
+    dice: '#d4a574',        // Gold (Amber)
+    interpretation: '#c77dba', // Ruby (Rose) - Alias for AI
+    ai: '#c77dba',          // Ruby (Rose)
+    user: '#5db3a1',        // Emerald (Teal)
+    chat: '#5db3a1',        // Emerald (Alias)
+    system: '#6b9edd',      // Sapphire (Blue)
+    weave: '#9d8cca',       // Amethyst
+    clock: '#a67c52',       // Antique Bronze
+    track: '#7ec9a2',       // Jade
     other: '#252530',       // Panel/Slate
 };
 

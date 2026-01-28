@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { EntryDoc, EditorMode } from '../types/tapestry';
 import { normalizeTag, deduplicateTags, extractInlineTags } from '../utils/tags';
-import { Thread } from '../core/results/types';
+import { Thread } from '../types/thread';
 import { useTabStore } from './useTabStore';
 
 interface EditorState {

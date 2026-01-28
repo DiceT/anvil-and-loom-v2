@@ -13,7 +13,7 @@ interface ThreadCardProps {
     mode?: 'embedded' | 'history' | 'compact' | 'full';
     defaultExpanded?: boolean;
     actions?: ThreadAction[];
-    onAction?: (action: ThreadAction, thread: Thread) => void;
+    onAction?: (action: ThreadAction, thread: Thread) => Promise<void> | void;
     onUpdate?: (updates: any) => void;
 }
 
@@ -32,7 +32,7 @@ export function ThreadCard({
 
     const handleAction = (action: ThreadAction) => {
         if (onAction) {
-            onAction(action, thread);
+            return onAction(action, thread);
         }
     };
 

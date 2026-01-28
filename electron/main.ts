@@ -12,6 +12,7 @@ import { setupStorageHandlers } from './ipc/storage.js';
 import { setupSettingsHandlers } from './ipc/settings.js';
 import { registerTapestryHandlers } from './ipc/tapestry.js';
 import { registerWeaveHandlers } from './ipc/weaves.js';
+import { registerDmChatHandlers } from './ipc/dmChat.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,6 +53,7 @@ app.whenReady().then(() => {
   setupSettingsHandlers();
   registerTapestryHandlers();
   registerWeaveHandlers();
+  registerDmChatHandlers();
 
   // Register media protocol for local file access
   protocol.handle('media', async (request) => {

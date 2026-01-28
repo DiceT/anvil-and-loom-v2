@@ -5,10 +5,14 @@ import { EffectivePersona } from '../../types/ai';
 /**
  * Build prompt messages for thread interpretation
  */
+/**
+ * Build prompt messages for thread interpretation
+ */
 export function buildInterpretationPrompt(
     threadContent: string,
     threadSummary: string,
-    persona: EffectivePersona
+    persona: EffectivePersona,
+    previousInterpretation?: string
 ): AiMessage[] {
     const messages: AiMessage[] = [];
 
@@ -25,16 +29,28 @@ export function buildInterpretationPrompt(
     });
 
     // 3. Task-specific request (user)
-    const taskPrompt = `# Thread Interpretation
+    let taskPrompt = `# Thread Interpretation
 
 You are interpreting a Thread result from the game world.
 
 **Thread Summary:**
 ${threadSummary}
 
-**Roll Details:**
+**Roll Details (Header | Result):**
 ${threadContent}
+`;
 
+    if (previousInterpretation) {
+        taskPrompt += `
+**Previous Interpretation (Latest Development):**
+${previousInterpretation}
+
+**Instruction:**
+Interpret this result as a continuation or evolution of the previous development.
+`;
+    }
+
+    taskPrompt += `
 ---
 
 Your task:

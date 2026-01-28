@@ -1,6 +1,6 @@
 import { useDrop, useDrag } from 'react-dnd'
 import { useMacroStore } from '../../stores/useMacroStore'
-import { MacroSlot as MacroSlotType, createTableMacro, createPanelMacro } from '../../types/macro'
+import { MacroSlot as MacroSlotType, createTableMacro, createPanelMacro, createOracleMacro } from '../../types/macro'
 import { MacroSlotIcon } from './MacroSlotIcon'
 import { MacroSlotTooltip } from './MacroSlotTooltip'
 import { executeMacro } from '../../lib/macro/executeMacro'
@@ -136,8 +136,20 @@ export function MacroSlot({ slot, visualIndex }: MacroSlotProps) {
                         const item = JSON.parse(data);
                         e.preventDefault();
                         if (item.type === 'table') {
-                            const newMacro = createTableMacro(slot.index, item.id, item.name);
-                            setSlot(slot.index, newMacro);
+                            if (slot.type === 'table' && item.id !== slot.tableId) {
+                                // Combine into Oracle
+                                const newOracle = createOracleMacro(
+                                    slot.index,
+                                    `${slot.tableName} + ${item.name}`,
+                                    [slot.tableId!, item.id],
+                                    [slot.tableName!, item.name]
+                                );
+                                setSlot(slot.index, newOracle);
+                            } else {
+                                // Replace
+                                const newMacro = createTableMacro(slot.index, item.id, item.name);
+                                setSlot(slot.index, newMacro);
+                            }
                         } else if (item.type === 'panel') {
                             // Helper to guess path/title if not fully provided, though logic usually provides it
                             // For now assume item has what we need, or fallback

@@ -1,6 +1,6 @@
-import { U as UNIVERSAL_GM_INSTRUCTIONS, u as useSettingsStore, g as getPersonaDefault, c as callAi } from "./index-Blugov4u.js";
+import { U as UNIVERSAL_GM_INSTRUCTIONS, a as useAiStore, g as getPersonaDefault, c as callAi } from "./index-B67ULY0K.js";
 import "uuid";
-function buildInterpretationPrompt(threadContent, threadSummary, persona) {
+function buildInterpretationPrompt(threadContent, threadSummary, persona, previousInterpretation) {
   const messages = [];
   messages.push({
     role: "system",
@@ -10,16 +10,26 @@ function buildInterpretationPrompt(threadContent, threadSummary, persona) {
     role: "system",
     content: persona.instructions
   });
-  const taskPrompt = `# Thread Interpretation
+  let taskPrompt = `# Thread Interpretation
 
 You are interpreting a Thread result from the game world.
 
 **Thread Summary:**
 ${threadSummary}
 
-**Roll Details:**
+**Roll Details (Header | Result):**
 ${threadContent}
+`;
+  if (previousInterpretation) {
+    taskPrompt += `
+**Previous Interpretation (Latest Development):**
+${previousInterpretation}
 
+**Instruction:**
+Interpret this result as a continuation or evolution of the previous development.
+`;
+  }
+  taskPrompt += `
 ---
 
 Your task:
@@ -38,8 +48,7 @@ Do not include any meta-commentary, dice numbers, or table names in your narrati
   return messages;
 }
 async function interpretThread(thread) {
-  const settings = useSettingsStore.getState().settings;
-  const aiConfig = settings.ai;
+  const aiConfig = useAiStore.getState().settings;
   if (!aiConfig.apiKey) {
     throw new Error("AI API Key not configured");
   }
@@ -51,10 +60,12 @@ async function interpretThread(thread) {
     instructions: defaultPersona.defaultInstructions
     // userInstructions could be merged here
   };
+  const latestInterpretation = thread.aiInterpretations?.filter((i) => i.status === "accepted").sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
   const messages = buildInterpretationPrompt(
     thread.content || thread.summary,
     thread.summary,
-    effectivePersona
+    effectivePersona,
+    latestInterpretation?.content
   );
   const response = await callAi(
     aiConfig.uri || "https://api.openai.com/v1/chat/completions",

@@ -7,13 +7,12 @@
 import { Thread, ThreadAiInterpretation } from '../../types/thread';
 import { callAi } from './aiClient';
 import { buildInterpretationPrompt } from './promptBuilder';
-import { PERSONA_DEFAULTS, getPersonaDefault } from './personaDefaults';
-import { useSettingsStore } from '../../stores/useSettingsStore';
+import { getPersonaDefault } from './personaDefaults';
+import { useAiStore } from '../../stores/useAiStore';
 import { EffectivePersona, GmPersonaId } from '../../types/ai';
 
 export async function interpretThread(thread: Thread): Promise<ThreadAiInterpretation> {
-    const settings = useSettingsStore.getState().settings;
-    const aiConfig = settings.ai;
+    const aiConfig = useAiStore.getState().settings;
 
     if (!aiConfig.apiKey) {
         throw new Error('AI API Key not configured');
@@ -31,10 +30,18 @@ export async function interpretThread(thread: Thread): Promise<ThreadAiInterpret
         // userInstructions could be merged here
     };
 
+    // Get the latest accepted interpretation to use as context
+    const latestInterpretation = thread.aiInterpretations
+        ?.filter(i => i.status === 'accepted')
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+
+    // Format content as "Header | Result" if possible, otherwise use summary
+    // This assumes thread.summary or content contains the table result
     const messages = buildInterpretationPrompt(
         thread.content || thread.summary,
         thread.summary,
-        effectivePersona
+        effectivePersona,
+        latestInterpretation?.content
     );
 
     const response = await callAi(
