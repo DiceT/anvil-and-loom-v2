@@ -25,10 +25,12 @@ export const defaultDiceSettings: DiceSettings = {
 
 // Editor Settings
 export type EditorTheme = 'nord-dark' | 'nord-light';
+export type EditorWidth = 'readable' | 'full';
 
 export interface EditorSettings {
     // Theme
     theme: EditorTheme;
+    editorWidth: EditorWidth;
 
     // Core markdown behavior
     enableCommonmark: boolean;
@@ -66,6 +68,7 @@ export interface EditorSettings {
 
 export const defaultEditorSettings: EditorSettings = {
     theme: 'nord-dark',
+    editorWidth: 'readable',
     enableCommonmark: true,
     enableGfm: true,
 

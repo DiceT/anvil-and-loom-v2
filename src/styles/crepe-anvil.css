@@ -16,38 +16,38 @@
   --crepe-color-hover: #2a2a38;
   --crepe-color-selected: #3a3a48;
   --crepe-color-inline-area: #252530;
-  
+
   /* ═══ Text ═══ */
   --crepe-color-on-background: #e8e4dc;
   --crepe-color-on-surface: #e8e4dc;
   --crepe-color-on-surface-variant: #a8a4a0;
   --crepe-color-outline: #6b6865;
-  
+
   /* ═══ Primary Accent (Gold) ═══ */
   --crepe-color-primary: #d4a574;
   --crepe-color-on-primary: #1a1a22;
-  
+
   /* ═══ Secondary Accent (Amethyst) ═══ */
   --crepe-color-secondary: #9d8cca;
   --crepe-color-on-secondary: #1a1a22;
-  
+
   /* ═══ Inverse (for tooltips, etc) ═══ */
   --crepe-color-inverse: #e8e4dc;
   --crepe-color-on-inverse: #0f0f12;
-  
+
   /* ═══ Code & Errors ═══ */
   --crepe-color-inline-code: #c77dba;
   --crepe-color-error: #cf7b7b;
-  
+
   /* ═══ Fonts ═══ */
   --crepe-font-title: Georgia, Cambria, 'Times New Roman', Times, serif;
   --crepe-font-default: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --crepe-font-code: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
-  
+
   /* ═══ Shadows (subtle for dark mode) ═══ */
   --crepe-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.4);
   --crepe-shadow-2: 0 2px 8px rgba(0, 0, 0, 0.5);
-  
+
   /* ═══ Border Radius ═══ */
   --crepe-radius-sm: 4px;
   --crepe-radius-md: 6px;
@@ -60,14 +60,22 @@
 
 .crepe,
 .milkdown {
-  --thread-gold: #d4a574;      /* Dice, rolls, fortune */
-  --thread-bronze: #8b7355;    /* Clock, time pressure */
-  --thread-ivory: #f0e6d3;     /* User, player voice */
-  --thread-ruby: #c77dba;      /* AI, interpretation */
-  --thread-amethyst: #9d8cca;  /* Oracle, tables, weave */
-  --thread-sapphire: #6b9edd;  /* System, information */
-  --thread-jade: #7ec9a2;      /* Track, progress */
-  --thread-coral: #e07a5f;     /* Alternative user accent */
+  --thread-gold: #d4a574;
+  /* Dice, rolls, fortune */
+  --thread-bronze: #8b7355;
+  /* Clock, time pressure */
+  --thread-ivory: #f0e6d3;
+  /* User, player voice */
+  --thread-ruby: #c77dba;
+  /* AI, interpretation */
+  --thread-amethyst: #9d8cca;
+  /* Oracle, tables, weave */
+  --thread-sapphire: #6b9edd;
+  /* System, information */
+  --thread-jade: #7ec9a2;
+  /* Track, progress */
+  --thread-coral: #e07a5f;
+  /* Alternative user accent */
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -85,166 +93,48 @@
 }
 
 .crepe-editor-container .milkdown {
-  max-width: 65ch;
+  /* Default handled by utility classes */
   margin: 0 auto;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   Typography
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.crepe .editor {
-  font-family: var(--crepe-font-default);
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--crepe-color-on-background);
-}
-
-.crepe h1,
-.crepe h2,
-.crepe h3,
-.crepe h4,
-.crepe h5,
-.crepe h6 {
-  font-family: var(--crepe-font-title);
-  color: var(--crepe-color-on-background);
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
-  line-height: 1.3;
-}
-
-.crepe h1 { font-size: 2rem; }
-.crepe h2 { font-size: 1.5rem; }
-.crepe h3 { font-size: 1.25rem; }
-.crepe h4 { font-size: 1.125rem; }
-
-.crepe p {
-  margin-bottom: 1em;
-}
+/* ... existing typography ... */
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Links
+   Editor Width Modes
    ───────────────────────────────────────────────────────────────────────────── */
 
-.crepe a {
-  color: var(--thread-sapphire);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.15s ease;
+/* Readable width — constrained, centered, easy on the eyes */
+.crepe-editor-container.width-readable .milkdown,
+.crepe-editor-container.width-readable .ProseMirror {
+  max-width: 65ch !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
-.crepe a:hover {
-  border-bottom-color: var(--thread-sapphire);
-}
-
-/* WikiLinks (custom styling) */
-.crepe [data-wiki-link],
-.crepe a[href^="[["] {
-  color: var(--thread-amethyst);
-  border-bottom: 1px dashed var(--thread-amethyst);
-}
-
-.crepe [data-wiki-link]:hover {
-  border-bottom-style: solid;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Code
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.crepe code {
-  font-family: var(--crepe-font-code);
-  font-size: 0.9em;
-  background: var(--crepe-color-inline-area);
-  color: var(--crepe-color-inline-code);
-  padding: 0.15em 0.4em;
-  border-radius: var(--crepe-radius-sm);
-}
-
-.crepe pre {
-  background: var(--crepe-color-surface);
-  border: 1px solid var(--crepe-color-outline);
-  border-radius: var(--crepe-radius-md);
-  padding: 1rem;
-  overflow-x: auto;
-}
-
-.crepe pre code {
-  background: transparent;
-  padding: 0;
-  font-size: 0.875rem;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Blockquotes
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.crepe blockquote {
-  border-left: 3px solid var(--thread-amethyst);
-  margin-left: 0;
-  padding-left: 1rem;
-  color: var(--crepe-color-on-surface-variant);
-  font-style: italic;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Lists
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.crepe ul,
-.crepe ol {
-  margin-bottom: 1em;
-  padding-left: 1.5em;
-}
-
-.crepe li {
-  margin-bottom: 0.25em;
-}
-
-.crepe li::marker {
-  color: var(--crepe-color-outline);
-}
-
-/* Task lists */
-.crepe input[type="checkbox"] {
-  accent-color: var(--thread-jade);
-  margin-right: 0.5em;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Horizontal Rules
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.crepe hr {
-  border: none;
-  border-top: 1px solid var(--crepe-color-outline);
-  margin: 2rem 0;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Tables
-   ───────────────────────────────────────────────────────────────────────────── */
-
-.crepe table {
+/* Full width — expands to fill container */
+.crepe-editor-container.width-full .milkdown,
+.crepe-editor-container.width-full .ProseMirror {
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
 }
 
-.crepe th,
-.crepe td {
-  border: 1px solid var(--crepe-color-outline);
-  padding: 0.5rem 0.75rem;
-  text-align: left;
+/* Ensure embedded elements (tables, images, clocks, tracks) can exceed readable width if needed */
+.crepe-editor-container.width-readable .milkdown table,
+.crepe-editor-container.width-readable .milkdown [data-image-block],
+.crepe-editor-container.width-readable .milkdown [data-thread-card],
+.crepe-editor-container.width-readable .milkdown [data-clock],
+.crepe-editor-container.width-readable .milkdown [data-track] {
+  max-width: 100%;
 }
 
-.crepe th {
-  background: var(--crepe-color-surface);
-  font-weight: 600;
-}
-
-.crepe tr:hover td {
-  background: var(--crepe-color-hover);
+/* Optional: Allow "breakout" elements to exceed readable width */
+.crepe-editor-container.width-readable .milkdown .breakout,
+.crepe-editor-container.width-readable .milkdown [data-breakout] {
+  max-width: calc(65ch + 20%);
+  margin-left: -10%;
+  margin-right: -10%;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -404,7 +294,8 @@
    ───────────────────────────────────────────────────────────────────────────── */
 
 .crepe ::selection {
-  background: rgba(157, 140, 202, 0.3); /* Amethyst with transparency */
+  background: rgba(157, 140, 202, 0.3);
+  /* Amethyst with transparency */
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

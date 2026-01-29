@@ -1,9 +1,8 @@
-import { Edit3, Eye, Save, Code } from 'lucide-react';
+import { Edit3, Eye, Save, Code, Lock } from 'lucide-react';
 import { useEditorStore } from '../../stores/useEditorStore';
-import { useState } from 'react';
 import { EditorMode } from '../../types/tapestry';
 import { useSessionStore } from '../../stores/useSessionStore';
-import { Lock } from 'lucide-react';
+import { EditorWidthToggle } from './EditorWidthToggle';
 
 export function EditorModeToggle() {
     const { mode, setMode, saveAllEntries, openEntries, activeEntryId, saveEntry } = useEditorStore();
@@ -11,7 +10,6 @@ export function EditorModeToggle() {
     const isDirty = activeEntry?.isDirty || false;
 
     const { activeSessionId } = useSessionStore();
-    // Start of Selection
     const isSessionPanel = activeEntryId === activeSessionId;
     const isReadOnly = isSessionPanel; // Could extend logic later
 
@@ -31,7 +29,6 @@ export function EditorModeToggle() {
 
     return (
         <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800 bg-slate-900/50">
-            {/* Mode Toggle */}
             {/* Read Only Indicator */}
             {isReadOnly && (
                 <div className="flex items-center gap-1.5 px-2 py-1 bg-red-900/20 border border-red-900/50 rounded mr-2">
@@ -40,8 +37,12 @@ export function EditorModeToggle() {
                 </div>
             )}
 
-            {/* Mode Toggle */}
+            {/* Mode & Width Toggle */}
             <div className={`flex bg-slate-800 rounded p-0.5 ${isReadOnly ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className="flex items-center border-r border-slate-700 mr-1 pr-1">
+                    <EditorWidthToggle />
+                </div>
+
                 <button
                     onClick={() => handleModeToggle('view')}
                     className={`p-1.5 rounded transition-colors ${mode === 'view' ? 'bg-slate-600 text-white' : 'text-slate-400 hover:text-white'}`}
@@ -66,7 +67,6 @@ export function EditorModeToggle() {
                     <Code className="w-4 h-4" />
                 </button>
             </div>
-
 
             {/* Save Button (only in edit mode) */}
             {!isReadOnly && mode === 'edit' && (

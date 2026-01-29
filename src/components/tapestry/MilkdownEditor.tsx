@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useEffect, useState, useCallback } from 'react';
 import { ProsemirrorAdapterProvider, useNodeViewFactory } from '@prosemirror-adapter/react';
 import { useEditorStore } from '../../stores/useEditorStore';
+import { useSettingsStore } from '../../stores/useSettingsStore';
 import {
     createCrepeEditor,
     CrepeEditorInstance
@@ -23,6 +24,8 @@ function MilkdownEditorInner({ markdown, onMarkdownChange }: MilkdownEditorProps
     const rootRef = useRef<HTMLDivElement | null>(null);
     const editorRef = useRef<CrepeEditorInstance | null>(null);
     const { registerInsertThreadCallback, mode } = useEditorStore();
+    const { settings } = useSettingsStore();
+    const { editorWidth } = settings.editor;
     const [loading, setLoading] = useState(true);
     const nodeViewFactory = useNodeViewFactory();
 
@@ -131,7 +134,12 @@ function MilkdownEditorInner({ markdown, onMarkdownChange }: MilkdownEditorProps
             )}
             <div
                 ref={rootRef}
-                className={`crepe-editor-container min-h-full ${loading ? 'hidden' : ''}`}
+                className={`
+          crepe-editor-container
+          min-h-full
+          ${editorWidth === 'readable' ? 'width-readable' : 'width-full'}
+          ${loading ? 'hidden' : ''}
+        `}
             />
         </div>
     );

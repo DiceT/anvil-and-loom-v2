@@ -7,6 +7,7 @@ import { analyzeThread } from '../../lib/thread/threadAnalyzer';
 import { getAvailableActions } from '../../lib/thread/actions/registry';
 import { ThreadModel } from '../../types/tapestry';
 import { WikiLink } from './WikiLink';
+import { useSettingsStore } from '../../stores/useSettingsStore';
 
 interface MarkdownViewerProps {
     markdown: string;
@@ -14,9 +15,18 @@ interface MarkdownViewerProps {
 }
 
 export function MarkdownViewer({ markdown, onInterpretThread }: MarkdownViewerProps) {
+    const { settings } = useSettingsStore();
+    const { editorWidth } = settings.editor;
+
     return (
-        <div className="p-8 bg-slate-900">
-            <div className="prose prose-slate prose-invert max-w-none" style={{ color: '#eeeeff' }}>
+        <div className="p-8 bg-slate-900 h-full overflow-auto">
+            <div
+                className={`
+                    prose prose-slate prose-invert 
+                    ${editorWidth === 'readable' ? 'max-w-[65ch] mx-auto' : 'max-w-none'}
+                `}
+                style={{ color: '#eeeeff' }}
+            >
                 <ReactMarkdown
                     remarkPlugins={[
                         remarkGfm,
