@@ -1,0 +1,460 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANVIL & LOOM — CREPE THEME
+   Gemstone palette on charcoal canvas
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS Custom Properties — Crepe Variables
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe,
+.milkdown {
+  /* ═══ Canvas (Background) ═══ */
+  --crepe-color-background: #0f0f12;
+  --crepe-color-surface: #1a1a22;
+  --crepe-color-surface-low: #252530;
+  --crepe-color-hover: #2a2a38;
+  --crepe-color-selected: #3a3a48;
+  --crepe-color-inline-area: #252530;
+  
+  /* ═══ Text ═══ */
+  --crepe-color-on-background: #e8e4dc;
+  --crepe-color-on-surface: #e8e4dc;
+  --crepe-color-on-surface-variant: #a8a4a0;
+  --crepe-color-outline: #6b6865;
+  
+  /* ═══ Primary Accent (Gold) ═══ */
+  --crepe-color-primary: #d4a574;
+  --crepe-color-on-primary: #1a1a22;
+  
+  /* ═══ Secondary Accent (Amethyst) ═══ */
+  --crepe-color-secondary: #9d8cca;
+  --crepe-color-on-secondary: #1a1a22;
+  
+  /* ═══ Inverse (for tooltips, etc) ═══ */
+  --crepe-color-inverse: #e8e4dc;
+  --crepe-color-on-inverse: #0f0f12;
+  
+  /* ═══ Code & Errors ═══ */
+  --crepe-color-inline-code: #c77dba;
+  --crepe-color-error: #cf7b7b;
+  
+  /* ═══ Fonts ═══ */
+  --crepe-font-title: Georgia, Cambria, 'Times New Roman', Times, serif;
+  --crepe-font-default: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --crepe-font-code: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', monospace;
+  
+  /* ═══ Shadows (subtle for dark mode) ═══ */
+  --crepe-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --crepe-shadow-2: 0 2px 8px rgba(0, 0, 0, 0.5);
+  
+  /* ═══ Border Radius ═══ */
+  --crepe-radius-sm: 4px;
+  --crepe-radius-md: 6px;
+  --crepe-radius-lg: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Color Tokens
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe,
+.milkdown {
+  --thread-gold: #d4a574;      /* Dice, rolls, fortune */
+  --thread-bronze: #8b7355;    /* Clock, time pressure */
+  --thread-ivory: #f0e6d3;     /* User, player voice */
+  --thread-ruby: #c77dba;      /* AI, interpretation */
+  --thread-amethyst: #9d8cca;  /* Oracle, tables, weave */
+  --thread-sapphire: #6b9edd;  /* System, information */
+  --thread-jade: #7ec9a2;      /* Track, progress */
+  --thread-coral: #e07a5f;     /* Alternative user accent */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Editor Container
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe-editor-wrapper {
+  background: var(--crepe-color-background);
+}
+
+.crepe-editor-container {
+  background: var(--crepe-color-background);
+  padding: 2rem;
+  min-height: 100%;
+}
+
+.crepe-editor-container .milkdown {
+  max-width: 65ch;
+  margin: 0 auto;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Typography
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe .editor {
+  font-family: var(--crepe-font-default);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--crepe-color-on-background);
+}
+
+.crepe h1,
+.crepe h2,
+.crepe h3,
+.crepe h4,
+.crepe h5,
+.crepe h6 {
+  font-family: var(--crepe-font-title);
+  color: var(--crepe-color-on-background);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.crepe h1 { font-size: 2rem; }
+.crepe h2 { font-size: 1.5rem; }
+.crepe h3 { font-size: 1.25rem; }
+.crepe h4 { font-size: 1.125rem; }
+
+.crepe p {
+  margin-bottom: 1em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Links
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe a {
+  color: var(--thread-sapphire);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.crepe a:hover {
+  border-bottom-color: var(--thread-sapphire);
+}
+
+/* WikiLinks (custom styling) */
+.crepe [data-wiki-link],
+.crepe a[href^="[["] {
+  color: var(--thread-amethyst);
+  border-bottom: 1px dashed var(--thread-amethyst);
+}
+
+.crepe [data-wiki-link]:hover {
+  border-bottom-style: solid;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Code
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe code {
+  font-family: var(--crepe-font-code);
+  font-size: 0.9em;
+  background: var(--crepe-color-inline-area);
+  color: var(--crepe-color-inline-code);
+  padding: 0.15em 0.4em;
+  border-radius: var(--crepe-radius-sm);
+}
+
+.crepe pre {
+  background: var(--crepe-color-surface);
+  border: 1px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-md);
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.crepe pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.875rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Blockquotes
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe blockquote {
+  border-left: 3px solid var(--thread-amethyst);
+  margin-left: 0;
+  padding-left: 1rem;
+  color: var(--crepe-color-on-surface-variant);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Lists
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe ul,
+.crepe ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.crepe li {
+  margin-bottom: 0.25em;
+}
+
+.crepe li::marker {
+  color: var(--crepe-color-outline);
+}
+
+/* Task lists */
+.crepe input[type="checkbox"] {
+  accent-color: var(--thread-jade);
+  margin-right: 0.5em;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Horizontal Rules
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe hr {
+  border: none;
+  border-top: 1px solid var(--crepe-color-outline);
+  margin: 2rem 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Tables
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.crepe th,
+.crepe td {
+  border: 1px solid var(--crepe-color-outline);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.crepe th {
+  background: var(--crepe-color-surface);
+  font-weight: 600;
+}
+
+.crepe tr:hover td {
+  background: var(--crepe-color-hover);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Block Handles (Crepe Feature)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe [data-block-handle] {
+  color: var(--crepe-color-outline);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.crepe [data-block]:hover [data-block-handle],
+.crepe [data-block-handle]:hover {
+  opacity: 1;
+}
+
+.crepe [data-block-handle]:hover {
+  color: var(--crepe-color-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Toolbar (Crepe Feature)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe [data-toolbar],
+.crepe .milkdown-toolbar {
+  background: var(--crepe-color-surface);
+  border: 1px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-md);
+  box-shadow: var(--crepe-shadow-2);
+  padding: 0.25rem;
+}
+
+.crepe [data-toolbar] button,
+.crepe .milkdown-toolbar button {
+  background: transparent;
+  border: none;
+  color: var(--crepe-color-on-surface);
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--crepe-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.crepe [data-toolbar] button:hover,
+.crepe .milkdown-toolbar button:hover {
+  background: var(--crepe-color-hover);
+}
+
+.crepe [data-toolbar] button[data-active="true"],
+.crepe .milkdown-toolbar button.active {
+  background: var(--crepe-color-selected);
+  color: var(--crepe-color-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Link Tooltip (Crepe Feature)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe [data-link-tooltip],
+.crepe .milkdown-link-tooltip {
+  background: var(--crepe-color-surface);
+  border: 1px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-md);
+  box-shadow: var(--crepe-shadow-2);
+  padding: 0.5rem;
+}
+
+.crepe [data-link-tooltip] input,
+.crepe .milkdown-link-tooltip input {
+  background: var(--crepe-color-surface-low);
+  border: 1px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-sm);
+  color: var(--crepe-color-on-surface);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.crepe [data-link-tooltip] input:focus,
+.crepe .milkdown-link-tooltip input:focus {
+  outline: none;
+  border-color: var(--crepe-color-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Slash Menu (Crepe Feature)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe [data-slash-menu],
+.crepe .milkdown-slash-menu {
+  background: var(--crepe-color-surface);
+  border: 1px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-md);
+  box-shadow: var(--crepe-shadow-2);
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.crepe [data-slash-menu] [data-item],
+.crepe .milkdown-slash-menu .slash-item {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--crepe-color-on-surface);
+  transition: background 0.1s ease;
+}
+
+.crepe [data-slash-menu] [data-item]:hover,
+.crepe [data-slash-menu] [data-item][data-selected],
+.crepe .milkdown-slash-menu .slash-item:hover,
+.crepe .milkdown-slash-menu .slash-item.selected {
+  background: var(--crepe-color-hover);
+}
+
+.crepe [data-slash-menu] [data-item] [data-icon],
+.crepe .milkdown-slash-menu .slash-item .icon {
+  color: var(--crepe-color-on-surface-variant);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Placeholder
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe [data-placeholder]::before {
+  color: var(--crepe-color-outline);
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Image Block (Crepe Feature)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe [data-image-block] {
+  margin: 1rem 0;
+}
+
+.crepe [data-image-block] img {
+  max-width: 100%;
+  border-radius: var(--crepe-radius-md);
+  border: 1px solid var(--crepe-color-outline);
+}
+
+.crepe [data-image-block] [data-caption] {
+  text-align: center;
+  color: var(--crepe-color-on-surface-variant);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Selection
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe ::selection {
+  background: rgba(157, 140, 202, 0.3); /* Amethyst with transparency */
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Cards (Custom Node)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Thread cards are rendered via React component (PanelThreadCard).
+   These styles provide fallback/wrapper styling. */
+
+.crepe [data-thread-card] {
+  margin: 1rem 0;
+}
+
+/* Prevent prose styles from bleeding into thread cards */
+.crepe [data-thread-card] * {
+  all: revert;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Focus States
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe .ProseMirror:focus {
+  outline: none;
+}
+
+.crepe .ProseMirror-focused [data-node-selected] {
+  outline: 2px solid var(--crepe-color-primary);
+  outline-offset: 2px;
+  border-radius: var(--crepe-radius-sm);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Scrollbar (Webkit)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.crepe-editor-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.crepe-editor-wrapper::-webkit-scrollbar-track {
+  background: var(--crepe-color-background);
+}
+
+.crepe-editor-wrapper::-webkit-scrollbar-thumb {
+  background: var(--crepe-color-outline);
+  border-radius: 4px;
+}
+
+.crepe-editor-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--crepe-color-on-surface-variant);
+}

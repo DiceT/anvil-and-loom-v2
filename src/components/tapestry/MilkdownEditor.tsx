@@ -1,112 +1,145 @@
-import { Editor } from '@milkdown/core';
-import { replaceAll, callCommand } from '@milkdown/utils';
-import { useLayoutEffect, useRef, useEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useEffect, useState, useCallback } from 'react';
 import { ProsemirrorAdapterProvider, useNodeViewFactory } from '@prosemirror-adapter/react';
-import { useSettingsStore } from '../../stores/useSettingsStore';
 import { useEditorStore } from '../../stores/useEditorStore';
-import { createEditor } from '../../lib/editor/createEditor';
-import { insertThreadCard } from '../../lib/editor/commands/insertThreadCard';
+import {
+    createCrepeEditor,
+    CrepeEditorInstance
+} from '../../lib/editor/createCrepeEditor';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface MilkdownEditorProps {
     markdown: string;
     onMarkdownChange: (markdown: string) => void;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Inner Component (needs ProsemirrorAdapterProvider context)
+// ─────────────────────────────────────────────────────────────────────────────
+
 function MilkdownEditorInner({ markdown, onMarkdownChange }: MilkdownEditorProps) {
     const rootRef = useRef<HTMLDivElement | null>(null);
-    const editorRef = useRef<Editor | null>(null);
-    const { settings } = useSettingsStore();
-    const { editor: editorSettings } = settings;
+    const editorRef = useRef<CrepeEditorInstance | null>(null);
     const { registerInsertThreadCallback, mode } = useEditorStore();
     const [loading, setLoading] = useState(true);
     const nodeViewFactory = useNodeViewFactory();
+
+    // Track the last markdown we emitted to prevent feedback loops
     const lastEmittedMarkdown = useRef(markdown);
 
-    // Re-create editor when critical settings change
+    // Track the last markdown we received from props
+    const lastPropMarkdown = useRef(markdown);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Editor Lifecycle
+    // ─────────────────────────────────────────────────────────────────────────
+
     useLayoutEffect(() => {
         if (!rootRef.current) return;
 
         // Cleanup previous instance
         if (editorRef.current) {
             editorRef.current.destroy();
+            editorRef.current = null;
         }
 
         let isMounted = true;
-        const editor = createEditor(
-            rootRef.current,
-            editorSettings,
-            markdown,
-            (md) => {
+        setLoading(true);
+
+        // Store current markdown for initialization
+        const initialMarkdown = lastPropMarkdown.current;
+
+        createCrepeEditor({
+            root: rootRef.current,
+            defaultValue: initialMarkdown,
+            onChange: (md) => {
+                if (!isMounted) return;
                 lastEmittedMarkdown.current = md;
                 onMarkdownChange(md);
             },
             nodeViewFactory,
-            mode // Pass current mode
-        );
-
-        editorRef.current = editor;
-        setLoading(true);
-
-        editor.create()
-            .then(() => {
+            mode,
+        })
+            .then((instance) => {
                 if (isMounted) {
+                    editorRef.current = instance;
                     setLoading(false);
                 } else {
-                    editor.destroy();
+                    instance.destroy();
                 }
             })
-            .catch(console.error);
+            .catch((error) => {
+                console.error('Failed to create Crepe editor:', error);
+                if (isMounted) {
+                    setLoading(false);
+                }
+            });
 
         return () => {
             isMounted = false;
-            editor.destroy();
-            editorRef.current = null;
-            if (rootRef.current) {
-                rootRef.current.innerHTML = '';
+            if (editorRef.current) {
+                editorRef.current.destroy();
+                editorRef.current = null;
             }
         };
-        // We intentionally depend on editorSettings to re-create on change.
-        // We exclude markdown/onMarkdownChange to avoid re-creation on typing.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        editorSettings.showToolbar,
-        editorSettings.enableSlashMenu,
-        editorSettings.enableCursorEnhancements,
-        editorSettings.theme,
-        editorSettings.enableGfm,
-        nodeViewFactory,
-        mode // Re-create on mode change
-    ]);
+    }, [nodeViewFactory, mode]); // Re-create on mode change
 
-    // Handle external markdown updates
+    // ─────────────────────────────────────────────────────────────────────────
+    // Handle External Markdown Updates
+    // ─────────────────────────────────────────────────────────────────────────
+
     useLayoutEffect(() => {
+        lastPropMarkdown.current = markdown;
+
         if (editorRef.current && !loading) {
-            // Only replace if the content is actually different from what we last emitted
-            // This prevents the loop where typing updates state -> triggers prop update -> triggers replaceAll -> resets cursor
+            // Only replace if the content differs from what we last emitted
+            // This prevents cursor-jumping on every keystroke
             if (markdown !== lastEmittedMarkdown.current) {
-                editorRef.current.action(replaceAll(markdown));
+                editorRef.current.replaceContent(markdown);
                 lastEmittedMarkdown.current = markdown;
             }
         }
     }, [markdown, loading]);
 
-    // Register insertion callback
+    // ─────────────────────────────────────────────────────────────────────────
+    // Thread Insertion Callback
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const insertThread = useCallback((thread: any) => {
+        if (editorRef.current && !loading) {
+            editorRef.current.insertThread(thread);
+        }
+    }, [loading]);
+
     useEffect(() => {
-        registerInsertThreadCallback((thread) => {
-            if (editorRef.current && !loading) {
-                editorRef.current.action(callCommand(insertThreadCard.key, thread));
-            }
-        });
+        registerInsertThreadCallback(insertThread);
         return () => registerInsertThreadCallback(() => { });
-    }, [registerInsertThreadCallback, loading]);
+    }, [registerInsertThreadCallback, insertThread]);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Render
+    // ─────────────────────────────────────────────────────────────────────────
 
     return (
-        <div
-            ref={rootRef}
-            className="milkdown-editor-container p-8 bg-slate-900 min-h-full"
-        />
+        <div className="crepe-editor-wrapper h-full overflow-auto">
+            {loading && (
+                <div className="flex items-center justify-center h-32 text-slate-500">
+                    <span className="animate-pulse">Loading editor...</span>
+                </div>
+            )}
+            <div
+                ref={rootRef}
+                className={`crepe-editor-container min-h-full ${loading ? 'hidden' : ''}`}
+            />
+        </div>
     );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Exported Component (wraps with ProsemirrorAdapterProvider)
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function MilkdownEditor(props: MilkdownEditorProps) {
     return (
