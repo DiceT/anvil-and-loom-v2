@@ -112,7 +112,7 @@ function MilkdownEditorInner({ markdown, onMarkdownChange }: MilkdownEditorProps
 
     const insertThread = useCallback((thread: any) => {
         if (editorRef.current && !loading) {
-            editorRef.current.insertThread(thread);
+            editorRef.current.appendContent(thread);
         }
     }, [loading]);
 

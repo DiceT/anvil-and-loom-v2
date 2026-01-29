@@ -1,9 +1,13 @@
 import { Crepe, CrepeFeature } from '@milkdown/crepe';
 import { listener, listenerCtx } from '@milkdown/plugin-listener';
-import { $view } from '@milkdown/utils';
-import { threadCardNode } from './nodes/threadCardNode';
-import { ThreadCardNodeView } from './views/ThreadCardNodeView';
-import { insertThreadCard } from './commands/insertThreadCard';
+import { replaceAll, getMarkdown } from '@milkdown/utils';
+import { editorViewCtx } from '@milkdown/core';
+import { Ctx } from '@milkdown/ctx';
+import { toggleMark } from '@milkdown/prose/commands';
+import { threadFeature } from './features/thread';
+import { litmMarksFeature } from './features/marks/litmMarks';
+// import { litmToolbarItems } from './toolbar/litmToolbarItems'; // Logic moved inline to use builder
+import { litmSlashCommands } from './slash/litmSlashCommands'; // Kept for reference but unused yet
 
 // Import Crepe base styles
 import '@milkdown/crepe/theme/common/style.css';
@@ -15,20 +19,21 @@ import '../../styles/crepe-anvil.css';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface CrepeEditorConfig {
-    root: HTMLElement;
-    defaultValue: string;
-    onChange: (markdown: string) => void;
-    nodeViewFactory: any; // From @prosemirror-adapter/react
-    mode: 'edit' | 'view' | 'source';
-    placeholder?: string;
+  root: HTMLElement;
+  defaultValue: string;
+  onChange: (markdown: string) => void;
+  nodeViewFactory?: any;
+  mode: 'edit' | 'view' | 'source';
+  placeholder?: string;
 }
 
 export interface CrepeEditorInstance {
-    crepe: Crepe;
-    destroy: () => void;
-    replaceContent: (markdown: string) => void;
-    insertThread: (thread: any) => void;
-    getMarkdown: () => string;
+  crepe: Crepe;
+  destroy: () => void;
+  replaceContent: (markdown: string) => void;
+  appendContent: (markdown: string) => void;
+  getMarkdown: () => string;
+  getRawMarkdown: () => string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -36,129 +41,177 @@ export interface CrepeEditorInstance {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function createCrepeEditor(
-    config: CrepeEditorConfig
+  config: CrepeEditorConfig
 ): Promise<CrepeEditorInstance> {
-    const {
-        root,
-        defaultValue,
-        onChange,
-        nodeViewFactory,
-        mode,
-        placeholder = 'Start writing, or type / for commands...',
-    } = config;
+  const {
+    root,
+    defaultValue,
+    onChange,
+    mode,
+    placeholder = 'Start writing, or type / for commands...',
+  } = config;
 
-    // Determine feature flags based on mode
-    const isEditable = mode === 'edit';
-    const isSourceMode = mode === 'source';
+  const isEditable = mode === 'edit';
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Create Crepe Instance
-    // ─────────────────────────────────────────────────────────────────────────
+  console.log('[Crepe] createCrepeEditor called. Mode:', mode);
 
-    const crepe = new Crepe({
-        root,
-        defaultValue,
-        features: {
-            // Editing features — only in edit mode
-            [CrepeFeature.BlockEdit]: isEditable,
-            [CrepeFeature.Toolbar]: isEditable,
+  // ─────────────────────────────────────────────────────────────────────────
+  // Create Crepe Instance
+  // ─────────────────────────────────────────────────────────────────────────
 
-            // Always-on features
-            [CrepeFeature.LinkTooltip]: true,
-            [CrepeFeature.ListItem]: true,
-            [CrepeFeature.Table]: true,
-            [CrepeFeature.Cursor]: true,
-
-            // Optional features
-            [CrepeFeature.ImageBlock]: isEditable,
-            [CrepeFeature.Placeholder]: isEditable,
-
-            // Disabled features (heavy or not needed)
-            [CrepeFeature.CodeMirror]: false, // Use basic code blocks
-            [CrepeFeature.Latex]: false,       // No math support needed
+  const crepe = new Crepe({
+    root,
+    defaultValue: defaultValue, // Pass markdown directly, no preprocessor!
+    features: {
+      [CrepeFeature.BlockEdit]: isEditable,
+      [CrepeFeature.Toolbar]: isEditable,
+      [CrepeFeature.LinkTooltip]: isEditable, // Disable in view mode
+      [CrepeFeature.ListItem]: true,
+      [CrepeFeature.Table]: true,
+      [CrepeFeature.Cursor]: isEditable,
+      [CrepeFeature.ImageBlock]: isEditable,
+      [CrepeFeature.Placeholder]: isEditable,
+      [CrepeFeature.CodeMirror]: false,
+      [CrepeFeature.Latex]: false,
+    },
+    featureConfigs: {
+      [CrepeFeature.Placeholder]: {
+        text: placeholder,
+      },
+      [CrepeFeature.Toolbar]: {
+        buildToolbar: (builder: any) => {
+          // Add LitM Group using builder pattern
+          builder.addGroup('litm', 'Legent in the Mist')
+            .addItem('lmtag', {
+              icon: '🏷️',
+              onRun: (ctx: Ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const markType = view.state.schema.marks.lmtag;
+                if (markType) toggleMark(markType)(view.state, view.dispatch);
+              },
+              active: (ctx: Ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const markType = view.state.schema.marks.lmtag;
+                if (!markType) return false;
+                const { from, to } = view.state.selection;
+                let active = false;
+                view.state.doc.nodesBetween(from, to, (node: any) => {
+                  if (markType.isInSet(node.marks)) active = true;
+                });
+                return active;
+              }
+            })
+            .addItem('lmstatus', {
+              icon: '⚡',
+              onRun: (ctx: Ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const markType = view.state.schema.marks.lmstatus;
+                if (markType) toggleMark(markType)(view.state, view.dispatch);
+              },
+              active: (ctx: Ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const markType = view.state.schema.marks.lmstatus;
+                if (!markType) return false;
+                const { from, to } = view.state.selection;
+                let active = false;
+                view.state.doc.nodesBetween(from, to, (node: any) => {
+                  if (markType.isInSet(node.marks)) active = true;
+                });
+                return active;
+              }
+            })
+            .addItem('lmchallenge', {
+              icon: '⚔️',
+              onRun: (ctx: Ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const markType = view.state.schema.marks.lmchallenge;
+                if (markType) toggleMark(markType)(view.state, view.dispatch);
+              },
+              active: (ctx: Ctx) => {
+                const view = ctx.get(editorViewCtx);
+                const markType = view.state.schema.marks.lmchallenge;
+                if (!markType) return false;
+                const { from, to } = view.state.selection;
+                let active = false;
+                view.state.doc.nodesBetween(from, to, (node: any) => {
+                  if (markType.isInSet(node.marks)) active = true;
+                });
+                return active;
+              }
+            });
         },
-        featureConfigs: {
-            [CrepeFeature.Placeholder]: {
-                text: placeholder,
-            },
-            [CrepeFeature.Toolbar]: {
-                // Toolbar items to show
-                // Default includes: bold, italic, strikethrough, code, link
-            },
-            [CrepeFeature.LinkTooltip]: {
-                onCopyLink: () => {
-                    // Could show toast notification here
-                    console.log('Link copied to clipboard');
-                },
-            },
-        },
-    });
+      },
+    },
+  });
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Add Listener Plugin for Change Events
-    // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Configure Features & Plugins
+  // ─────────────────────────────────────────────────────────────────────────
 
+  // Configure Slash Commands to include LitM commands
+  // Note: We use the comment strategy here because verifying the exact API 
+  // for extending Crepe's internal slash menu without potentially duplicating it
+  // requires inspecting internal types not exposed in the public exports.
+  // The commands are ready in `litmSlashCommands.ts` for when the integration point is verified.
+  /*
+  crepe.editor.config((ctx) => {
+    // Placeholder for slash commands hookup
+  });
+  */
+
+  // 1. Thread Feature (NATIVE!)
+  crepe.editor.use(threadFeature);
+  crepe.editor.use(litmMarksFeature);
+
+  // 2. Change Listener (Only in Edit Mode)
+  if (isEditable) {
     crepe.editor.use(listener);
 
     crepe.editor.config((ctx) => {
-        const listenerInstance = ctx.get(listenerCtx);
-
-        listenerInstance.markdownUpdated((ctx, markdown, prevMarkdown) => {
-            if (markdown !== prevMarkdown) {
-                onChange(markdown);
-            }
-        });
+      const listenerInstance = ctx.get(listenerCtx);
+      listenerInstance.markdownUpdated((_ctx, markdown, prevMarkdown) => {
+        if (markdown !== prevMarkdown) {
+          onChange(markdown);
+        }
+      });
     });
+  }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Add Custom Thread Card Node (except in source mode)
-    // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // Create the Editor
+  // ─────────────────────────────────────────────────────────────────────────
 
-    if (!isSourceMode) {
-        // Register the custom node schema
-        crepe.editor.use(threadCardNode);
+  await crepe.create();
 
-        // Register the React view for rendering
-        crepe.editor.use(
-            $view(threadCardNode, () =>
-                nodeViewFactory({ component: ThreadCardNodeView })
-            )
-        );
+  // ─────────────────────────────────────────────────────────────────────────
+  // Return Instance with Helper Methods
+  // ─────────────────────────────────────────────────────────────────────────
 
-        // Register the insert command
-        crepe.editor.use(insertThreadCard);
-    }
+  return {
+    crepe,
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Create the Editor
-    // ─────────────────────────────────────────────────────────────────────────
+    destroy: () => {
+      crepe.destroy();
+    },
 
-    await crepe.create();
+    replaceContent: (markdown: string) => {
+      crepe.editor.action(replaceAll(markdown));
+    },
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Return Instance with Helper Methods
-    // ─────────────────────────────────────────────────────────────────────────
+    appendContent: (markdown: string) => {
+      const current = crepe.editor.action(getMarkdown());
+      // Handle spacing intelligently
+      const spacing = current.endsWith('\n\n') ? '' : current.endsWith('\n') ? '\n' : '\n\n';
+      const combined = current + spacing + markdown;
+      crepe.editor.action(replaceAll(combined));
+    },
 
-    return {
-        crepe,
+    getMarkdown: () => {
+      return crepe.editor.action(getMarkdown());
+    },
 
-        destroy: () => {
-            crepe.destroy();
-        },
-
-        replaceContent: (markdown: string) => {
-            const { replaceAll } = require('@milkdown/utils');
-            crepe.editor.action(replaceAll(markdown));
-        },
-
-        insertThread: (thread: any) => {
-            const { callCommand } = require('@milkdown/utils');
-            crepe.editor.action(callCommand(insertThreadCard.key, thread));
-        },
-
-        getMarkdown: () => {
-            const { getMarkdown } = require('@milkdown/utils');
-            return crepe.editor.action(getMarkdown());
-        },
-    };
+    getRawMarkdown: () => {
+      return crepe.editor.action(getMarkdown());
+    },
+  };
 }

@@ -184,6 +184,28 @@ export const useDmChatStore = create<DmChatState>()(
                     error: null,
                 }))
 
+                // ─── Auto-Log User Message ───
+                try {
+                    const { useSettingsStore } = await import('./useSettingsStore')
+                    const { logToEntry } = useSettingsStore.getState().settings.dice
+
+                    if (logToEntry) {
+                        const { logThread } = await import('../core/results/threadEngine')
+                        logThread({
+                            header: 'User',
+                            result: content,
+                            content: '',
+                            source: 'user',
+                            intent: 'prompt',
+                            meta: {
+                                fromDmChat: true
+                            }
+                        })
+                    }
+                } catch (e) {
+                    console.error('Failed to auto-log user message', e)
+                }
+
                 try {
                     // Build prompt with persona and precision
                     const { buildDmChatPrompt } = await import('../lib/dmChat/promptBuilder')
@@ -215,12 +237,13 @@ export const useDmChatStore = create<DmChatState>()(
                     // Get persona name
                     const { getPersonaById } = await import('../core/ai/personaDefaults')
                     const persona = getPersonaById(selectedPersonaId as any)
+                    const personaName = persona?.defaultName || 'DM'
 
                     // Create assistant message
                     const assistantMessage = createAssistantMessage(
                         response.content,
                         selectedPersonaId,
-                        persona?.defaultName || 'DM',
+                        personaName,
                         precisionLevel
                     )
 
@@ -235,6 +258,38 @@ export const useDmChatStore = create<DmChatState>()(
                         } : null,
                         isLoading: false,
                     }))
+
+                    // ─── Auto-Log Assistant Message ───
+                    try {
+                        const { useSettingsStore } = await import('./useSettingsStore')
+                        const { logToEntry } = useSettingsStore.getState().settings.dice
+
+                        if (logToEntry) {
+                            const { logThread } = await import('../core/results/threadEngine')
+
+                            // Check if response is an interpretation
+                            // The user mentioned "Interpretation from AI Chat".
+                            // If the persona is specifically "The Interpreter" or context implies it?
+                            // Usually just log as AI/Interpretation. 
+                            // Using 'ai' source or 'interpretation' source?
+                            // Let's use 'interpretation' if it seems like one, or just generic AI.
+                            // But usually DM chat is "The Guide" etc.
+                            // Let's use the persona name in the header.
+
+                            logThread({
+                                header: `Interpretation: ${personaName}`,
+                                result: response.content,
+                                content: '',
+                                source: 'interpretation', // Using 'interpretation' style (purple) as requested implicitly by screenshot showing purple header
+                                meta: {
+                                    personaId: selectedPersonaId as any,
+                                    fromDmChat: true,
+                                },
+                            })
+                        }
+                    } catch (e) {
+                        console.error('Failed to auto-log assistant message', e)
+                    }
 
                     // Auto-save
                     get().saveCurrentChat()

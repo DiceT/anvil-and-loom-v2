@@ -299,19 +299,252 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Thread Cards (Custom Node)
+   THREAD CONTAINERS
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* Thread cards are rendered via React component (PanelThreadCard).
-   These styles provide fallback/wrapper styling. */
-
-.crepe [data-thread-card] {
+/* Base Container */
+.thread-container,
+[data-thread-container] {
+  position: relative;
   margin: 1rem 0;
+  padding: 0;
+  border-radius: var(--crepe-radius-lg);
+  background: var(--crepe-color-surface);
+  border: 1px solid var(--crepe-color-outline);
+  overflow: hidden;
 }
 
-/* Prevent prose styles from bleeding into thread cards */
-.crepe [data-thread-card] * {
-  all: revert;
+/* Thread header (h4 inside thread) */
+.thread-container h4,
+[data-thread-container] h4 {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--crepe-font-default);
+  border-bottom: 1px solid var(--crepe-color-outline);
+}
+
+/* Thread content area */
+.thread-container>*:not(h4):not(h3),
+[data-thread-container]>*:not(h4):not(h3) {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* First content element after header */
+.thread-container>h4+*,
+[data-thread-container]>h4+* {
+  margin-top: 0.75rem;
+}
+
+/* Last element padding */
+.thread-container>*:last-child,
+[data-thread-container]>*:last-child {
+  padding-bottom: 0.75rem;
+}
+
+/* Blockquote styling inside threads (meta info) */
+.thread-container blockquote,
+[data-thread-container] blockquote {
+  margin: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--crepe-color-surface-low);
+  border-left: 3px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-sm);
+  font-size: 0.875rem;
+  color: var(--crepe-color-on-surface-variant);
+}
+
+.thread-container blockquote p,
+[data-thread-container] blockquote p {
+  margin: 0;
+}
+
+/* Strong text (results) */
+.thread-container strong,
+[data-thread-container] strong {
+  color: var(--crepe-color-on-background);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Dice (Gold)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-dice h4,
+.thread-container[data-thread-type="dice"] h4,
+[data-thread-container][data-thread-type="dice"] h4 {
+  background: var(--thread-gold);
+  color: #1a1a22;
+}
+
+.thread-dice blockquote,
+.thread-container[data-thread-type="dice"] blockquote,
+[data-thread-container][data-thread-type="dice"] blockquote {
+  border-left-color: var(--thread-gold);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Oracle (Amethyst)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-oracle h4,
+.thread-container[data-thread-type="oracle"] h4,
+[data-thread-container][data-thread-type="oracle"] h4 {
+  background: var(--thread-amethyst);
+  color: #1a1a22;
+}
+
+.thread-oracle blockquote,
+.thread-container[data-thread-type="oracle"] blockquote,
+[data-thread-container][data-thread-type="oracle"] blockquote {
+  border-left-color: var(--thread-amethyst);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: AI (Ruby)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-ai h4,
+.thread-container[data-thread-type="ai"] h4,
+[data-thread-container][data-thread-type="ai"] h4 {
+  background: var(--thread-ruby);
+  color: #1a1a22;
+}
+
+.thread-ai blockquote,
+.thread-container[data-thread-type="ai"] blockquote,
+[data-thread-container][data-thread-type="ai"] blockquote {
+  border-left-color: var(--thread-ruby);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: User (Ivory)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-user h4,
+.thread-container[data-thread-type="user"] h4,
+[data-thread-container][data-thread-type="user"] h4 {
+  background: var(--thread-ivory);
+  color: #1a1a22;
+}
+
+.thread-user blockquote,
+.thread-container[data-thread-type="user"] blockquote,
+[data-thread-container][data-thread-type="user"] blockquote {
+  border-left-color: var(--thread-ivory);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: System (Sapphire)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-system h4,
+.thread-container[data-thread-type="system"] h4,
+[data-thread-container][data-thread-type="system"] h4 {
+  background: var(--thread-sapphire);
+  color: #1a1a22;
+}
+
+.thread-system blockquote,
+.thread-container[data-thread-type="system"] blockquote,
+[data-thread-container][data-thread-type="system"] blockquote {
+  border-left-color: var(--thread-sapphire);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Clock (Bronze)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-clock h4,
+.thread-container[data-thread-type="clock"] h4,
+[data-thread-container][data-thread-type="clock"] h4 {
+  background: var(--thread-bronze);
+  color: #e8e4dc;
+}
+
+.thread-clock blockquote,
+.thread-container[data-thread-type="clock"] blockquote,
+[data-thread-container][data-thread-type="clock"] blockquote {
+  border-left-color: var(--thread-bronze);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Track (Jade)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-track h4,
+.thread-container[data-thread-type="track"] h4,
+[data-thread-container][data-thread-type="track"] h4 {
+  background: var(--thread-jade);
+  color: #1a1a22;
+}
+
+.thread-track blockquote,
+.thread-container[data-thread-type="track"] blockquote,
+[data-thread-container][data-thread-type="track"] blockquote {
+  border-left-color: var(--thread-jade);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Selection State
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container:focus-within,
+[data-thread-container]:focus-within {
+  outline: 2px solid var(--crepe-color-primary);
+  outline-offset: 2px;
+}
+
+.thread-container.ProseMirror-selectednode,
+[data-thread-container].ProseMirror-selectednode {
+  outline: 2px solid var(--crepe-color-primary);
+  outline-offset: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Block Handle Integration
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Ensure block handle appears for thread containers */
+.thread-container [data-block-handle],
+[data-thread-container] [data-block-handle] {
+  position: absolute;
+  left: -24px;
+  top: 0.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Actions (Future: Add inline action buttons)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container .thread-actions,
+[data-thread-container] .thread-actions {
+  display: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  gap: 0.25rem;
+}
+
+.thread-container:hover .thread-actions,
+[data-thread-container]:hover .thread-actions {
+  display: flex;
+}
+
+.thread-actions button {
+  padding: 0.25rem;
+  background: var(--crepe-color-surface-low);
+  border: 1px solid var(--crepe-color-outline);
+  border-radius: var(--crepe-radius-sm);
+  color: var(--crepe-color-on-surface-variant);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.thread-actions button:hover {
+  background: var(--crepe-color-hover);
+  color: var(--crepe-color-on-surface);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -348,4 +581,288 @@
 
 .crepe-editor-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--crepe-color-on-surface-variant);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THREAD CONTAINERS
+   Clean, consistent styling for all thread types
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Base Container
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container {
+  position: relative;
+  margin: 1rem 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header (h4 inside thread)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container h4 {
+  margin: 0 !important;
+  padding: 4px 16px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  border: none !important;
+  background: transparent;
+}
+
+/* Remove any default h4 decorations */
+.thread-container h4::before,
+.thread-container h4::after {
+  display: none !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Content Area
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Apply padding to all direct children except header */
+.thread-container>*:not(h4) {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.thread-container>h4+* {
+  margin-top: 12px !important;
+}
+
+.thread-container>*:last-child {
+  margin-bottom: 12px !important;
+}
+
+/* Paragraphs */
+.thread-container p {
+  margin: 4px 0 !important;
+  line-height: 1.5;
+  font-size: 0.875rem;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Blockquotes (Meta Info)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container blockquote {
+  /* Reset margin to avoid double indentation if wrapper handles it, 
+     but since we are targeting direct children for padding, 
+     we want blockquote to fill the padded area but look distinct. 
+     
+     If parent adds 16px padding:
+     Blockquote width = 100% of available space.
+     We want blockquote to have its own background/border.
+  */
+  margin: 8px 0 !important;
+  padding: 8px 12px !important;
+  background: rgba(0, 0, 0, 0.15);
+  border-left: 3px solid currentColor;
+  border-radius: 4px;
+  /* Fully rounded */
+  font-size: 0.8125rem;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.thread-container blockquote p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Strong Text (Results)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container strong {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Dice (Gold)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-dice {
+  border-color: rgba(212, 165, 116, 0.4);
+  background: rgba(212, 165, 116, 0.08);
+}
+
+.thread-dice h4 {
+  background: #d4a574 !important;
+  color: #1a1a22 !important;
+}
+
+.thread-dice blockquote {
+  border-left-color: #d4a574;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Oracle (Amethyst)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-oracle {
+  border-color: rgba(157, 140, 202, 0.4);
+  background: rgba(157, 140, 202, 0.08);
+}
+
+.thread-oracle h4 {
+  background: #9d8cca !important;
+  color: #1a1a22 !important;
+}
+
+.thread-oracle blockquote {
+  border-left-color: #9d8cca;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: AI (Ruby)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-ai {
+  border-color: rgba(199, 125, 186, 0.4);
+  background: rgba(199, 125, 186, 0.08);
+}
+
+.thread-ai h4 {
+  background: #c77dba !important;
+  color: #1a1a22 !important;
+}
+
+.thread-ai blockquote {
+  border-left-color: #c77dba;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: User (Ivory)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-user {
+  border-color: rgba(240, 230, 211, 0.4);
+  background: rgba(240, 230, 211, 0.08);
+}
+
+.thread-user h4 {
+  background: #f0e6d3 !important;
+  color: #1a1a22 !important;
+}
+
+.thread-user blockquote {
+  border-left-color: #f0e6d3;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: System (Sapphire)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-system {
+  border-color: rgba(107, 158, 221, 0.4);
+  background: rgba(107, 158, 221, 0.08);
+}
+
+.thread-system h4 {
+  background: #6b9edd !important;
+  color: #1a1a22 !important;
+}
+
+.thread-system blockquote {
+  border-left-color: #6b9edd;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Clock (Bronze)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-clock {
+  border-color: rgba(139, 115, 85, 0.4);
+  background: rgba(139, 115, 85, 0.08);
+}
+
+.thread-clock h4 {
+  background: #8b7355 !important;
+  color: #f0e6d3 !important;
+}
+
+.thread-clock blockquote {
+  border-left-color: #8b7355;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Thread Type: Track (Jade)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-track {
+  border-color: rgba(126, 201, 162, 0.4);
+  background: rgba(126, 201, 162, 0.08);
+}
+
+.thread-track h4 {
+  background: #7ec9a2 !important;
+  color: #1a1a22 !important;
+}
+
+.thread-track blockquote {
+  border-left-color: #7ec9a2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Hover & Focus States
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.thread-container:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.thread-container:focus-within {
+  outline: 2px solid rgba(212, 165, 116, 0.5);
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEGEND IN THE MIST MARKS
+   Inline highlight marks for Tags, Status, and Challenges
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Base mark styling */
+.lm-mark {
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+/* Tag Mark - Sapphire */
+.lm-tag {
+  background: rgba(107, 158, 221, 0.3);
+  border-bottom: 2px solid #6b9edd;
+  color: #a8c8f0;
+}
+
+/* Status Mark - Jade */
+.lm-status {
+  background: rgba(126, 201, 162, 0.3);
+  border-bottom: 2px solid #7ec9a2;
+  color: #a8e6c8;
+}
+
+/* Challenge Mark - Bronze */
+.lm-challenge {
+  background: rgba(139, 115, 85, 0.3);
+  border-bottom: 2px solid #8b7355;
+  color: #c4a882;
+}
+
+/* Hover states */
+.lm-mark:hover {
+  filter: brightness(1.1);
+}
+
+/* Selection state */
+.lm-mark::selection,
+.lm-mark *::selection {
+  background: rgba(255, 255, 255, 0.3);
 }

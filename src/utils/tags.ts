@@ -31,11 +31,20 @@ export function formatTag(tag: string): string {
  * @returns Array of normalized tag strings (without # prefix)
  */
 export function extractInlineTags(markdown: string): string[] {
-    // Match #tag patterns
-    // Supports: letters, numbers, underscores, hyphens, forward slashes
     const regex = /#([a-zA-Z0-9_/-]+)/g;
     const matches = [...markdown.matchAll(regex)];
-    return matches.map(m => normalizeTag(m[0]));
+    return matches
+        .map(m => normalizeTag(m[0]))
+        // Filter out thread ID patterns (timestamp-random like 1769713677981-l3kkwygdu)
+        .filter(tag => !isThreadIdPattern(tag));
+}
+
+/**
+ * Detects thread ID patterns to exclude from tag extraction.
+ * Thread IDs are: 13-digit timestamp + hyphen + random alphanumeric
+ */
+function isThreadIdPattern(tag: string): boolean {
+    return /^\d{10,}-[a-z0-9]+$/i.test(tag);
 }
 
 /**
