@@ -33,10 +33,10 @@ export function formatTag(tag: string): string {
 export function extractInlineTags(markdown: string): string[] {
     const regex = /#([a-zA-Z0-9_/-]+)/g;
     const matches = [...markdown.matchAll(regex)];
+
     return matches
         .map(m => normalizeTag(m[0]))
-        // Filter out thread ID patterns (timestamp-random like 1769713677981-l3kkwygdu)
-        .filter(tag => !isThreadIdPattern(tag));
+        .filter(tag => !/^\d{10,}-[a-z0-9]+$/i.test(tag));  // Filter thread IDs
 }
 
 /**

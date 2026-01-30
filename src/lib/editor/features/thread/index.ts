@@ -44,6 +44,7 @@ export const threadNode = $node('thread_container', () => ({
         0, // Slot for content
     ],
     parseMarkdown: {
+
         match: (node) => node.type === 'containerDirective' && node.name === 'thread',
         runner: (state, node, type) => {
             console.log('[ThreadFeature] Parsing Directive:', node.name, node.attributes);
@@ -88,6 +89,11 @@ export const textDirectiveNode = $node('text_directive', () => ({
     parseMarkdown: {
         match: (node) => {
             if (node.type === 'textDirective') {
+                // Don't catch LitM directives - let the mark handlers deal with them
+                const litmDirectives = ['lmtag', 'lmstatus', 'lmchallenge'];
+                if (litmDirectives.includes(node.name)) {
+                    return false;
+                }
                 console.log('[ThreadFeature] Matched textDirective:', node);
                 return true;
             }
