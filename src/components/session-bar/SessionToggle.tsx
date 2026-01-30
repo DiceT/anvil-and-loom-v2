@@ -1,27 +1,16 @@
-import { useSessionStore } from '../../stores/useSessionStore'
-import { useEditorStore } from '../../stores/useEditorStore'
-import { useTapestryStore } from '../../stores/useTapestryStore'
+import { useSessionLifecycle } from '../../hooks/useSessionLifecycle'
 
 export function SessionToggle() {
-    const { activeSessionId, startSession, endSession } = useSessionStore()
-    const { openEntry } = useEditorStore()
-    const { createEntry } = useTapestryStore()
-
-    const isActive = !!activeSessionId
+    const { startSession, endSession, isActive } = useSessionLifecycle()
+    // Removed createEntry usage since useSessionLifecycle handles file creation
 
     const handleStart = async () => {
-        // Create new session panel
-        const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-')
-        const title = `Session - ${timestamp}`
-
-        // Create entry and open it
-        const { path, id } = await createEntry(title, 'session')
-        await openEntry(path)
-        startSession(id)
+        // useSessionLifecycle handles everything now
+        await startSession();
     }
 
-    const handleEnd = () => {
-        endSession()
+    const handleEnd = async () => {
+        await endSession()
     }
 
     return (

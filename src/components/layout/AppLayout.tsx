@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { FolderTree, Tag, Bookmark, Dices, List, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, Infinity, Mountain, MessageSquare } from 'lucide-react';
+import { FolderTree, Tag, Bookmark, Dices, List, ArrowLeftToLine, ArrowRightFromLine, ArrowRightToLine, ArrowLeftFromLine, Infinity, Mountain, MessageSquare, Scroll } from 'lucide-react';
 import { TopBar } from './TopBar';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
 import { LeftLane } from './LeftLane';
 import { CenterLane } from './CenterLane';
 import { RightPane } from './RightPane';
+import { GlobalSessionModals } from '../session/GlobalSessionModals';
 import { IconButton } from '../ui/IconButton';
 import { TapestryManager } from '../tapestry/TapestryManager';
 import { useTapestryStore } from '../../stores/useTapestryStore';
@@ -13,6 +14,7 @@ import { useLeftPaneStore, type LeftPaneMode } from '../../stores/useLeftPaneSto
 import { usePaneStore } from '../../stores/usePaneStore';
 import { useToolStore, type RightPaneMode } from '../../stores/useToolStore';
 import { GlobalDialogManager } from '../ui/GlobalDialogManager';
+import { SettingsModal } from '../settings/SettingsModal';
 
 import { useMacroShortcuts } from '../../hooks/useMacroShortcuts';
 import { DiceOverlay } from '../overlays/DiceOverlay';
@@ -25,6 +27,7 @@ export function AppLayout() {
   const { isRightPaneCollapsed, leftPaneWidth, setLeftPaneWidth, rightPaneWidth, setRightPaneWidth } = usePaneStore();
   const { rightPaneMode, setRightPaneMode } = useToolStore();
   const isRingOpen = useToolStore((state) => state.isRingOpen);
+  const isSettingsOpen = useToolStore((state) => state.isSettingsOpen);
 
   const [isDraggingLeft, setIsDraggingLeft] = useState(false);
   const [isDraggingRight, setIsDraggingRight] = useState(false);
@@ -42,6 +45,7 @@ export function AppLayout() {
     { mode: 'weave', icon: Infinity, label: 'Weave' },
     { mode: 'environment', icon: Mountain, label: 'Environment' },
     { mode: 'dm-chat', icon: MessageSquare, label: 'DM Chat' },
+    { mode: 'session', icon: Scroll, label: 'Session' },
   ];
 
   // Show TapestryManager if no tapestry is active
@@ -200,9 +204,15 @@ export function AppLayout() {
 
       {/* Global Dialogs */}
       <GlobalDialogManager />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => useToolStore.getState().closeSettings()}
+      />
+      <GlobalSessionModals />
+
+      {/* Tool Modals */}
       <DiceOverlay />
       <TheRing visible={isRingOpen} onClose={() => useToolStore.getState().toggleRing()} />
     </div>
   );
 }
-

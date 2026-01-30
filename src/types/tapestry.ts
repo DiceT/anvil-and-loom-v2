@@ -80,32 +80,7 @@ export interface EditorState {
     activeEntryId?: string;
 }
 
-/**
- * Panel Thread types
- *
- * Embedded Threads stored inside Panels (historically called ResultCardModel).
- */
-export type ThreadType = 'dice' | 'ai' | 'interpretation' | 'user' | 'oracle';
-
-import { ThreadAiInterpretation } from './ai';
-
-export interface PanelThreadModel {
-    id: string;          // uuid
-    type: ThreadType;
-    source: string;      // e.g. "Dice: 2d6+3"
-    expression?: string; // dice expression, if any
-    summary: string;     // short headline prompt
-    content?: string;    // detailed content (roll info, etc)
-    payload: any;        // detailed data, JSON-serializable
-    timestamp: string;   // ISO datetime for when the thread was created
-    aiInterpretations?: ThreadAiInterpretation[]; // AI-generated interpretations
-}
-
-/**
- * Domain alias: embedded panel threads are Threads within Panels.
- * Prefer ThreadModel / PanelThread language in new code.
- */
-export type ThreadModel = PanelThreadModel;
+// [Legacy thread types removed]
 
 // Helper types for IPC
 export interface CreateTapestryData {

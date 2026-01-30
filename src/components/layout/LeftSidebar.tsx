@@ -5,8 +5,8 @@ import { useEditorStore } from '../../stores/useEditorStore';
 import { useTabStore } from '../../stores/useTabStore';
 import { IconButton } from '../ui/IconButton';
 import { Dialog } from '../ui/Dialog';
-import { SettingsModal } from '../settings/SettingsModal';
 import { TEMPLATES, PanelTemplate } from '../../data/templates';
+import { useToolStore } from '../../stores/useToolStore';
 
 export function LeftSidebar() {
   const { tree, loadTree, closeTapestry } = useTapestryStore();
@@ -16,7 +16,6 @@ export function LeftSidebar() {
   const [showDialog, setShowDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<PanelTemplate | null>(null);
   const [newName, setNewName] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
 
   const handleNewEntryClick = (template: PanelTemplate) => {
     setSelectedTemplate(template);
@@ -90,7 +89,7 @@ export function LeftSidebar() {
           icon={Settings}
           size="m"
           tooltip="Settings"
-          onClick={() => setShowSettings(true)}
+          onClick={() => useToolStore.getState().openSettings()}
         />
         <IconButton
           icon={LogOut}
@@ -136,13 +135,6 @@ export function LeftSidebar() {
           </div>
         </Dialog>
       )}
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        initialCategory="editor"
-      />
     </div>
   );
 }

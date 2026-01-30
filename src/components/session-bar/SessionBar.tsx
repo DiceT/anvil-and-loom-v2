@@ -1,5 +1,4 @@
 import { useSessionStore } from '../../stores/useSessionStore'
-import { SessionToggle } from './SessionToggle'
 import { MacroBar } from './MacroBar'
 import { RowNavigation } from './RowNavigation'
 import { SessionChatInput } from './SessionChatInput'
@@ -13,8 +12,7 @@ export function SessionBar() {
         <div className="border-t border-border bg-canvas-panel/95 backdrop-blur-sm p-3">
             {/* Top row: Session toggle + Macros + Navigation + DC */}
             <div className="flex items-center justify-center gap-4">
-                {/* Session Toggle */}
-                <SessionToggle />
+                {/* Session Toggle - Moved to MacroBar */}
 
                 {/* Macro Slots */}
                 <MacroBar />

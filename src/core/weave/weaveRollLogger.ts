@@ -8,53 +8,52 @@
  * - Result → result
  */
 
-import { logThread, LogThreadInput } from '../results/threadEngine';
+import { useSessionStore } from '../../stores/useSessionStore';
+import { createOracleCard } from '../../utils/threadCardFactory';
 import type { RollResult, Table } from '../../types/weave';
 
-/**
- * Log a Weave table roll to the Thread Card engine
- * 
- * @param tableName - The name of the table that was rolled
- * @param table - The full table object (for metadata)
- * @param rollResult - The roll result from the table engine
- */
 export async function logWeaveRoll(
   tableName: string,
   table: Table,
   rollResult: RollResult
 ): Promise<void> {
   try {
-    // Format of roll value(s) for display
-    const rollDisplay = formatRollDisplay(rollResult.rolls);
+    const { activeSessionId, addCard } = useSessionStore.getState();
+    if (!activeSessionId) return;
 
-    // Build content string and metadata
+    // Use the factory to create the card
+    const card = createOracleCard(activeSessionId, {
+      tableId: table.id,
+      tableName: tableName,
+      tableChain: rollResult.tableChain,
+      rollValue: rollResult.rolls,
+      result: formatResultDisplay(rollResult.result), // We still need this helper or logic
+    });
+
+    // Add custom metadata from weave if needed (buildContentAndMeta logic was complex, 
+    // maybe we can simplify or keep it in meta?)
+    // The factory sets basic meta. Let's restart buildContentAndMeta logic if we want rich text?
+    // Actually createOracleCard expects simple args.
+    // If we want the "Result Summary" with Aspect/Domain handling, we should probably keep buildContentAndMeta logic
+    // but pass resultSummary as 'result'.
+
+    // Let's re-use the helpers below (formatRollDisplay etc) but just for result string.
     const builtData = await buildContentAndMeta(rollResult, table);
 
-    // Create thread input
-    const threadInput: LogThreadInput = {
-      header: tableName,
-      result: builtData.resultSummary,
-      content: builtData.content,
-      source: 'weave',
-      meta: {
-        tableId: table.id,
-        tableName: tableName,
-        tableType: table.tableType,
-        category: table.category,
-        rollValue: rollDisplay,
-        rolls: rollResult.rolls,
-        seed: rollResult.seed,
-        tableChain: rollResult.tableChain,
-        warnings: rollResult.warnings,
-        weave: builtData.weaveMeta // Store valid metadata
-      },
-    };
+    // Override factory defaults if we want specific formatting
+    card.result = builtData.resultSummary;
+    card.content = [
+      { label: 'Roll', value: formatRollDisplay(rollResult.rolls), type: 'roll' },
+      { label: 'Result', value: builtData.resultSummary }
+    ];
+    if (builtData.weaveMeta) {
+      card.meta = { ...card.meta, ...builtData.weaveMeta };
+    }
 
-    // Log to Thread Card engine
-    logThread(threadInput);
+    addCard(card);
+
   } catch (error) {
     console.error('Failed to log Weave roll to Thread Card engine:', error);
-    // Don't throw - logging failures shouldn't break the roll
   }
 }
 

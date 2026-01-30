@@ -1,48 +1,33 @@
 import { ipcMain } from 'electron';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
-// Stubbed in-memory Tapestry with fake entries
-const stubbedTapestry = {
-  name: 'My Campaign',
-  children: [
-    {
-      name: 'session-01.md',
-      type: 'file',
-      path: '/session-01.md',
-    },
-    {
-      name: 'session-02.md',
-      type: 'file',
-      path: '/session-02.md',
-    },
-    {
-      name: 'lair.canvas.json',
-      type: 'file',
-      path: '/lair.canvas.json',
-    },
-    {
-      name: 'notes',
-      type: 'folder',
-      path: '/notes',
-      children: [
-        {
-          name: 'npc-ideas.md',
-          type: 'file',
-          path: '/notes/npc-ideas.md',
-        },
-      ],
-    },
-  ],
-};
-
-const stubbedEntries: Record<string, string> = {
-  '/session-01.md': '# Session 1\n\nOur adventure begins...',
-  '/session-02.md': '# Session 2\n\nThe party continues...',
-  '/lair.canvas.json':
-    '{"version":"1.0.0","nodes":[{"id":"1","type":"text","x":100,"y":100,"text":"Entrance"}]}',
-  '/notes/npc-ideas.md': '# NPC Ideas\n\n- A mysterious wanderer\n- The innkeeper',
-};
+// ... (stubs kept or ignored)
 
 export function setupFileSystemHandlers() {
+  // ... existing stubs ...
+
+  // Real FS handlers
+  ipcMain.handle('fs-write-file', async (_event, filePath: string, content: string) => {
+    try {
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      await fs.writeFile(filePath, content, 'utf-8');
+      return { success: true };
+    } catch (error) {
+      console.error('[fs-write-file] Error:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('fs-read-file', async (_event, filePath: string) => {
+    return fs.readFile(filePath, 'utf-8');
+  });
+
+  // Stubs (keep existing ones if needed, or replace if they conflict? 
+  // Existing ones are 'tapestry:getTree', 'tapestry:readEntry', 'tapestry:writeEntry'. 
+  // These seem distinct from 'tapestry:loadRegistry' etc in tapestry.ts.
+  // So I'll just append the new handlers inside the function.
+
   ipcMain.handle('tapestry:getTree', async () => {
     return stubbedTapestry;
   });

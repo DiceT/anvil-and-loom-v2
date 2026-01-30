@@ -33,6 +33,9 @@ interface TapestryState {
     // Tag Filtering
     activeTagFilter: string | null;
     setTagFilter: (tag: string | null) => void;
+    // Files
+    saveFile: (path: string, content: string) => Promise<void>;
+    createFile: (path: string, content: string) => Promise<void>;
 }
 
 export const useTapestryStore = create<TapestryState>((set, get) => ({
@@ -42,6 +45,21 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
     activeTagFilter: null,
 
     setTagFilter: (tag) => set({ activeTagFilter: tag }),
+
+    // Save generic file
+    saveFile: async (path: string, content: string) => {
+        try {
+            await window.electron.ipcRenderer.invoke('fs-write-file', path, content);
+        } catch (error) {
+            console.error('[TapestryStore] Failed to save file:', error);
+            throw error;
+        }
+    },
+
+    // Create generic file (alias for saveFile)
+    createFile: async (path: string, content: string) => {
+        await get().saveFile(path, content);
+    },
 
     // Load registry from disk
     loadRegistry: async () => {

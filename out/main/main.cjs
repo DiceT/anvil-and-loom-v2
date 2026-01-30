@@ -24,45 +24,20 @@ function _interopNamespaceDefault(e) {
 }
 const path__namespace = /* @__PURE__ */ _interopNamespaceDefault(path);
 const fs__namespace = /* @__PURE__ */ _interopNamespaceDefault(fs);
-const stubbedTapestry = {
-  name: "My Campaign",
-  children: [
-    {
-      name: "session-01.md",
-      type: "file",
-      path: "/session-01.md"
-    },
-    {
-      name: "session-02.md",
-      type: "file",
-      path: "/session-02.md"
-    },
-    {
-      name: "lair.canvas.json",
-      type: "file",
-      path: "/lair.canvas.json"
-    },
-    {
-      name: "notes",
-      type: "folder",
-      path: "/notes",
-      children: [
-        {
-          name: "npc-ideas.md",
-          type: "file",
-          path: "/notes/npc-ideas.md"
-        }
-      ]
-    }
-  ]
-};
-const stubbedEntries = {
-  "/session-01.md": "# Session 1\n\nOur adventure begins...",
-  "/session-02.md": "# Session 2\n\nThe party continues...",
-  "/lair.canvas.json": '{"version":"1.0.0","nodes":[{"id":"1","type":"text","x":100,"y":100,"text":"Entrance"}]}',
-  "/notes/npc-ideas.md": "# NPC Ideas\n\n- A mysterious wanderer\n- The innkeeper"
-};
 function setupFileSystemHandlers() {
+  electron.ipcMain.handle("fs-write-file", async (_event, filePath, content) => {
+    try {
+      await fs__namespace.mkdir(path__namespace.dirname(filePath), { recursive: true });
+      await fs__namespace.writeFile(filePath, content, "utf-8");
+      return { success: true };
+    } catch (error) {
+      console.error("[fs-write-file] Error:", error);
+      throw error;
+    }
+  });
+  electron.ipcMain.handle("fs-read-file", async (_event, filePath) => {
+    return fs__namespace.readFile(filePath, "utf-8");
+  });
   electron.ipcMain.handle("tapestry:getTree", async () => {
     return stubbedTapestry;
   });
@@ -194,8 +169,140 @@ async function ensureFrontmatterId(filePath, frontmatter, content) {
   await fs__namespace.writeFile(filePath, full, "utf-8");
   return updated;
 }
+async function loadJsonEntry(filePath) {
+  try {
+    const raw = await fs__namespace.readFile(filePath, "utf-8");
+    let jsonContent = raw;
+    let data = null;
+    try {
+      data = JSON.parse(jsonContent);
+      if ((!data.cards || data.cards.length === 0) && raw.includes(":::thread")) {
+        const cards = [];
+        const threadRegex = /:::thread\{([^}]+)\}\n([\s\S]*?)\n:::/g;
+        let match;
+        while ((match = threadRegex.exec(raw)) !== null) {
+          const metaString = match[1];
+          const content = match[2];
+          const typeMatch = metaString.match(/type="([^"]+)"/);
+          const tidMatch = metaString.match(/tid="([^"]+)"/);
+          const tsMatch = metaString.match(/timestamp="([^"]+)"/);
+          if (typeMatch && tidMatch) {
+            cards.push({
+              id: tidMatch[1],
+              type: typeMatch[1],
+              title: "Legacy Entry",
+              content: [],
+              // Store the raw markdown content in 'metadata' or similar if needed, 
+              // but for now we just want it to show up. 
+              // ThreadCard structure usually has 'content' as blocks or similar?
+              // Let's check ThreadCard type definition... 
+              // But for now, let's put it in a result field or similar to be safe.
+              result: content.trim(),
+              createdAt: tsMatch ? tsMatch[1] : (/* @__PURE__ */ new Date()).toISOString(),
+              tags: []
+            });
+          }
+        }
+        if (cards.length > 0) {
+          data.cards = cards;
+          jsonContent = JSON.stringify(data, null, 2);
+        }
+      }
+    } catch (parseError) {
+      if (raw.startsWith("---")) {
+        const parts = raw.split("---");
+        if (parts.length >= 3) {
+          jsonContent = parts.slice(2).join("---").trim();
+        }
+      }
+      try {
+        data = JSON.parse(jsonContent);
+        if ((!data.cards || data.cards.length === 0) && raw.includes(":::thread")) {
+          const cards = [];
+          const threadRegex = /:::thread\{([^}]+)\}\n([\s\S]*?)\n:::/g;
+          let match;
+          while ((match = threadRegex.exec(raw)) !== null) {
+            const metaString = match[1];
+            const typeMatch = metaString.match(/type="([^"]+)"/);
+            const tidMatch = metaString.match(/tid="([^"]+)"/);
+            if (typeMatch && tidMatch) {
+              cards.push({
+                id: tidMatch[1],
+                type: typeMatch[1],
+                title: "Legacy Entry",
+                result: match[2].trim(),
+                tags: []
+              });
+            }
+          }
+          if (cards.length > 0) {
+            data.cards = cards;
+            jsonContent = JSON.stringify(data, null, 2);
+          }
+        }
+      } catch (innerError) {
+        const start = jsonContent.indexOf("{");
+        if (start !== -1) {
+          const idMatch = jsonContent.match(/"id":\s*"([^"]+)"/);
+          const titleMatch = jsonContent.match(/"title":\s*"([^"]+)"/);
+          if (idMatch && titleMatch) {
+            data = {
+              id: idMatch[1],
+              title: titleMatch[1],
+              tags: [],
+              cards: []
+            };
+            if (raw.includes(":::thread")) {
+              const cards = [];
+              const threadRegex = /:::thread\{([^}]+)\}\n([\s\S]*?)\n:::/g;
+              let match;
+              while ((match = threadRegex.exec(raw)) !== null) {
+                const metaString = match[1];
+                const typeMatch = metaString.match(/type="([^"]+)"/);
+                const tidMatch = metaString.match(/tid="([^"]+)"/);
+                if (typeMatch && tidMatch) {
+                  cards.push({
+                    id: tidMatch[1],
+                    type: typeMatch[1],
+                    title: "Recovered Entry",
+                    result: match[2].trim(),
+                    tags: []
+                  });
+                }
+              }
+              data.cards = cards;
+            }
+            jsonContent = JSON.stringify(data, null, 2);
+          }
+        }
+      }
+    }
+    if (!data || !data.id || !data.title) return null;
+    return {
+      id: data.id,
+      path: filePath,
+      title: data.title,
+      category: "session",
+      content: jsonContent,
+      // Return clean JSON if we recovered it, or original if valid
+      frontmatter: {
+        id: data.id,
+        title: data.title,
+        category: "session",
+        tags: data.tags || []
+      },
+      isDirty: false
+    };
+  } catch (error) {
+    return null;
+  }
+}
 async function loadEntryDoc(filePath) {
   try {
+    const ext = path__namespace.extname(filePath).toLowerCase();
+    if (ext === ".json") {
+      return loadJsonEntry(filePath);
+    }
     const raw = await fs__namespace.readFile(filePath, "utf-8");
     const parsed = matter(raw);
     const fm = parsed.data;
@@ -218,6 +325,22 @@ async function loadEntryDoc(filePath) {
   }
 }
 async function saveEntryDoc(doc) {
+  const ext = path__namespace.extname(doc.path).toLowerCase();
+  if (ext === ".json") {
+    try {
+      const currentContent = JSON.parse(doc.content);
+      const updatedContent = {
+        ...currentContent,
+        // Apply frontmatter updates (title, tags)
+        title: doc.frontmatter.title,
+        tags: doc.frontmatter.tags
+      };
+      await fs__namespace.writeFile(doc.path, JSON.stringify(updatedContent, null, 2), "utf-8");
+    } catch (e) {
+      await fs__namespace.writeFile(doc.path, doc.content, "utf-8");
+    }
+    return;
+  }
   const full = matter.stringify(doc.content, doc.frontmatter);
   await fs__namespace.writeFile(doc.path, full, "utf-8");
 }
@@ -284,6 +407,25 @@ async function buildFolderTree(folderPath) {
             path: fullPath,
             category: doc.category,
             tags: doc.frontmatter.tags
+          });
+        }
+      } else if (ext === ".json") {
+        const doc = await loadJsonEntry(fullPath);
+        if (doc) {
+          nodes.push({
+            id: doc.id,
+            type: "entry",
+            name: doc.title,
+            path: fullPath,
+            category: "session",
+            tags: doc.frontmatter.tags
+          });
+        } else {
+          nodes.push({
+            id: fullPath,
+            type: "asset",
+            name: dirent.name,
+            path: fullPath
           });
         }
       } else {

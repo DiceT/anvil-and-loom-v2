@@ -106,8 +106,80 @@ async function ensureFrontmatterId(filePath: string, frontmatter: EntryFrontmatt
     return updated;
 }
 
+async function loadJsonEntry(filePath: string): Promise<EntryDoc | null> {
+    try {
+        const raw = await fs.readFile(filePath, 'utf-8');
+        let jsonContent = raw;
+        let data: any = null;
+
+        try {
+            data = JSON.parse(jsonContent);
+        } catch (parseError) {
+            // Failed to parse raw JSON. It might have Frontmatter or be mixed content.
+            // 1. Strip Frontmatter if present
+            if (raw.startsWith('---')) {
+                const parts = raw.split('---');
+                if (parts.length >= 3) {
+                    // content is after the second ---
+                    jsonContent = parts.slice(2).join('---').trim();
+                }
+            }
+
+            // 2. Try parsing stripped content
+            try {
+                data = JSON.parse(jsonContent);
+            } catch (innerError) {
+                // 3. It might have trailing Markdown (e.g. :::thread).
+                // Try to find the first valid JSON object block.
+
+                const start = jsonContent.indexOf('{');
+                if (start !== -1) {
+                    // Regex fallback for metadata (so Tree can display it)
+                    const idMatch = jsonContent.match(/"id":\s*"([^"]+)"/);
+                    const titleMatch = jsonContent.match(/"title":\s*"([^"]+)"/);
+
+                    if (idMatch && titleMatch) {
+                        data = {
+                            id: idMatch[1],
+                            title: titleMatch[1],
+                            tags: [],
+                            cards: []
+                        };
+                        // Return valid JSON structure so it opens correctly
+                        jsonContent = JSON.stringify(data, null, 2);
+                    }
+                }
+            }
+        }
+
+        if (!data || !data.id || !data.title) return null;
+
+        return {
+            id: data.id,
+            path: filePath,
+            title: data.title,
+            category: 'session',
+            content: jsonContent, // Return clean JSON if we recovered it, or original if valid
+            frontmatter: {
+                id: data.id,
+                title: data.title,
+                category: 'session',
+                tags: data.tags || []
+            },
+            isDirty: false,
+        };
+    } catch (error) {
+        return null; // Not a valid JSON entry
+    }
+}
+
 async function loadEntryDoc(filePath: string): Promise<EntryDoc | null> {
     try {
+        const ext = path.extname(filePath).toLowerCase();
+        if (ext === '.json') {
+            return loadJsonEntry(filePath);
+        }
+
         const raw = await fs.readFile(filePath, 'utf-8');
         const parsed = matter(raw);
         const fm = parsed.data as EntryFrontmatter;
@@ -131,6 +203,30 @@ async function loadEntryDoc(filePath: string): Promise<EntryDoc | null> {
 }
 
 async function saveEntryDoc(doc: EntryDoc): Promise<void> {
+    const ext = path.extname(doc.path).toLowerCase();
+
+    if (ext === '.json') {
+        // Evaluate if we should merge frontmatter back into content?
+        // useSessionStore saves via fs-write-file directly.
+        // If this is called, it might be from useEditorStore updates (e.g. tags).
+        // So we should try to merge frontmatter updates into the JSON content.
+
+        try {
+            const currentContent = JSON.parse(doc.content);
+            const updatedContent = {
+                ...currentContent,
+                // Apply frontmatter updates (title, tags)
+                title: doc.frontmatter.title,
+                tags: doc.frontmatter.tags
+            };
+            await fs.writeFile(doc.path, JSON.stringify(updatedContent, null, 2), 'utf-8');
+        } catch (e) {
+            // Fallback if content isn't valid JSON (shouldn't happen for session files)
+            await fs.writeFile(doc.path, doc.content, 'utf-8');
+        }
+        return;
+    }
+
     const full = matter.stringify(doc.content, doc.frontmatter);
     await fs.writeFile(doc.path, full, 'utf-8');
 }
@@ -208,6 +304,27 @@ async function buildFolderTree(folderPath: string): Promise<TapestryNode[]> {
                         path: fullPath,
                         category: doc.category,
                         tags: doc.frontmatter.tags,
+                    });
+                }
+            } else if (ext === '.json') {
+                // Try to load as session entry
+                const doc = await loadJsonEntry(fullPath);
+                if (doc) {
+                    nodes.push({
+                        id: doc.id,
+                        type: 'entry',
+                        name: doc.title,
+                        path: fullPath,
+                        category: 'session',
+                        tags: doc.frontmatter.tags,
+                    });
+                } else {
+                    // Fallback to asset
+                    nodes.push({
+                        id: fullPath,
+                        type: 'asset',
+                        name: dirent.name,
+                        path: fullPath,
                     });
                 }
             } else {

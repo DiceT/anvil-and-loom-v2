@@ -4,7 +4,6 @@ import { replaceAll, getMarkdown } from '@milkdown/utils';
 import { editorViewCtx } from '@milkdown/core';
 import { Ctx } from '@milkdown/ctx';
 import { toggleMark } from '@milkdown/prose/commands';
-import { threadFeature } from './features/thread';
 import { litmMarksFeature } from './features/marks/litmMarks';
 // import { litmToolbarItems } from './toolbar/litmToolbarItems'; // Logic moved inline to use builder
 import { litmSlashCommands } from './slash/litmSlashCommands'; // Kept for reference but unused yet
@@ -160,7 +159,6 @@ export async function createCrepeEditor(
   */
 
   // 1. Thread Feature (NATIVE!)
-  crepe.editor.use(threadFeature);
   crepe.editor.use(litmMarksFeature);
 
   // 2. Change Listener (Only in Edit Mode)
