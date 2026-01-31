@@ -36,12 +36,14 @@ interface SessionState {
     createSession: (title: string) => Session;
     deleteSession: (sessionId: string) => void;
     updateSessionTitle: (sessionId: string, title: string) => void;
+    renameSession: (title: string) => Promise<void>;
     setActiveSession: (sessionId: string | null) => void;
 
     // Card CRUD
     addCard: (card: ThreadCard) => void;
     updateCard: (cardId: string, updates: Partial<ThreadCard>) => void;
     deleteCard: (cardId: string) => void;
+    deleteCards: (cardIds: string[]) => void;
     reorderCards: (sessionId: string, cardIds: string[]) => void;
 
     // Card Queries
@@ -61,6 +63,7 @@ interface SessionState {
     activeFilePath: string | null;
     setActiveSessionFilePath: (filePath: string | null) => void;
     saveActiveSession: () => void; // Debounced save
+    persistSession?: () => Promise<void>; // Direct save (internal/advanced use)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -140,6 +143,68 @@ export const useSessionStore = create<SessionState>()(
                 }));
             },
 
+            renameSession: async (title: string) => {
+                const { activeSessionId, activeFilePath } = get();
+
+                if (!activeSessionId || !activeFilePath) {
+                    console.warn('[SessionStore] No active session to rename');
+                    return;
+                }
+
+                // 1. Update in-memory title
+                set(state => ({
+                    sessions: state.sessions.map(s =>
+                        s.id === activeSessionId
+                            ? { ...s, title, updatedAt: new Date().toISOString() }
+                            : s
+                    ),
+                }));
+
+                try {
+                    // 2. Rename file
+                    const { useTapestryStore } = await import('./useTapestryStore');
+                    // We need to ensure we only rename if the title causes a filename change
+                    // But for now, we assume the user wants the file to match the title
+                    const newPath = await useTapestryStore.getState().renameEntry(activeFilePath, title);
+                    // 3. Update active file path
+                    set({ activeFilePath: newPath });
+
+                    // 4. Save IMMEDIATELY to ensure content (with new title) is written to new path
+                    // We use persistSession to bypass debounce and ensure await
+                    const { persistSession } = get();
+                    if (persistSession) {
+                        await persistSession();
+                    }
+
+                    // 5. Update EditorStore (Tab)
+                    const { useEditorStore } = await import('./useEditorStore');
+                    useEditorStore.getState().handleRename(activeFilePath, newPath, title);
+
+                    // 6. Update TabStore (Visible Tabs)
+                    const { useTabStore } = await import('./useTabStore');
+                    // Find the tab with the old ID (which is mostly likely the session ID, assuming tab ID = session ID / file ID)
+                    // Actually, for sessions, the tab ID is usually the session ID. 
+                    // Let's check how openTab is called.
+                    // In EditorStore.openEntry: id: entry.id.
+                    // In renameEntry, does entry.id change? 
+                    // Tapestry entries usually have ID = path or a UUID. 
+                    // If ID = UUID, it shouldn't change.
+                    // If ID = path, it changes.
+                    // Tapestry entries usually use UUIDs generated or paths.
+                    // If ID persists, we just update title.
+                    // Helper: find tab by ID matching activeSessionId.
+                    useTabStore.getState().updateTabTitle(activeSessionId, title);
+
+                    // 7. Reload tree (with retry/delay to ensure FS catches up)
+                    setTimeout(() => {
+                        useTapestryStore.getState().loadTree();
+                    }, 100);
+
+                } catch (error) {
+                    console.error('[SessionStore] Failed to rename session file:', error);
+                }
+            },
+
             setActiveSession: (sessionId: string | null) => {
                 set({ activeSessionId: sessionId });
             },
@@ -148,7 +213,7 @@ export const useSessionStore = create<SessionState>()(
             // Card CRUD
             // ─────────────────────────────────────────────────────────────────────
 
-            addCard: (card: ThreadCard) => {
+            addCard: async (card: ThreadCard) => {
                 const { activeSessionId } = get();
                 if (!activeSessionId) {
                     console.warn('[SessionStore] No active session to add card to');
@@ -167,7 +232,11 @@ export const useSessionStore = create<SessionState>()(
                     ),
                 }));
 
-                get().saveActiveSession();
+                // Force immediate save for reliability
+                const { persistSession } = get();
+                if (persistSession) {
+                    await persistSession();
+                }
             },
 
             updateCard: (cardId: string, updates: Partial<ThreadCard>) => {
@@ -180,9 +249,11 @@ export const useSessionStore = create<SessionState>()(
                         updatedAt: new Date().toISOString(),
                     })),
                 }));
+                get().saveActiveSession();
             },
 
-            deleteCard: (cardId: string) => {
+            deleteCard: async (cardId: string) => {
+                console.log('[SessionStore] Deleting card:', cardId);
                 set(state => ({
                     sessions: state.sessions.map(s => ({
                         ...s,
@@ -190,6 +261,32 @@ export const useSessionStore = create<SessionState>()(
                         updatedAt: new Date().toISOString(),
                     })),
                 }));
+
+                // Force immediate save
+                const { persistSession } = get();
+                if (persistSession) {
+                    await persistSession();
+                } else {
+                    console.error('[SessionStore] persistSession not found');
+                }
+            },
+
+            deleteCards: async (cardIds: string[]) => {
+                console.log('[SessionStore] Deleting cards (batch):', cardIds.length);
+                const ids = new Set(cardIds);
+                set(state => ({
+                    sessions: state.sessions.map(s => ({
+                        ...s,
+                        cards: s.cards.filter(c => !ids.has(c.id)),
+                        updatedAt: new Date().toISOString(),
+                    })),
+                }));
+
+                // Force immediate save
+                const { persistSession } = get();
+                if (persistSession) {
+                    await persistSession();
+                }
             },
 
             reorderCards: (sessionId: string, cardIds: string[]) => {
@@ -212,6 +309,7 @@ export const useSessionStore = create<SessionState>()(
                         };
                     }),
                 }));
+                get().saveActiveSession();
             },
 
             // ─────────────────────────────────────────────────────────────────────
@@ -306,22 +404,49 @@ export const useSessionStore = create<SessionState>()(
                 set({ activeFilePath: filePath });
             },
 
-            saveActiveSession: debounce(async () => {
-                const { activeSession, activeFilePath } = get();
-                if (!activeSession || !activeFilePath) return;
+            // Internal helper that performs the actual save (exposed via debounce below)
+            persistSession: async () => {
+                const { sessions, activeSessionId, activeFilePath } = get();
+                // Manually find session to ensure we get the latest state
+                const currentSession = sessions.find(s => s.id === activeSessionId);
 
-                const content = JSON.stringify(activeSession, null, 2);
+                if (!currentSession || !activeFilePath) {
+                    console.error('[SessionStore] Skip save - missing session or path.', { currentSessionId: activeSessionId, activeFilePath });
+                    return;
+                }
+
+                const content = JSON.stringify(currentSession, null, 2);
 
                 try {
-                    // Dynamically import to avoid circular dependencies if possible, 
-                    // or just use the store directly if already imported.
-                    // We'll import here to be safe and lazy.
                     const { useTapestryStore } = await import('./useTapestryStore');
                     await useTapestryStore.getState().saveFile(activeFilePath, content);
                     console.log('[SessionStore] Saved session to:', activeFilePath);
+
+                    // Sync consistency with EditorStore
+                    // This prevents stale content from re-importing if the Editor re-renders or checks the file content
+                    const { useEditorStore } = await import('./useEditorStore');
+                    const editorStore = useEditorStore.getState();
+
+                    // We need to find the entry ID by path
+                    const openEntries = editorStore.openEntries;
+                    const entry = openEntries.find(e => e.path === activeFilePath);
+
+                    if (entry) {
+                        editorStore.updateEntryContent(entry.id, content);
+                        // Since we just saved, we might want to ensure it's not marked dirty causing loop, 
+                        // but updateEntryContent marks dirty. 
+                        // However, SessionPanel doesn't trigger save from dirty state (Ctrl+S ignored).
+                        // The re-import logic in TapestryEditor checks `activeEntry.content`.
+                        // By updating it here, we ensure that IF TapestryEditor re-runs logic, it sees the NEW content.
+                    }
+
                 } catch (error) {
-                    console.error('[SessionStore] Failed to auto-save session:', error);
+                    console.error('[SessionStore] Failed to save session:', error);
                 }
+            },
+
+            saveActiveSession: debounce(() => {
+                get().persistSession?.();
             }, 500),
         }),
         {

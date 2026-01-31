@@ -47,7 +47,9 @@ export const useSessionActions = (): UseSessionActionsResult => {
                     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(tableIdOrName);
 
                     if (isUuid) {
-                        const result = await WeaveService.roll(tableIdOrName);
+                        const { useWeaveStore } = await import('../stores/useWeaveStore');
+                        // Use consistent store roll to trigger 3D dice if available
+                        const result = await useWeaveStore.getState().rollTable(tableIdOrName, undefined, false);
                         // We need to fetch table details to return expected format if WeaveService doesn't provide everything
                         // But WeaveService.roll returns RollResult which has what we need?
                         // Actually actionDispatcher expects { tableId, tableName, tableChain, rollValue, result }

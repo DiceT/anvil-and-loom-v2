@@ -64,13 +64,13 @@ export function createActionRegistry(dependencies: {
         // ─────────────────────────────────────────────────────────────────────
 
         'dice.roll': async (params) => {
-            const { expression } = params as { expression: string };
+            const { expression, meta } = params as { expression: string; meta?: any };
             const { activeSessionId, addCard } = sessionStore.getState();
 
             if (!activeSessionId || !expression) return;
 
-            // Roll using your dice engine
-            const result = await diceEngine.roll(expression);
+            // Roll using your dice engine (Propagate meta if provided)
+            const result = await diceEngine.roll(expression, { meta });
 
             // Create and add card
             const card = createDiceCard(activeSessionId, {
@@ -86,10 +86,10 @@ export function createActionRegistry(dependencies: {
         },
 
         'dice.reroll': async (params) => {
-            const { expression } = params as { expression?: string };
+            const { expression, meta } = params as { expression?: string; meta?: any };
             if (expression) {
-                // Re-roll using the same expression
-                await createActionRegistry(dependencies)['dice.roll']({ expression });
+                // Re-roll using the same expression (and metadata)
+                await createActionRegistry(dependencies)['dice.roll']({ expression, meta });
             }
         },
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type TabType = 'entry' | 'weave';
+export type TabType = 'entry' | 'weave' | 'session';
 
 export interface Tab {
   id: string;
@@ -9,6 +9,7 @@ export interface Tab {
   path?: string;
   data?: unknown; // Type-specific data (e.g., entryPath)
   weaveTableId?: string; // For weave tabs
+  sessionId?: string; // For session tabs
 }
 
 interface TabStore {

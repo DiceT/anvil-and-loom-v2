@@ -36,6 +36,14 @@ export class WeaveService {
     }
 
     /**
+     * Get all environment tables (User + Standard)
+     */
+    static async getEnvironmentTables(): Promise<WeaveTableListResponse> {
+        // Use the 'environment' namespace exposed in preload
+        return await window.electron.environment.getTables();
+    }
+
+    /**
      * Get a specific table by ID
      */
     static async getTable(tableId: string): Promise<WeaveTableResponse> {
@@ -64,6 +72,7 @@ export class WeaveService {
      * Roll on a table and return result
      */
     static async rollTable(tableId: string, seed?: string, silent: boolean = false): Promise<WeaveRollResponse> {
+        console.log('[WeaveService] Rolling table:', tableId, 'Seed:', seed);
         const response = await window.electron.weave.rollTable(tableId, seed);
 
         // Log to Thread Card engine if successful and not silent

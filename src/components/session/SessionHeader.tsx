@@ -6,16 +6,20 @@
 
 import React, { useState, useCallback } from 'react';
 import { useActiveSession, useSessionStore } from '../../stores/useSessionStore';
-import { Settings, Download, X, Check, FileText } from 'lucide-react';
+import { Settings, Download, X, Check, FileText, Maximize2, Minimize2 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
+
+const noDrag: React.CSSProperties = {
+    WebkitAppRegion: 'no-drag'
+} as any;
 
 interface SessionHeaderProps {
     onExport?: () => void;
     onCurate?: () => void;
     onSettings?: () => void;
+    onToggleWidth?: () => void;
+    isFullWidth?: boolean;
     onClose?: () => void;
     className?: string;
 }
@@ -28,11 +32,13 @@ export const SessionHeader: React.FC<SessionHeaderProps> = ({
     onExport,
     onCurate,
     onSettings,
+    onToggleWidth,
+    isFullWidth,
     onClose,
     className = '',
 }) => {
     const session = useActiveSession();
-    const { updateSessionTitle } = useSessionStore();
+    const { renameSession } = useSessionStore();
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState('');
 
@@ -48,9 +54,10 @@ export const SessionHeader: React.FC<SessionHeaderProps> = ({
 
     const saveTitle = useCallback(() => {
         if (!session || !editTitle.trim()) return;
-        updateSessionTitle(session.id, editTitle.trim());
+        // Call renameSession to handle file renaming and tree/tab updates
+        renameSession(editTitle.trim());
         setIsEditing(false);
-    }, [session, editTitle, updateSessionTitle]);
+    }, [session, editTitle, renameSession]);
 
     const cancelEditing = useCallback(() => {
         setIsEditing(false);
@@ -95,6 +102,7 @@ export const SessionHeader: React.FC<SessionHeaderProps> = ({
                 text-lg font-semibold text-slate-100
                 focus:outline-none focus:border-violet-500
               "
+                            style={noDrag}
                         />
                         <button
                             onClick={saveTitle}
@@ -112,8 +120,9 @@ export const SessionHeader: React.FC<SessionHeaderProps> = ({
                 ) : (
                     <h1
                         onClick={startEditing}
-                        className="text-lg font-semibold text-slate-100 cursor-pointer hover:text-violet-400 transition-colors"
+                        className="text-lg font-semibold text-slate-100 cursor-pointer hover:text-violet-400 transition-colors relative z-10"
                         title="Click to edit title"
+                        style={noDrag}
                     >
                         {session.title}
                     </h1>
@@ -135,6 +144,16 @@ export const SessionHeader: React.FC<SessionHeaderProps> = ({
                     >
                         <FileText size={14} />
                         <span>Curate</span>
+                    </button>
+                )}
+
+                {onToggleWidth && (
+                    <button
+                        onClick={onToggleWidth}
+                        className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-700 rounded transition-colors"
+                        title={isFullWidth ? "Switch to Readable Width" : "Switch to Full Width"}
+                    >
+                        {isFullWidth ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
                     </button>
                 )}
 

@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { SessionPanel } from '../session/SessionPanel';
+import { SessionHeader } from '../session/SessionHeader';
 import { useSessionStore } from '../../stores/useSessionStore';
 import { useEditorStore } from '../../stores/useEditorStore';
 import { useTapestryStore } from '../../stores/useTapestryStore';
@@ -11,6 +12,7 @@ import { TagList } from '../tags/TagList';
 export function TapestryEditor() {
     const { mode, openEntries, activeEntryId, updateEntryContent, saveEntry, addTag, removeTag } = useEditorStore();
     const { setTagFilter } = useTapestryStore();
+    const [isFullWidth, setIsFullWidth] = useState(false);
 
     const activeEntry = openEntries.find(e => e.id === activeEntryId);
 
@@ -40,9 +42,30 @@ export function TapestryEditor() {
                 const sessionData = JSON.parse(activeEntry.content);
 
                 // Update store if switched to a new session file
-                const { activeSessionId, activeFilePath, importSession, setActiveSession, setActiveSessionFilePath } = useSessionStore.getState();
+                // Update store if switched to a new session file
+                const { activeSessionId, activeFilePath, importSession, setActiveSession, setActiveSessionFilePath, sessions } = useSessionStore.getState();
 
-                if (activeFilePath !== activeEntry.path || activeSessionId !== sessionData.id) {
+                // Normalize paths for comparison (handle Windows drive letter case differences)
+                const currentPath = activeFilePath?.toLowerCase() || '';
+                const newPath = activeEntry.path.toLowerCase();
+
+                // Check if we need to switch/import
+                if (currentPath !== newPath || activeSessionId !== sessionData.id) {
+                    // Safety check: Don't overwrite if in-memory session is newer
+                    const existingSession = sessions.find(s => s.id === sessionData.id);
+                    if (existingSession) {
+                        const inMemoryTime = new Date(existingSession.updatedAt).getTime();
+                        const fileTime = new Date(sessionData.updatedAt).getTime();
+
+                        if (inMemoryTime > fileTime) {
+                            console.warn('[TapestryEditor] Skipping import - in-memory session is newer.', { inMemory: existingSession.updatedAt, file: sessionData.updatedAt });
+                            // However, we MUST set the active session ID and path if they differ, so the UI switches context
+                            if (activeSessionId !== sessionData.id) setActiveSession(sessionData.id);
+                            if (currentPath !== newPath) setActiveSessionFilePath(activeEntry.path);
+                            return;
+                        }
+                    }
+
                     importSession(sessionData);
                     setActiveSession(sessionData.id);
                     setActiveSessionFilePath(activeEntry.path);
@@ -72,19 +95,17 @@ export function TapestryEditor() {
                     Let's reuse the standard header for now, or maybe hide it?
                     The plan didn't specify. Standard header has tags.
                 */}
-                <div className="px-6 py-3 border-b border-slate-800 bg-slate-900/50">
-                    <h1 className="text-xl font-semibold text-white mb-2">{activeEntry.title}</h1>
-                    <TagList
-                        tags={activeEntry.frontmatter.tags || []}
-                        onAdd={mode === 'edit' ? (tag) => addTag(activeEntry.id, tag) : undefined}
-                        onRemove={mode === 'edit' ? (tag) => removeTag(activeEntry.id, tag) : undefined}
-                        onTagClick={(tag) => setTagFilter(tag)}
-                        editable={mode === 'edit'}
-                    />
-                </div>
+                <SessionHeader
+                    className="border-b border-slate-800 bg-slate-900/50"
+                    isFullWidth={isFullWidth}
+                    onToggleWidth={() => setIsFullWidth(!isFullWidth)}
+                />
 
                 <div className="flex-1 overflow-hidden">
-                    <SessionPanel className="h-full" />
+                    <SessionPanel
+                        className="h-full"
+                        isFullWidth={isFullWidth}
+                    />
                 </div>
             </div>
         );

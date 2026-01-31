@@ -168,6 +168,37 @@ export const useDmChatStore = create<DmChatState>()(
                         contextPanelTitle = activeEntry.title
                         contextContent = activeEntry.content
                     }
+
+                    // Include Active Session Context
+                    const { useSessionStore } = await import('./useSessionStore')
+                    const { activeSessionId, sessions } = useSessionStore.getState()
+
+                    if (activeSessionId) {
+                        const session = sessions.find(s => s.id === activeSessionId)
+
+                        if (session) {
+                            // Format cards roughly:
+                            // [Header]
+                            // Result: ...
+                            const sessionLog = session.cards.map(card => {
+                                const parts = [`> ${card.header}`];
+                                if (card.result) parts.push(`Result: ${card.result}`);
+                                // Optional: Include content blocks if useful? User asked for Header + Result.
+                                // Let's keep it clean for now.
+                                return parts.join('\n');
+                            }).join('\n\n');
+
+                            if (sessionLog) {
+                                const header = `\n\n=== ACTIVE SESSION LOG (${session.cards.length} Cards) ===\n`;
+                                contextContent = (contextContent || '') + header + sessionLog;
+
+                                // If no panel was named, use session ID as title context hint
+                                if (!contextPanelTitle) {
+                                    contextPanelTitle = `Session: ${activeSessionId}`;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Create user message
@@ -190,17 +221,22 @@ export const useDmChatStore = create<DmChatState>()(
                     const { logToEntry } = useSettingsStore.getState().settings.dice
 
                     if (logToEntry) {
-                        const { logThread } = await import('../core/results/threadEngine')
-                        logThread({
-                            header: 'User',
-                            result: content,
-                            content: '',
-                            source: 'user',
-                            intent: 'prompt',
-                            meta: {
-                                fromDmChat: true
-                            }
-                        })
+                        // Use useSessionStore instead of logThread
+                        const { useSessionStore } = await import('./useSessionStore')
+                        const { addCard } = useSessionStore.getState()
+                        const { activeSessionId } = useSessionStore.getState()
+
+                        if (activeSessionId) {
+                            const { createUserCard } = await import('../utils/threadCardFactory')
+                            const card = createUserCard(activeSessionId, {
+                                input: content,
+                                source: 'Player'
+                            })
+                            // Add meta for chat tracking if needed
+                            card.meta = { ...card.meta, fromDmChat: true }
+
+                            addCard(card)
+                        }
                     }
                 } catch (e) {
                     console.error('Failed to auto-log user message', e)
@@ -265,27 +301,23 @@ export const useDmChatStore = create<DmChatState>()(
                         const { logToEntry } = useSettingsStore.getState().settings.dice
 
                         if (logToEntry) {
-                            const { logThread } = await import('../core/results/threadEngine')
 
-                            // Check if response is an interpretation
-                            // The user mentioned "Interpretation from AI Chat".
-                            // If the persona is specifically "The Interpreter" or context implies it?
-                            // Usually just log as AI/Interpretation. 
-                            // Using 'ai' source or 'interpretation' source?
-                            // Let's use 'interpretation' if it seems like one, or just generic AI.
-                            // But usually DM chat is "The Guide" etc.
-                            // Let's use the persona name in the header.
+                            const { useSessionStore } = await import('./useSessionStore')
+                            const { addCard } = useSessionStore.getState()
+                            const { activeSessionId } = useSessionStore.getState()
 
-                            logThread({
-                                header: `Interpretation: ${personaName}`,
-                                result: response.content,
-                                content: '',
-                                source: 'interpretation', // Using 'interpretation' style (purple) as requested implicitly by screenshot showing purple header
-                                meta: {
-                                    personaId: selectedPersonaId as any,
-                                    fromDmChat: true,
-                                },
-                            })
+                            if (activeSessionId) {
+                                const { createAICard } = await import('../utils/threadCardFactory')
+
+                                const card = createAICard(activeSessionId, {
+                                    persona: personaName,
+                                    interpretation: response.content,
+                                    model: settings.model,
+                                })
+                                card.meta = { ...card.meta, fromDmChat: true, personaId: selectedPersonaId }
+
+                                addCard(card)
+                            }
                         }
                     } catch (e) {
                         console.error('Failed to auto-log assistant message', e)
@@ -377,17 +409,21 @@ export const useDmChatStore = create<DmChatState>()(
                 const { getPersonaById } = await import('../core/ai/personaDefaults')
                 const persona = getPersonaById(selectedPersonaId as any)
 
-                const { logThread } = await import('../core/results/threadEngine')
-                logThread({
-                    header: `Interpretation: ${persona?.defaultName || 'DM'}`,
-                    result: message.content,
-                    content: '',
-                    source: 'interpretation',
-                    meta: {
-                        personaId: selectedPersonaId as any,
-                        fromDmChat: true,
-                    },
-                })
+                const { useSessionStore } = await import('./useSessionStore')
+                const { addCard } = useSessionStore.getState()
+                const { activeSessionId } = useSessionStore.getState()
+
+                if (activeSessionId) {
+                    const { createAICard } = await import('../utils/threadCardFactory')
+
+                    const card = createAICard(activeSessionId, {
+                        persona: persona?.defaultName || 'DM',
+                        interpretation: message.content,
+                    })
+                    card.meta = { ...card.meta, fromDmChat: true, personaId: selectedPersonaId }
+
+                    addCard(card)
+                }
             },
 
             createPanelFromResponse: async (messageId: string) => {

@@ -3,19 +3,18 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AppLayout } from './components/layout/AppLayout';
 
 import { DiceOverlay } from './components/overlays/DiceOverlay';
+import { AppInitializer } from './components/init/AppInitializer';
+import { diceEngine } from './integrations/anvil-dice-app'; // Add explicit import to force bundle
 
-import { useEffect } from 'react';
-import { initializeThreadEngine } from './core/results/threadEngine';
 
 function App() {
-  useEffect(() => {
-    return initializeThreadEngine();
-  }, []);
-
   return (
     <DndProvider backend={HTML5Backend}>
-      <DiceOverlay />
-      <AppLayout />
+      {/* AppInitializer handles splash screen and global setup */}
+      <AppInitializer>
+        <DiceOverlay />
+        <AppLayout />
+      </AppInitializer>
     </DndProvider>
   );
 }

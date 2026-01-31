@@ -16,6 +16,110 @@ export interface ValidationResult {
   errors: string[];
 }
 
+// ------------------------------------------------------------------
+// Internal Helper: Resolve Roll (3D Dice vs Standard)
+// ------------------------------------------------------------------
+async function resolveRoll(
+  tableId: string,
+  options?: RollOptions,
+  silent?: boolean
+): Promise<{ result: RollResult; table?: Table }> {
+  // 1. Check if we should use 3D Dice (Not silent, no forced seed/value, engine available)
+  // We lazy-import to avoid circular dependencies or initialization issues
+  const { diceEngine } = await import('../integrations/anvil-dice-app');
+
+  const shouldUse3D =
+    !silent &&
+    !options?.rollValue &&
+    !options?.seed &&
+    !!diceEngine.getEngineCore();
+
+  if (shouldUse3D) {
+    // Import heavy dependencies only when needed
+    const { WeaveService } = await import('../core/weave/WeaveService');
+    const {
+      RandomTableEngine,
+      getRollMode,
+    } = await import('../core/weave/RandomTableEngine');
+
+    // Load table to determine dice expression
+    // We prefer the service lookup to ensure we have the full table object
+    const tableResponse = await WeaveService.getTable(tableId);
+
+    if (tableResponse.error || !tableResponse.table) {
+      throw new Error(tableResponse.error || `Table ${tableId} not found`);
+    }
+
+    const table = tableResponse.table;
+    const mode = getRollMode(table);
+
+    // Determine Expression
+    let expression = '';
+    let isSpecial = false;
+
+    switch (mode) {
+      case 'd66':
+        expression = '2d6';
+        isSpecial = true;
+        break;
+      case 'd88':
+        expression = '2d8';
+        isSpecial = true;
+        break;
+      case 'standard':
+        expression =
+          table.maxRoll === 100 ? 'd%' : `d${table.maxRoll || 20}`;
+        break;
+      default:
+        expression = mode; // 2d6, 2d10 etc.
+        break;
+    }
+
+    // Perform 3D Roll
+    // We pass suppressLogging: true so DiceOverlay doesn't create a duplicate Dice Thread Card
+    const diceResult = await diceEngine.roll(expression, {
+      meta: { suppressLogging: true }
+    });
+
+    // Calculate Forced Value
+    let forcedValue = diceResult.total;
+    if (isSpecial && (mode === 'd66' || mode === 'd88')) {
+      // d66/d88: Treat first die as tens, second as ones
+      // We assume breakdown order is consistent or random enough
+      const rolls = diceResult.breakdown?.map((b) => b.value) || [];
+      if (rolls.length >= 2) {
+        forcedValue = rolls[0] * 10 + rolls[1];
+      }
+    }
+
+    // Resolve Result Locally using Forced Value
+    // This allows us to use the visual result for the logical lookup
+    const engine = new RandomTableEngine();
+    const result = engine.roll(table, {
+      ...options,
+      rollValue: forcedValue,
+    });
+
+    return { result, table };
+  } else {
+    // 2. Standard Backup Path (IPC / Backend validation)
+    const { WeaveService } = await import('../core/weave/WeaveService');
+
+    // WeaveService.roll handles logging internally if !silent
+    // But we need the table object for the store state sometimes, though here we just return result
+    // The service roll returns RollResult directly (helper method)
+    const result = await WeaveService.roll(tableId, options?.seed, silent);
+
+    // We assume backend fetched table. If we need it returned, we might need an extra call
+    // But for the Store's purpose, we mostly just need the Result.
+    // However, if we wanted to be consistent with 'table' return, we'd need to fetch it.
+    // Optimization: Don't fetch table if not needed.
+    return { result, table: undefined };
+  }
+}
+
+// ------------------------------------------------------------------
+
 // Helper function to format result values
 const formatResultValue = (result: ResultValue): string => {
   if (typeof result === 'string') {
@@ -465,7 +569,18 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
 
   rollTable: async (tableId: string, options?: RollOptions, silent?: boolean) => {
     try {
-      const result = await WeaveService.roll(tableId, options?.seed, silent);
+      const { result, table } = await resolveRoll(tableId, options, silent);
+
+      // If we resolved locally (3D dice), we must manually log to Thread
+      // If we resolved via Service (Standard), it handles logging internally
+      // How do distinguish? 'table' is returned if we did 3D / manual resolution.
+      const shouldLog = !silent && !options?.suppressLogging;
+
+      if (table && shouldLog) {
+        const { logWeaveRoll } = await import('../core/weave/weaveRollLogger');
+        await logWeaveRoll(table.name, table, result);
+      }
+
       get().addRollLogEntry(result);
       return result;
     } catch (err) {
@@ -482,7 +597,16 @@ export const useWeaveStore = create<WeaveStore>((set, get) => ({
 
       for (const tableId of tableIds) {
         try {
-          const result = await WeaveService.roll(tableId, options?.seed, silent);
+          const { result, table } = await resolveRoll(tableId, options, silent);
+
+          // Manual log if 3D resolved
+          const shouldLog = !silent && !options?.suppressLogging;
+
+          if (table && shouldLog) {
+            const { logWeaveRoll } = await import('../core/weave/weaveRollLogger');
+            await logWeaveRoll(table.name, table, result);
+          }
+
           results.push(result);
           get().addRollLogEntry(result);
         } catch (err) {

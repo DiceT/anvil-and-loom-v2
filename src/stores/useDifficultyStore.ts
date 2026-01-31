@@ -14,7 +14,7 @@ interface DifficultyState {
 }
 
 export const useDifficultyStore = create<DifficultyState>((set) => ({
-    targetNumber: 15, // Default DC
+    targetNumber: 10, // Default DC
     tierDifferential: -3, // Default for DC-3 (Success with Consequence = DC - 3)
     actionBonus: 3, // Default Action Bonus
     isEnabled: false,

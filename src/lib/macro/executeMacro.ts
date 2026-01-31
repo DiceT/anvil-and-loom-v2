@@ -1,5 +1,6 @@
 import { MacroSlot } from '../../types/macro'
 import { useEditorStore } from '../../stores/useEditorStore'
+import { diceEngine } from '../../integrations/anvil-dice-app'
 
 
 /**
@@ -28,14 +29,30 @@ export async function executeMacro(slot: MacroSlot): Promise<void> {
     }
 }
 
+
+
 async function executeDiceMacro(slot: MacroSlot): Promise<void> {
     if (!slot.diceExpression) return
 
-    // Import dice engine and roll
+    // Import dice engine logic only (helper)
     const { rollDiceExpression } = await import('../../core/dice/diceEngine')
+
+    // Check if 3D engine is active BEFORE rolling. 
+    // We use the static import singleton to ensure identity match with Overlay.
+    const is3dEngineActive = !!diceEngine.getEngineCore();
+    console.log('[executeDiceMacro] is3dEngineActive:', is3dEngineActive);
+
+    // Check if DiceOverlay is actually mounted/listening (implicitly by engine check)
+    // There is a race condition where getEngineCore is true but listeners aren't ready?
+    // Unlikely if it's a singleton initialized in App root.
+
     const result = await rollDiceExpression(slot.diceExpression)
 
-    // Import store to add card
+    // If the 3D engine handled the roll, DiceOverlay has already logged it.
+    // We only manually log if we fell back to the non-3D calculator.
+    if (is3dEngineActive) return;
+
+    // Manual logging for fallback/headless mode
     const { useSessionStore } = await import('../../stores/useSessionStore')
     const { createDiceCard } = await import('../../utils/threadCardFactory')
 
@@ -46,8 +63,7 @@ async function executeDiceMacro(slot: MacroSlot): Promise<void> {
             expression: slot.diceExpression,
             rolls: result.rolls.map((r: any) => r.value),
             total: result.total,
-            modifier: 0, // Simplified for now
-            // success: result.success // If available
+            modifier: 0,
         })
         addCard(card)
     }
@@ -57,34 +73,66 @@ async function executeTableMacro(slot: MacroSlot): Promise<void> {
     if (!slot.tableId) return
 
     const { useWeaveStore } = await import('../../stores/useWeaveStore')
-    const { logWeaveRoll } = await import('../../core/weave/weaveRollLogger')
 
     const store = useWeaveStore.getState();
     let table = store.tables.find(t => t.id === slot.tableId);
 
-    if (!table) {
-        // Try loading if not in store
-        const { WeaveService } = await import('../../core/weave/WeaveService');
-        try {
-            table = await WeaveService.loadTable(slot.tableId!);
-        } catch (err) {
-            console.warn(`[Macro] Failed to load table: ${slot.tableId}`, err);
-            return;
+    // Fallback: If ID not found, try to fuzzy match by Name (handling the Haunted Catacombs case)
+    if (!table && (slot.tableName || slot.label)) {
+        const targetName = slot.tableName || slot.label;
+        // Try exact match in-memory first
+        table = store.tables.find(t => t.name === targetName);
+
+        if (!table && targetName) {
+            console.log(`[Macro] ID lookup failed for ${slot.tableId}, tried name match for "${targetName}" -> Not Found in Store. Checking Disk...`);
+
+            try {
+                const { WeaveService } = await import('../../core/weave/WeaveService');
+
+                // Fetch ALL available tables (User + Environment)
+                // This is heavier but necessary for repair
+                const [userTables, envTables] = await Promise.all([
+                    WeaveService.getTables(),
+                    WeaveService.getEnvironmentTables()
+                ]);
+
+                const allTables = [...(userTables.tables || []), ...(envTables.tables || [])];
+
+                // Search in full list
+                table = allTables.find(t => t.name === targetName);
+
+                if (table) {
+                    console.log(`[Macro] FOUND "${targetName}" on disk with ID: ${table.id}. Using this ID.`);
+                    // Optional: Modify slot in store to fix future clicks? 
+                    // Cannot easily do that from here without the store action.
+                }
+            } catch (diskErr) {
+                console.warn('[Macro] Failed to search disk for table name:', diskErr);
+            }
         }
     }
 
     if (!table) {
-        console.warn(`[Macro] Table load returned null: ${slot.tableId}`);
+        // Try loading if not in store (standard path for valid IDs)
+        const { WeaveService } = await import('../../core/weave/WeaveService');
+        try {
+            if (slot.tableId) {
+                // Wrapper to catch ID load errors
+                table = await WeaveService.loadTable(slot.tableId);
+            }
+        } catch (err) {
+            console.warn(`[Macro] Failed to load table by ID: ${slot.tableId}`, err);
+        }
+    }
+
+    if (!table) {
+        console.warn(`[Macro] Table load returned null: ${slot.tableId} (${slot.tableName})`);
         return;
     }
 
-    // Pass silent=true to prevent internal duplication if any, but mainly we want the Result object
-    const result = await store.rollTable(table.id, undefined, true)
-
-    if (!result) return
-
-    // Use the central Weave Logger to ensure consistent formatting, Metadata, and Action Buttons
-    await logWeaveRoll(table.name, table, result);
+    // Use the central store action which now handles 3D dice and logging internally
+    // We pass silent=false (default) to enable 3D dice and logging
+    await store.rollTable(table.id);
 }
 
 async function executePanelMacro(slot: MacroSlot): Promise<void> {
@@ -104,8 +152,13 @@ async function executeOracleMacro(slot: MacroSlot): Promise<void> {
     const { useWeaveStore } = await import('../../stores/useWeaveStore')
     const store = useWeaveStore.getState()
 
-    // Pass silent=true to prevent individual thread creation
-    const results = await store.rollMultiple(slot.oracleTableIds, undefined, true)
+    // We want 3D dice (silent=false) but we suppress individual table cards
+    // because we will create one combined Oracle card at the end.
+    const results = await store.rollMultiple(
+        slot.oracleTableIds,
+        { suppressLogging: true },
+        false
+    );
 
     if (!results || results.length !== 2) {
         console.error('[executeMacro] Failed to get results for oracle tables:', slot.oracleTableIds);

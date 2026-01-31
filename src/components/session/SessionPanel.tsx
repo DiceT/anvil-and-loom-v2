@@ -11,10 +11,12 @@ import { useActiveSession, useSessionStore } from '../../stores/useSessionStore'
 import { useSessionActions } from '../../hooks/useSessionActions';
 
 interface SessionPanelProps {
+    isFullWidth?: boolean;
     className?: string;
 }
 
 export const SessionPanel: React.FC<SessionPanelProps> = ({
+    isFullWidth = false,
     className = '',
 }) => {
     const session = useActiveSession();
@@ -67,6 +69,7 @@ export const SessionPanel: React.FC<SessionPanelProps> = ({
                 onAction={handleAction}
                 showTimestamps={true}
                 autoScroll={true}
+                isFullWidth={isFullWidth}
                 className="flex-1"
             />
         </div>

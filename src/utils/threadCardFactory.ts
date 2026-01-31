@@ -73,17 +73,19 @@ export function createDiceCard(
     total: number;
     dc?: number;
     success?: boolean;
+    outcome?: string;
+    formattedResult?: string;
   }
 ): ThreadCard {
-  const { expression, rolls, modifier, total, dc, success } = options;
-  
+  const { expression, rolls, modifier, total, dc, success, outcome } = options;
+
   // Build header
   let header = `🎲 Dice: ${expression}`;
   if (dc !== undefined) {
     const icon = success ? '✅' : '❌';
     header += ` | DC ${dc} ${icon}`;
   }
-  
+
   // Build content
   const content: ContentBlock[] = [
     { label: 'Expression', value: expression, type: 'code' },
@@ -92,18 +94,22 @@ export function createDiceCard(
   if (modifier !== undefined && modifier !== 0) {
     content.push({ label: 'Modifier', value: `${modifier >= 0 ? '+' : ''}${modifier}` });
   }
-  
+
   // Build result
   let result: string;
-  if (dc !== undefined) {
+  if (options.formattedResult) {
+    result = options.formattedResult;
+  } else if (outcome) {
+    result = `Total: ${total} → ${outcome}`; // Simplified
+  } else if (dc !== undefined) {
     const status = success ? 'SUCCESS' : 'FAILURE';
     result = `Total: ${total} vs DC ${dc} → ${status}`;
   } else {
     result = `Total: ${total}`;
   }
-  
+
   const card = createBaseCard('dice', sessionId, header, result, content);
-  
+
   // Add meta
   card.meta = {
     expression,
@@ -113,7 +119,7 @@ export function createDiceCard(
     dc,
     success,
   } as DiceCardMeta;
-  
+
   return card;
 }
 
@@ -125,23 +131,53 @@ export function createOracleCard(
   options: {
     tableId: string;
     tableName: string;
+    category?: string;
     tableChain?: string[];
     rollValue: number | number[];
     result: string;
   }
 ): ThreadCard {
-  const { tableId, tableName, tableChain = [tableName], rollValue, result } = options;
-  
-  const header = `🎴 Oracle: ${tableName}`;
-  
+  const { tableId, tableName, category, tableChain = [tableName], rollValue, result } = options;
+
+  let header = `🎴 Oracle: ${tableName}`;
+
+  // Custom formatting for Aspects and Domains hierarchies
+  // Requested Format: ORACLE: ASPECT - HAUNTED: ATMOSPHERE
+
+  // Strategy 1: Use explicit Category if provided (Most Reliable)
+  if (category) {
+    if (category.startsWith('Aspect - ')) {
+      const parent = category.replace('Aspect - ', '').toUpperCase();
+      const subtable = tableName.toUpperCase();
+      header = `🎴 ORACLE: ASPECT - ${parent}: ${subtable}`;
+    } else if (category.startsWith('Domain - ')) {
+      const parent = category.replace('Domain - ', '').toUpperCase();
+      const subtable = tableName.toUpperCase();
+      header = `🎴 ORACLE: DOMAIN - ${parent}: ${subtable}`;
+    }
+  }
+  // Strategy 2: Fallback to Table Chain (for compatibility)
+  else if (tableChain && tableChain.length >= 2) {
+    // Helper to identify known Categories if missing from chain
+    const KNOWN_ASPECTS = ['Blighted', 'Forgotten', 'Hallow', 'Haunted', 'Infested', 'Overgrown', 'Profane'];
+    const KNOWN_DOMAINS = ['Catacombs', 'Cemetery', 'Dungeon', 'Forest', 'Marsh', 'Mire', 'Temple', 'Cavern', 'Desert', 'Frozen', 'Ocean', 'Ruins', 'Shadowlands', 'Stronghold', 'Underkeep'];
+
+    const root = tableChain[0];
+    if (KNOWN_ASPECTS.includes(root)) {
+      header = `🎴 ORACLE: ASPECT - ${root.toUpperCase()}: ${(tableChain[1] || tableName).toUpperCase()}`;
+    } else if (KNOWN_DOMAINS.includes(root)) {
+      header = `🎴 ORACLE: DOMAIN - ${root.toUpperCase()}: ${(tableChain[1] || tableName).toUpperCase()}`;
+    }
+  }
+
   // Build content
   const content: ContentBlock[] = [
     { label: 'Tables', value: tableChain.join(' → '), type: 'table-chain' },
     { label: 'Roll', value: Array.isArray(rollValue) ? rollValue.join(', ') : String(rollValue) },
   ];
-  
+
   const card = createBaseCard('oracle', sessionId, header, result, content);
-  
+
   // Add meta
   card.meta = {
     tableId,
@@ -149,7 +185,7 @@ export function createOracleCard(
     tableChain,
     rollValue,
   } as OracleCardMeta;
-  
+
   return card;
 }
 
@@ -166,24 +202,24 @@ export function createAICard(
   }
 ): ThreadCard {
   const { persona = 'The Guide', interpretation, model, contextCards } = options;
-  
+
   const header = `✨ ${persona}`;
-  
+
   // AI cards typically don't have collapsible content
   const content: ContentBlock[] = [];
   if (contextCards && contextCards.length > 0) {
     content.push({ label: 'Context', value: `${contextCards.length} card(s)` });
   }
-  
+
   const card = createBaseCard('ai', sessionId, header, interpretation, content);
-  
+
   // Add meta
   card.meta = {
     persona,
     model,
     contextCards,
   } as AICardMeta;
-  
+
   return card;
 }
 
@@ -198,12 +234,12 @@ export function createUserCard(
   }
 ): ThreadCard {
   const { input, source = 'Player' } = options;
-  
+
   const header = `📝 ${source}`;
-  
+
   // User cards have no collapsible content
   const card = createBaseCard('user', sessionId, header, input, []);
-  
+
   return card;
 }
 
@@ -220,9 +256,9 @@ export function createClockCard(
   }
 ): ThreadCard {
   const { name, segments, filled = 0, trigger } = options;
-  
+
   const header = `⏱ Clock: ${name}`;
-  
+
   // Build content
   const content: ContentBlock[] = [
     { label: 'Segments', value: String(segments) },
@@ -230,22 +266,22 @@ export function createClockCard(
   if (trigger) {
     content.push({ label: 'Trigger', value: trigger });
   }
-  
+
   const result = `Progress: ${filled}/${segments}`;
-  
+
   const card = createBaseCard('clock', sessionId, header, result, content);
-  
+
   // Add state
   card.state = {
     segments,
     filled,
   } as ClockCardState;
-  
+
   // Add meta
   if (trigger) {
     card.meta = { trigger } as ClockCardMeta;
   }
-  
+
   return card;
 }
 
@@ -263,12 +299,12 @@ export function createTrackCard(
   }
 ): ThreadCard {
   const { name, segments = 10, filled = 0, difficulty, description } = options;
-  
+
   let header = `📊 Track: ${name}`;
   if (difficulty) {
     header += ` | ${difficulty}`;
   }
-  
+
   // Build content
   const content: ContentBlock[] = [
     { label: 'Segments', value: String(segments) },
@@ -279,23 +315,23 @@ export function createTrackCard(
   if (description) {
     content.push({ label: 'Description', value: description });
   }
-  
+
   const result = `Progress: ${filled}/${segments}`;
-  
+
   const card = createBaseCard('track', sessionId, header, result, content);
-  
+
   // Add state
   card.state = {
     segments,
     filled,
   } as TrackCardState;
-  
+
   // Add meta
   card.meta = {
     difficulty,
     description,
   } as TrackCardMeta;
-  
+
   return card;
 }
 
@@ -310,7 +346,7 @@ export function createSystemCard(
   }
 ): ThreadCard {
   const { header, message = '' } = options;
-  
+
   return createBaseCard('system', sessionId, `⚙️ ${header}`, message, []);
 }
 
@@ -329,13 +365,13 @@ export function updateClockState(
     console.warn('[updateClockState] Card is not a clock');
     return card;
   }
-  
+
   const currentState = (card.state as ClockCardState) || { segments: 4, filled: 0 };
   const newState = { ...currentState, ...updates };
-  
+
   // Clamp filled to valid range
   newState.filled = Math.max(0, Math.min(newState.filled, newState.segments));
-  
+
   return {
     ...card,
     state: newState,
@@ -354,13 +390,13 @@ export function updateTrackState(
     console.warn('[updateTrackState] Card is not a track');
     return card;
   }
-  
+
   const currentState = (card.state as TrackCardState) || { segments: 10, filled: 0 };
   const newState = { ...currentState, ...updates };
-  
+
   // Clamp filled to valid range
   newState.filled = Math.max(0, Math.min(newState.filled, newState.segments));
-  
+
   return {
     ...card,
     state: newState,
@@ -374,7 +410,7 @@ export function updateTrackState(
 export function addTagsToCard(card: ThreadCard, tags: string[]): ThreadCard {
   const existingTags = card.tags || [];
   const newTags = [...new Set([...existingTags, ...tags])];
-  
+
   return {
     ...card,
     tags: newTags,
@@ -387,7 +423,7 @@ export function addTagsToCard(card: ThreadCard, tags: string[]): ThreadCard {
 export function removeTagsFromCard(card: ThreadCard, tags: string[]): ThreadCard {
   const existingTags = card.tags || [];
   const newTags = existingTags.filter(t => !tags.includes(t));
-  
+
   return {
     ...card,
     tags: newTags.length > 0 ? newTags : undefined,

@@ -75,7 +75,8 @@ export function WeaveTableEditor({ tableId }: WeaveTableEditorProps) {
     setShowRollResult(false);
 
     try {
-      const result = await WeaveService.roll(table.id);
+      const { rollTable } = useWeaveStore.getState();
+      const result = await rollTable(table.id);
       setRollResult(result);
       setShowRollResult(true);
     } catch (err) {

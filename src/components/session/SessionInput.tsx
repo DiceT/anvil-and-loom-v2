@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { SpeechButton } from './SpeechButton';
 import { useSessionStore } from '../../stores/useSessionStore';
-import { logThread } from '../../core/results/threadEngine';
+
 
 export function SessionInput() {
     const { activeSessionId } = useSessionStore();
@@ -17,20 +17,21 @@ export function SessionInput() {
         }
     }, [input]);
 
-    const handleSubmit = (e?: React.FormEvent) => {
+    const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!input.trim() || !activeSessionId) return;
 
         // Log to Thread Engine
-        logThread({
-            header: 'User', // TODO: Make this configurable (Player Name)
-            result: input.trim(),
-            content: input.trim(),
-            source: 'user', // Changed from 'chat' to 'user'
-            meta: {
-                type: 'chat'
-            }
+        // Create User Card
+        const { addCard } = useSessionStore.getState();
+        const { createUserCard } = await import('../../utils/threadCardFactory');
+
+        const card = createUserCard(activeSessionId, {
+            input: input.trim(),
+            source: 'Player'
         });
+
+        addCard(card);
 
         setInput('');
     };

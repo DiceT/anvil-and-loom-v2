@@ -176,38 +176,6 @@ async function loadJsonEntry(filePath) {
     let data = null;
     try {
       data = JSON.parse(jsonContent);
-      if ((!data.cards || data.cards.length === 0) && raw.includes(":::thread")) {
-        const cards = [];
-        const threadRegex = /:::thread\{([^}]+)\}\n([\s\S]*?)\n:::/g;
-        let match;
-        while ((match = threadRegex.exec(raw)) !== null) {
-          const metaString = match[1];
-          const content = match[2];
-          const typeMatch = metaString.match(/type="([^"]+)"/);
-          const tidMatch = metaString.match(/tid="([^"]+)"/);
-          const tsMatch = metaString.match(/timestamp="([^"]+)"/);
-          if (typeMatch && tidMatch) {
-            cards.push({
-              id: tidMatch[1],
-              type: typeMatch[1],
-              title: "Legacy Entry",
-              content: [],
-              // Store the raw markdown content in 'metadata' or similar if needed, 
-              // but for now we just want it to show up. 
-              // ThreadCard structure usually has 'content' as blocks or similar?
-              // Let's check ThreadCard type definition... 
-              // But for now, let's put it in a result field or similar to be safe.
-              result: content.trim(),
-              createdAt: tsMatch ? tsMatch[1] : (/* @__PURE__ */ new Date()).toISOString(),
-              tags: []
-            });
-          }
-        }
-        if (cards.length > 0) {
-          data.cards = cards;
-          jsonContent = JSON.stringify(data, null, 2);
-        }
-      }
     } catch (parseError) {
       if (raw.startsWith("---")) {
         const parts = raw.split("---");
@@ -217,29 +185,6 @@ async function loadJsonEntry(filePath) {
       }
       try {
         data = JSON.parse(jsonContent);
-        if ((!data.cards || data.cards.length === 0) && raw.includes(":::thread")) {
-          const cards = [];
-          const threadRegex = /:::thread\{([^}]+)\}\n([\s\S]*?)\n:::/g;
-          let match;
-          while ((match = threadRegex.exec(raw)) !== null) {
-            const metaString = match[1];
-            const typeMatch = metaString.match(/type="([^"]+)"/);
-            const tidMatch = metaString.match(/tid="([^"]+)"/);
-            if (typeMatch && tidMatch) {
-              cards.push({
-                id: tidMatch[1],
-                type: typeMatch[1],
-                title: "Legacy Entry",
-                result: match[2].trim(),
-                tags: []
-              });
-            }
-          }
-          if (cards.length > 0) {
-            data.cards = cards;
-            jsonContent = JSON.stringify(data, null, 2);
-          }
-        }
       } catch (innerError) {
         const start = jsonContent.indexOf("{");
         if (start !== -1) {
@@ -252,26 +197,6 @@ async function loadJsonEntry(filePath) {
               tags: [],
               cards: []
             };
-            if (raw.includes(":::thread")) {
-              const cards = [];
-              const threadRegex = /:::thread\{([^}]+)\}\n([\s\S]*?)\n:::/g;
-              let match;
-              while ((match = threadRegex.exec(raw)) !== null) {
-                const metaString = match[1];
-                const typeMatch = metaString.match(/type="([^"]+)"/);
-                const tidMatch = metaString.match(/tid="([^"]+)"/);
-                if (typeMatch && tidMatch) {
-                  cards.push({
-                    id: tidMatch[1],
-                    type: typeMatch[1],
-                    title: "Recovered Entry",
-                    result: match[2].trim(),
-                    tags: []
-                  });
-                }
-              }
-              data.cards = cards;
-            }
             jsonContent = JSON.stringify(data, null, 2);
           }
         }
@@ -1064,6 +989,9 @@ async function readTableFiles(dirPath) {
               table.id = uuid.v5(uniqueString, STANDARD_NAMESPACE);
             }
             table.sourcePath = filePath;
+            if (table.name.includes("Haunted") || table.name.includes("Catacombs")) {
+              console.log(`[IPC] Loaded table: ${table.name} (${table.category}) -> ID: ${table.id}`);
+            }
             tableCache.set(table.id, table);
             tables.push(table);
           }
@@ -1220,7 +1148,8 @@ function registerWeaveHandlers() {
           table = JSON.parse(data);
           table.sourcePath = filePath;
           tableCache.set(tableId, table);
-        } catch {
+        } catch (err) {
+          console.log(`[IPC] Table ${tableId} not found in .weave`, err);
           const envDir = getNamespaceDirPath(".environment");
           filePath = path__namespace.join(envDir, `${tableId}.json`);
           try {
@@ -1229,10 +1158,22 @@ function registerWeaveHandlers() {
             table.sourcePath = filePath;
             tableCache.set(tableId, table);
           } catch {
-            return {
-              table: null,
-              error: `Table with ID ${tableId} not found`
-            };
+            try {
+              const standardPath = getStandardTablesPath();
+              await readTableFiles(standardPath);
+              table = findTableById(tableId);
+              if (!table) {
+                return {
+                  table: null,
+                  error: `Table with ID ${tableId} not found`
+                };
+              }
+            } catch (err2) {
+              return {
+                table: null,
+                error: `Table with ID ${tableId} not found (Scan failed: ${err2})`
+              };
+            }
           }
         }
       }
@@ -1310,10 +1251,19 @@ function registerWeaveHandlers() {
       }
       let table = findTableById(tableId);
       if (!table) {
-        return {
-          result: null,
-          error: `Table with ID ${tableId} not found`
-        };
+        try {
+          const standardPath = getStandardTablesPath();
+          await readTableFiles(standardPath);
+          table = findTableById(tableId);
+        } catch (err) {
+          console.error("[IPC] Failed to scan standard tables during roll:", err);
+        }
+        if (!table) {
+          return {
+            result: null,
+            error: `Table with ID ${tableId} not found`
+          };
+        }
       }
       const options = {};
       if (seed) {

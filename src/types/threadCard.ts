@@ -60,43 +60,43 @@ export interface ThreadCard {
   // ─────────────────────────────────────────────────────────────────────────
   // Identity
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /** Unique identifier (UUID format) */
   id: string;
-  
+
   /** ID of the session this card belongs to */
   sessionId: string;
-  
+
   /** ISO 8601 timestamp of creation */
   timestamp: string;
 
   // ─────────────────────────────────────────────────────────────────────────
   // Type
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /** The card type, determines behavior and default actions */
   type: ThreadCardType;
 
   // ─────────────────────────────────────────────────────────────────────────
   // Display
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /** Header text (e.g., "🎲 Dice: 2d6+1", "🎴 Oracle: Aspect") */
   header: string;
-  
+
   /** Optional icon override (emoji or icon key) */
   icon?: string;
 
   // ─────────────────────────────────────────────────────────────────────────
   // Content
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /** 
    * Collapsible content blocks showing mechanics/steps.
    * Hidden by default, revealed on header click.
    */
   content: ContentBlock[];
-  
+
   /** 
    * The visible result/outcome.
    * This is what matters narratively.
@@ -106,7 +106,7 @@ export interface ThreadCard {
   // ─────────────────────────────────────────────────────────────────────────
   // State (Mutable)
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /**
    * Mutable state for interactive cards (clocks, tracks).
    * Updated by user actions.
@@ -116,7 +116,7 @@ export interface ThreadCard {
   // ─────────────────────────────────────────────────────────────────────────
   // Metadata (Immutable)
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /**
    * Type-specific immutable metadata.
    * Examples: roll breakdown, table chain, AI persona.
@@ -126,7 +126,7 @@ export interface ThreadCard {
   // ─────────────────────────────────────────────────────────────────────────
   // Organization
   // ─────────────────────────────────────────────────────────────────────────
-  
+
   /** User-applied tags for filtering and curation */
   tags?: string[];
 }
@@ -143,6 +143,8 @@ export interface DiceCardMeta {
   total: number;
   dc?: number;
   success?: boolean;
+  outcome?: string;
+  [key: string]: unknown;
 }
 
 /** Metadata for oracle cards */
@@ -151,6 +153,7 @@ export interface OracleCardMeta {
   tableName: string;
   tableChain: string[];
   rollValue: number | number[];
+  [key: string]: unknown;
 }
 
 /** Metadata for AI interpretation cards */
@@ -158,17 +161,20 @@ export interface AICardMeta {
   persona: string;
   model?: string;
   contextCards?: string[];
+  [key: string]: unknown;
 }
 
 /** Metadata for clock cards */
 export interface ClockCardMeta {
   trigger?: string;
+  [key: string]: unknown;
 }
 
 /** Metadata for track cards */
 export interface TrackCardMeta {
   difficulty?: string;
   description?: string;
+  [key: string]: unknown;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -179,12 +185,14 @@ export interface TrackCardMeta {
 export interface ClockCardState {
   segments: number;
   filled: number;
+  [key: string]: unknown;
 }
 
 /** State for track cards */
 export interface TrackCardState {
   segments: number;
   filled: number;
+  [key: string]: unknown;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

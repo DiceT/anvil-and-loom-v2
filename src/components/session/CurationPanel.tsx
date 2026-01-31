@@ -1,5 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { useSessionStore, useActiveSession } from '../../stores/useSessionStore';
+import { Trash2, FolderPlus, Clipboard } from 'lucide-react';
+import { useTapestryStore } from '../../stores/useTapestryStore';
+import { useEditorStore } from '../../stores/useEditorStore';
 import { ThreadCard } from './ThreadCard'; // Use full card for now, or compact if available
 import { threadCardsToMarkdown } from '../../utils/threadCardMarkdown';
 // import type { ThreadCard } from '../../types/threadCard';
@@ -58,30 +61,63 @@ export const CurationPanel: React.FC<CurationPanelProps> = ({
         const selected = getSelectedCards();
         if (selected.length === 0) return;
 
-        // We need a helper to convert cards to markdown
-        // Assuming threadCardsToMarkdown exists or we stub it
-        const markdown = selected.map(c => `**${c.header}**\n${c.content.map(b => b.value).join('\n')}`).join('\n\n');
+        const markdown = selected.map(c => `###### ${c.header}\n${c.result}\n\n---\n`).join('\n');
         await navigator.clipboard.writeText(markdown);
 
         console.log('[CurationPanel] Copied to clipboard');
     }, [getSelectedCards]);
 
-    const exportAsMarkdown = useCallback(() => {
+    const createPanelFromSelection = useCallback(async () => {
         const selected = getSelectedCards();
         if (selected.length === 0) return;
 
-        // Stub implementation
-        const markdown = selected.map(c => `**${c.header}**\n${c.content.map(b => b.value).join('\n')}`).join('\n\n');
+        // Format Markdown
+        const markdown = selected.map(c => `###### ${c.header}\n${c.result}\n\n---\n`).join('\n');
 
-        // Create and download file
-        const blob = new Blob([markdown], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${activeSession?.title || 'export'}.md`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const timestamp = new Date().toLocaleString().replace(/[/:]/g, '-');
+        const title = `Curation ${timestamp}`;
+
+        try {
+            // 1. Create Entry
+            // We use 'root' (or empty?) category to put it in the root entries folder if possible, 
+            // or just let createEntry fallback to 'entries' if category is invalid/handled. 
+            // The request said "in the Root of the tapestry directory", but `createEntry` logic usually puts it in `entries`. 
+            // I'll use a category that might map to root, or just pass a custom path if `createEntry` allowed it, but it takes (dir, title, category). 
+            // Let's assume 'entries' is the "Root of the tapestry directory" for content. 
+            // Actually, `createEntry` in store takes category 'session' -> 'entries/Sessions'. Default is 'entries'. 
+            // So if I pass undefined or empty or 'general', it goes to 'entries'.
+
+            const { createEntry, saveFile } = useTapestryStore.getState();
+            const { openEntry } = useEditorStore.getState();
+
+            const newEntry = await createEntry(title, 'general');
+
+            // 2. Overwrite content
+            await saveFile(newEntry.path, markdown);
+
+            // 3. Open it
+            await openEntry(newEntry.path);
+
+            // Clear selection
+            setSelectedIds(new Set());
+
+        } catch (error) {
+            console.error('Failed to create curation panel:', error);
+            alert('Failed to create panel. check console.');
+        }
+
     }, [getSelectedCards, activeSession]);
+
+    const deleteSelectedThreads = useCallback(() => {
+        const selected = getSelectedCards();
+        if (selected.length === 0) return;
+
+        if (window.confirm(`Are you sure you want to delete ${selected.length} threads? This cannot be undone.`)) {
+            const { deleteCards } = useSessionStore.getState();
+            deleteCards(selected.map(c => c.id));
+            setSelectedIds(new Set());
+        }
+    }, [getSelectedCards]);
 
     const sendToPanel = useCallback((panelId: string) => {
         const selected = getSelectedCards();
@@ -157,7 +193,7 @@ export const CurationPanel: React.FC<CurationPanelProps> = ({
                         <div className="pl-8 p-2 opacity-80 pointer-events-none">
                             <div className="text-xs font-bold text-slate-400 mb-1">{card.header}</div>
                             <div className="text-sm text-slate-300 line-clamp-2">
-                                {card.content[0]?.value || 'No content'}
+                                {card.result || 'No result'}
                             </div>
                         </div>
                     </div>
@@ -193,13 +229,15 @@ export const CurationPanel: React.FC<CurationPanelProps> = ({
                         onClick={copyToClipboard}
                         disabled={selectedIds.size === 0}
                         className="
+              flex items-center justify-center gap-2
               w-full px-3 py-2 text-sm
               bg-slate-700 hover:bg-slate-600 
               disabled:opacity-50 disabled:cursor-not-allowed
               rounded transition-colors text-white
             "
                     >
-                        📋 Copy to Clipboard
+                        <Clipboard size={16} />
+                        <span>Copy to Clipboard</span>
                     </button>
 
                     {/* Send to Panel Dropdown */}
@@ -235,16 +273,33 @@ export const CurationPanel: React.FC<CurationPanelProps> = ({
                     )}
 
                     <button
-                        onClick={exportAsMarkdown}
+                        onClick={createPanelFromSelection}
                         disabled={selectedIds.size === 0}
                         className="
+              flex items-center justify-center gap-2
               w-full px-3 py-2 text-sm
               bg-violet-600 hover:bg-violet-500
               disabled:opacity-50 disabled:cursor-not-allowed
               rounded transition-colors text-white
             "
                     >
-                        📄 Export as Markdown
+                        <FolderPlus size={16} />
+                        <span>Create New Panel</span>
+                    </button>
+
+                    <button
+                        onClick={deleteSelectedThreads}
+                        disabled={selectedIds.size === 0}
+                        className="
+              flex items-center justify-center gap-2
+              w-full px-3 py-2 text-sm
+              bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-800
+              disabled:opacity-50 disabled:cursor-not-allowed
+              rounded transition-colors
+            "
+                    >
+                        <Trash2 size={16} />
+                        <span>Delete Selected</span>
                     </button>
                 </div>
             </div>

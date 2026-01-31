@@ -25,6 +25,7 @@ export async function logWeaveRoll(
     const card = createOracleCard(activeSessionId, {
       tableId: table.id,
       tableName: tableName,
+      category: table.category,
       tableChain: rollResult.tableChain,
       rollValue: rollResult.rolls,
       result: formatResultDisplay(rollResult.result), // We still need this helper or logic
@@ -169,11 +170,19 @@ async function buildContentAndMeta(rollResult: RollResult, table: Table): Promis
         }
 
         if (slot) {
-          targetLabel = slot.label;
+          // Fix for Truncated Labels:
+          // Use rawId (full name from table) if slot label seems truncated or missing
+          const useFullName = rawId && (
+            !slot.label ||
+            slot.label.endsWith('...') ||
+            slot.label.length < rawId.length
+          );
+
+          targetLabel = useFullName ? rawId : slot.label;
           targetId = slot.id; // The macro ID (Correct UUID for actions)
           resultText = targetLabel; // Display Name
         } else {
-          targetId = rawId; // This might be the name, which will fail actions, but we tried.
+          targetId = rawId; // This might be the name
           targetLabel = rawId; // Display whatever we have
           resultText = rawId;
         }

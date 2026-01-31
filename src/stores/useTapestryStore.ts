@@ -36,6 +36,7 @@ interface TapestryState {
     // Files
     saveFile: (path: string, content: string) => Promise<void>;
     createFile: (path: string, content: string) => Promise<void>;
+    renameEntry: (path: string, newName: string) => Promise<string>;
 }
 
 export const useTapestryStore = create<TapestryState>((set, get) => ({
@@ -311,6 +312,21 @@ export const useTapestryStore = create<TapestryState>((set, get) => ({
         } catch (error) {
             set({
                 error: error instanceof Error ? error.message : 'Failed to create entry',
+                isLoading: false
+            });
+            throw error;
+        }
+    },
+
+    renameEntry: async (path: string, newName: string) => {
+        set({ isLoading: true, error: undefined });
+        try {
+            const newPath = await window.electron.tapestry.rename(path, newName);
+            set({ isLoading: false });
+            return newPath;
+        } catch (error) {
+            set({
+                error: error instanceof Error ? error.message : 'Failed to rename entry',
                 isLoading: false
             });
             throw error;

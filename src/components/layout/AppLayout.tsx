@@ -17,7 +17,6 @@ import { GlobalDialogManager } from '../ui/GlobalDialogManager';
 import { SettingsModal } from '../settings/SettingsModal';
 
 import { useMacroShortcuts } from '../../hooks/useMacroShortcuts';
-import { DiceOverlay } from '../overlays/DiceOverlay';
 import { TheRing } from '../tools/TheRing';
 
 export function AppLayout() {
@@ -211,7 +210,6 @@ export function AppLayout() {
       <GlobalSessionModals />
 
       {/* Tool Modals */}
-      <DiceOverlay />
       <TheRing visible={isRingOpen} onClose={() => useToolStore.getState().toggleRing()} />
     </div>
   );

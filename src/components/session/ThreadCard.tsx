@@ -8,6 +8,8 @@
 import React, { useState, useCallback } from 'react';
 import type { ThreadCard as ThreadCardType, ActionButton } from '../../types/threadCard';
 import { getActionsForCard, getCommonActions } from '../../utils/threadCardActions';
+import { Trash2 } from 'lucide-react';
+import { useSessionStore } from '../../stores/useSessionStore';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -177,14 +179,13 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
     >
       {/* Header */}
       <div
-        onClick={toggleExpanded}
         className={`
           px-3 py-1.5 flex items-center justify-between
           ${style.header}
           ${hasContent ? 'cursor-pointer' : ''}
         `}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-1" onClick={toggleExpanded}>
           {hasContent && (
             <span className="text-xs opacity-70">
               {isExpanded ? '▼' : '▶'}
@@ -192,11 +193,27 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
           )}
           <span className="text-sm font-semibold">{card.header}</span>
         </div>
-        {showTimestamp && (
-          <span className="text-xs opacity-70">
-            {formatTimestamp(card.timestamp)}
-          </span>
-        )}
+
+        <div className="flex items-center gap-3">
+          {showTimestamp && (
+            <span className="text-xs opacity-70">
+              {formatTimestamp(card.timestamp)}
+            </span>
+          )}
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm('Delete this card?')) {
+                useSessionStore.getState().deleteCard(card.id);
+              }
+            }}
+            className="opacity-60 hover:opacity-100 hover:text-red-300 transition-opacity"
+            title="Delete Card"
+          >
+            <Trash2 size={12} />
+          </button>
+        </div>
       </div>
 
       {/* Content (Collapsible) */}
@@ -222,7 +239,13 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
       {/* Result */}
       <div className="px-3 py-2">
         <div className="text-sm text-slate-100 whitespace-pre-wrap">
-          {card.result}
+          {(() => {
+            // Debug log to trace truncation source
+            if (card.result && card.result.includes('Macro')) {
+              console.log('[ThreadCard] Rendering Result:', card.result);
+            }
+            return card.result;
+          })()}
         </div>
 
         {/* Tags */}

@@ -5,9 +5,9 @@
 // Actions are buttons displayed on the card that trigger specific behaviors.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import type { 
-  ThreadCard, 
-  ThreadCardType, 
+import type {
+  ThreadCard,
+  ThreadCardType,
   ActionButton,
   DiceCardMeta,
   OracleCardMeta,
@@ -24,13 +24,16 @@ import type {
  */
 function getDiceActions(card: ThreadCard): ActionButton[] {
   const meta = card.meta as DiceCardMeta | undefined;
-  
+
   return [
     {
       id: 'reroll',
       label: 'Re-roll',
       action: 'dice.reroll',
-      params: { expression: meta?.expression },
+      params: {
+        expression: meta?.expression,
+        meta: meta // Pass the entire meta object to preserve context (resolution, bonus, etc.)
+      },
     },
     {
       id: 'interpret',
@@ -46,7 +49,7 @@ function getDiceActions(card: ThreadCard): ActionButton[] {
  */
 function getOracleActions(card: ThreadCard): ActionButton[] {
   const meta = card.meta as OracleCardMeta | undefined;
-  
+
   return [
     {
       id: 'reroll',
@@ -58,7 +61,7 @@ function getOracleActions(card: ThreadCard): ActionButton[] {
       id: 'drill',
       label: 'Drill Down',
       action: 'oracle.drill',
-      params: { 
+      params: {
         tableId: meta?.tableId,
         result: card.result,
       },
@@ -137,7 +140,7 @@ function getClockActions(card: ThreadCard): ActionButton[] {
   const state = card.state as ClockCardState | undefined;
   const filled = state?.filled ?? 0;
   const segments = state?.segments ?? 4;
-  
+
   return [
     {
       id: 'advance',
@@ -170,7 +173,7 @@ function getTrackActions(card: ThreadCard): ActionButton[] {
   const state = card.state as TrackCardState | undefined;
   const filled = state?.filled ?? 0;
   const segments = state?.segments ?? 10;
-  
+
   return [
     {
       id: 'advance',

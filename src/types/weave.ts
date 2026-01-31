@@ -140,6 +140,12 @@ export interface RollOptions {
      * When provided, RNG is bypassed entirely (for external dice engines).
      */
     rollValue?: number;
+
+    /**
+     * Suppress creation of the Thread Card for this roll.
+     * Use this when the caller intends to create a custom/combined card (e.g. Macros).
+     */
+    suppressLogging?: boolean;
 }
 
 // ============================================================================

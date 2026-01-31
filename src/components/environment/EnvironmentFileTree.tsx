@@ -12,7 +12,6 @@ import { useEnvironmentStore } from '../../stores/useEnvironmentStore';
 import { useTabStore } from '../../stores/useTabStore';
 import { Table } from '../../types/weave';
 import { Plus, Dices, FileJson, ChevronRight, ChevronDown } from 'lucide-react';
-import { WeaveService } from '../../core/weave/WeaveService';
 import { ContextMenu } from '../weave/shared/ContextMenu';
 
 interface EnvironmentFileTreeProps { }
@@ -180,7 +179,8 @@ export function EnvironmentFileTree({ }: EnvironmentFileTreeProps) {
     const handleQuickRoll = async (e: React.MouseEvent, table: Table) => {
         e.stopPropagation();
         try {
-            await WeaveService.roll(table.id);
+            const { useWeaveStore } = await import('../../stores/useWeaveStore');
+            await useWeaveStore.getState().rollTable(table.id);
         } catch (err) {
             console.error('Failed to roll table:', err);
         }

@@ -27,8 +27,8 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useWeaveStore } from '../../stores/useWeaveStore';
 import { useTabStore } from '../../stores/useTabStore';
-import { WeaveService } from '../../core/weave/WeaveService';
-import { ContextMenu } from './shared/ContextMenu';
+
+import { ContextMenu } from '../weave/shared/ContextMenu';
 import type { Table } from '../../types/weave';
 import './shared/FileTree.css';
 
@@ -393,7 +393,8 @@ export function WeaveFileTree({ onNewTable, onDeleteTable }: WeaveFileTreeProps)
   const handleQuickRoll = async (table: Table, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await WeaveService.roll(table.id);
+      const { rollTable } = useWeaveStore.getState();
+      await rollTable(table.id);
     } catch (err) {
       console.error('Failed to roll table:', err);
     }

@@ -9,7 +9,7 @@ export class DiceEngine {
     private container: HTMLElement | null = null;
     private listeners: { [key: string]: Function[] } = {};
     private _pendingRollResolve: ((results: RollResult) => void) | null = null;
-    private _pendingOptions: { meta?: any } | undefined;
+    private _pendingOptions: { meta?: any; cachedSettings?: any } | undefined;
 
     constructor() {
         // Pre-load colors/textures if needed, or wait for initialize
@@ -46,7 +46,7 @@ export class DiceEngine {
         // Hook internal events
         this.engineCore.rollController.onRollComplete = (results) => {
             // Attach pending options if any
-            const augmentedResults = this._pendingOptions
+            const augmentedResults = this._pendingOptions?.meta
                 ? { ...results, meta: this._pendingOptions.meta }
                 : results;
 
@@ -56,10 +56,19 @@ export class DiceEngine {
                 this._pendingRollResolve(augmentedResults);
                 this._pendingRollResolve = null;
             }
-            this._pendingOptions = undefined;
+            // Retain cached settings, clear only roll options
+            if (this._pendingOptions) {
+                this._pendingOptions.meta = undefined;
+            }
         };
 
         this.engineCore.start();
+
+        // Apply any cached settings from pre-init
+        if (this._pendingOptions && (this._pendingOptions as any).cachedSettings) {
+            // console.log('[DiceEngine] Applying cached settings on init.');
+            this.updateSettings((this._pendingOptions as any).cachedSettings);
+        }
     }
 
     /**
@@ -140,6 +149,21 @@ export class DiceEngine {
         if (this.engineCore && this.container) {
             this.engineCore.handleResize(this.container);
             this.engineCore.fitBoundsToScreen();
+        }
+    }
+
+    /**
+     * Updates the engine settings (theme, physics, etc.)
+     * If the engine is not initialized, settings are cached and applied on initialization.
+     */
+    public updateSettings(settings: any): void {
+        if (this.engineCore && typeof (this.engineCore as any).updateSettings === 'function') {
+            (this.engineCore as any).updateSettings(settings);
+        } else {
+            // console.log('[DiceEngine] Core not ready. Caching settings for init.');
+            // Cache settings to be applied on initialize
+            if (!this._pendingOptions) this._pendingOptions = {};
+            this._pendingOptions = { ...this._pendingOptions, cachedSettings: settings };
         }
     }
 

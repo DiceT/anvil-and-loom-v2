@@ -113,7 +113,6 @@ export const rollTableAction: ThreadAction = {
         const tableId = meta.targetId; // This should be the Table ID or Name
 
         // Dynamically import service to handle execution
-        const { WeaveService } = await import('../../../core/weave/WeaveService');
         const { useWeaveStore } = await import('../../../stores/useWeaveStore');
 
         // Try to handle Name vs ID if needed, similar to Macros, 
@@ -129,11 +128,11 @@ export const rollTableAction: ThreadAction = {
             }
 
             if (table) {
-                await WeaveService.roll(table.id);
+                await store.rollTable(table.id);
             } else {
                 console.warn('[WeaveActions] Table not found for roll:', tableId);
                 // Try rolling by ID anyway, maybe it loads?
-                await WeaveService.roll(tableId);
+                await store.rollTable(tableId);
             }
         } catch (err) {
             console.error('[WeaveActions] Failed to roll table result', err);

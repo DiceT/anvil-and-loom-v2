@@ -206,6 +206,10 @@ async function readTableFiles(dirPath: string): Promise<Table[]> {
                         // (Note unless overriding, standard tables in arrays map to the same file)
                         table.sourcePath = filePath;
 
+                        if (table.name.includes('Haunted') || table.name.includes('Catacombs')) {
+                            console.log(`[IPC] Loaded table: ${table.name} (${table.category}) -> ID: ${table.id}`);
+                        }
+
                         tableCache.set(table.id, table);
                         tables.push(table);
                     }
@@ -440,7 +444,8 @@ export function registerWeaveHandlers() {
                     table = JSON.parse(data) as Table;
                     table.sourcePath = filePath;
                     tableCache.set(tableId, table);
-                } catch {
+                } catch (err) {
+                    console.log(`[IPC] Table ${tableId} not found in .weave`, err);
                     // Check .environment
                     const envDir = getNamespaceDirPath('.environment');
                     filePath = path.join(envDir, `${tableId}.json`);
@@ -451,17 +456,29 @@ export function registerWeaveHandlers() {
                         tableCache.set(tableId, table);
                     } catch {
                         // Check Standard tables
-                        // We might not know the exact path without scanning, but we shouldn't rely on getTable(id)
-                        // for discovery usually. However, if cache was cleared, we might need it.
-                        // Ideally we should reload all tables if we're desperate, or scan recursively.
-                        // For now, fail if not in cache or direct known paths.
-                        // Actually, let's try reading all standard tables into cache if we miss?
-                        // That's heavy.
-                        // Let's assume the frontend calls getTables first.
-                        return {
-                            table: null,
-                            error: `Table with ID ${tableId} not found`,
-                        };
+                        // Lazy-load: If not found in user files, scan the standard tables directory.
+                        // This ensures that macros referring to standard tables work even if the user hasn't
+                        // browsed the Environment panel yet.
+                        try {
+                            const standardPath = getStandardTablesPath();
+                            // readTableFiles automatically populates the tableCache
+                            await readTableFiles(standardPath);
+
+                            // Try to retrieve from cache again
+                            table = findTableById(tableId);
+
+                            if (!table) {
+                                return {
+                                    table: null,
+                                    error: `Table with ID ${tableId} not found`,
+                                };
+                            }
+                        } catch (err) {
+                            return {
+                                table: null,
+                                error: `Table with ID ${tableId} not found (Scan failed: ${err})`,
+                            };
+                        }
                     }
                 }
             }
@@ -577,12 +594,21 @@ export function registerWeaveHandlers() {
 
             // If checking a standard table that hasn't been loaded yet
             if (!table) {
-                // Try to reload tables to find it? Or simple fail?
-                // Since getTables is usually called at startup, it should be in cache.
-                return {
-                    result: null,
-                    error: `Table with ID ${tableId} not found`,
-                };
+                // FALLBACK: Lazy-load standard tables if not found
+                try {
+                    const standardPath = getStandardTablesPath();
+                    await readTableFiles(standardPath);
+                    table = findTableById(tableId);
+                } catch (err) {
+                    console.error('[IPC] Failed to scan standard tables during roll:', err);
+                }
+
+                if (!table) {
+                    return {
+                        result: null,
+                        error: `Table with ID ${tableId} not found`,
+                    };
+                }
             }
 
             const options: any = {};

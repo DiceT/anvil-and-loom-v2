@@ -1,14 +1,29 @@
-export type MaterialPreset = 'plastic' | 'metal' | 'wood' | 'glass';
-export type SurfaceType = 'felt' | 'wood' | 'metal';
+export type AssetTexture = 'ledgerandink' | 'rock' | 'wood' | 'metal' | 'scifi' | 'galaxy' | 'cloud' | 'rust'; // Approximate list, can be string
+export type AssetShader = 'none' | 'liquid' | 'singularity' | 'flamecore' | 'vortex' | 'nebula' | 'caustic';
+export type AssetMaterial = 'plastic' | 'stone_master' | 'relic_stone' | 'metal_master' | 'arcane_master' | 'glass' | 'void_glass' | 'arcane_resin';
+
+export type SurfaceType = 'felt' | 'wood' | 'metal' | 'rubber' | 'glass';
 export type DiceSetType = 'chamfered' | 'rounded' | 'sharp' | 'stamped' | 'valkyrie';
 
 // Dice Settings
 export interface DiceSettings {
     diceColor: string;
     numberColor: string;
-    material: MaterialPreset;
+    diceColorSecondary?: string;
+    numberColorSecondary?: string;
+
+    texture: string;
+    material: AssetMaterial;
     surfaceType: SurfaceType;
     diceSet: DiceSetType;
+
+    shader: AssetShader;
+    shaderColor?: string;
+    shaderColorSecondary?: string;
+
+    scale: number;
+    textureContrast: number;
+
     logToEntry: boolean; // Toggle for logging results to active entry
     enableRiverPebble: boolean;
 }
@@ -16,9 +31,21 @@ export interface DiceSettings {
 export const defaultDiceSettings: DiceSettings = {
     diceColor: '#8b5cf6',
     numberColor: '#ffffff',
+    diceColorSecondary: '#8b5cf6',
+    numberColorSecondary: '#ffffff',
+
+    texture: 'ledgerandink',
     material: 'plastic',
     surfaceType: 'felt',
     diceSet: 'chamfered',
+
+    shader: 'none',
+    shaderColor: '#ff0055',
+    shaderColorSecondary: '#00aaff',
+
+    scale: 1.0,
+    textureContrast: 1.0,
+
     logToEntry: true, // Default to enabled
     enableRiverPebble: false,
 };

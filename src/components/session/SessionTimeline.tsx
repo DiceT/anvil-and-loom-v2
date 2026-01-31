@@ -19,6 +19,7 @@ interface SessionTimelineProps {
     onTagClick?: (tag: string) => void;
     autoScroll?: boolean;
     showTimestamps?: boolean;
+    isFullWidth?: boolean;
     className?: string;
 }
 
@@ -31,6 +32,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
     onTagClick,
     autoScroll = true,
     showTimestamps = true,
+    isFullWidth = false,
     className = '',
 }) => {
     const cards = useActiveCards();
@@ -86,20 +88,26 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
             ref={scrollContainerRef}
             className={`
         flex-1 overflow-y-auto
-        p-4 space-y-3
+        flex-1 overflow-y-auto
+        p-4
         ${className}
       `}
         >
-            {cards.map((card) => (
-                <ThreadCard
-                    key={card.id}
-                    card={card}
-                    onAction={onAction}
-                    onTagClick={onTagClick}
-                    showTimestamp={showTimestamps}
-                    showActions={true}
-                />
-            ))}
+            <div className={`
+                ${isFullWidth ? '' : 'max-w-3xl mx-auto'}
+                space-y-3
+            `}>
+                {cards.map((card) => (
+                    <ThreadCard
+                        key={card.id}
+                        card={card}
+                        onAction={onAction}
+                        onTagClick={onTagClick}
+                        showTimestamp={showTimestamps}
+                        showActions={true}
+                    />
+                ))}
+            </div>
 
             {/* Scroll anchor */}
             <div id="timeline-bottom" />
